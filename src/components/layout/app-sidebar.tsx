@@ -53,18 +53,17 @@ export default function AppSidebar() {
         onMouseLeave={() => setIsHovering(false)}
       >
         <div className={cn(
-          "flex items-center",
-          isExpanded ? "justify-between" : "justify-center",
-          "p-4 border-b"
+          "flex h-16 items-center border-b px-4",
+          isExpanded ? "justify-between" : "justify-end"
         )}>
-          <Link href="/dashboard" className={cn(!isExpanded && "hidden")}>
+          <Link href="/dashboard" className={cn("flex items-center gap-2", !isExpanded && "hidden")}>
             <div className="flex items-center gap-2">
               <Wallet className="h-6 w-6 text-primary" />
               <span className="font-bold">PennyPincher</span>
             </div>
           </Link>
           <Button variant="ghost" size="icon" onClick={handleTogglePin} aria-label="Toggle sidebar">
-            {isExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            {isPinned ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </Button>
         </div>
         
