@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MagicWand, Sparkles } from 'lucide-react';
+import { Wand2, Sparkles } from 'lucide-react';
 import React from 'react';
 import { askAssistant } from '@/ai/flows/assistant-flow';
 import type { Category, Expense, Person } from '@/lib/types';
@@ -67,7 +67,7 @@ export default function AIAssistant({ expenses, categories, people }: AIAssistan
     <Card className="lg:col-span-7">
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
-            <MagicWand className='text-primary' />
+            <Wand2 className='text-primary' />
             AI Assistant
         </CardTitle>
         <CardDescription>Ask questions about your finances in plain English.</CardDescription>
