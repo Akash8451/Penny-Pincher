@@ -61,7 +61,7 @@ export default function AppSidebar() {
         </div>
         
         <nav className="flex-1 px-2 py-4 space-y-2">
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delayDuration={0} disableHoverableContent>
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (
@@ -90,7 +90,7 @@ export default function AppSidebar() {
         </nav>
 
         <div className="mt-auto p-2 border-t">
-          <TooltipProvider delayDuration={0}>
+          <TooltipProvider delayDuration={0} disableHoverableContent>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
