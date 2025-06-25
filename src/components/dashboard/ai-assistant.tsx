@@ -4,9 +4,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Wand2, Sparkles } from 'lucide-react';
+import { Wand2, Sparkles, Lock } from 'lucide-react';
 import React from 'react';
 import { askAssistant } from '@/ai/flows/assistant-flow';
 import type { Category, Expense, Person } from '@/lib/types';
@@ -65,13 +64,14 @@ export default function AIAssistant({ expenses, categories, people }: AIAssistan
   }
 
   return (
-    <Card className="h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
+    <Card className="h-full transition-all duration-300 bg-secondary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
+            <Lock className='h-4 w-4 text-muted-foreground' />
             <Wand2 className='text-primary' />
             AI Assistant
         </CardTitle>
-        <CardDescription>Ask questions about your finances in plain English.</CardDescription>
+        <CardDescription>Ask questions about your finances. Your data is processed securely on-device.</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleAsk} className="flex gap-2 mb-4">
@@ -104,7 +104,7 @@ export default function AIAssistant({ expenses, categories, people }: AIAssistan
         )}
 
         {response && (
-            <div className="p-4 bg-muted/50 rounded-lg prose prose-sm dark:prose-invert max-w-none">
+            <div className="p-4 bg-background/50 rounded-lg prose prose-sm dark:prose-invert max-w-none">
                 <div dangerouslySetInnerHTML={{ __html: response.replace(/\n/g, '<br />') }} />
             </div>
         )}
