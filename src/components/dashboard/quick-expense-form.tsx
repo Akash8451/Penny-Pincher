@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -120,7 +119,15 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   };
 
   const handleVoiceError = (error: string) => {
-    toast({ variant: 'destructive', title: 'Speech Recognition Error', description: error });
+    let description = 'An unknown error occurred. Please try again.';
+    if (error === 'not-allowed' || error === 'service-not-allowed') {
+      description = 'Microphone access denied. Please enable it in your browser settings.';
+    } else if (error === 'no-speech') {
+      description = 'No speech was detected. Please make sure your microphone is working.';
+    } else if (error === 'network') {
+      description = 'A network error occurred. Please check your connection and try again.';
+    }
+    toast({ variant: 'destructive', title: 'Speech Recognition Error', description });
   };
   
   const { isListening, toggleListening } = useSpeechRecognition({ onResult: handleVoiceResult, onError: handleVoiceError });

@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -119,6 +118,12 @@ export default function TransactionList() {
     });
     doc.save("pennypincher_report.pdf");
   };
+  
+  const emptyStateMessage = useMemo(() => {
+    return expenses.length === 0
+      ? "You haven't logged any transactions yet. Add one to get started!"
+      : "No transactions found for the selected filters.";
+  }, [expenses.length]);
 
   return (
     <Card>
@@ -225,7 +230,7 @@ export default function TransactionList() {
             })}
             {filteredExpenses.length === 0 && (
                 <div className="text-center text-muted-foreground py-10">
-                    No transactions found for the selected period.
+                    {emptyStateMessage}
                 </div>
             )}
           </div>

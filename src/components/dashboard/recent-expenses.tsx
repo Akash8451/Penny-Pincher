@@ -84,7 +84,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                           <div className="mt-3 flex justify-end items-center gap-4 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                               <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
                                   <AlertDialogTrigger asChild>
-                                      <Button variant="destructive" size="sm" className="w-9 px-0 rounded-full">
+                                      <Button variant="destructive" size="sm" className="w-9 h-9 px-0 rounded-full">
                                           <Trash2 className="h-4 w-4" />
                                           <span className="sr-only">Delete</span>
                                       </Button>
@@ -104,7 +104,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                                       </AlertDialogFooter>
                                   </AlertDialogContent>
                               </AlertDialog>
-                              <Button asChild variant="outline" size="sm" className="rounded-full">
+                              <Button asChild variant="outline" size="sm" className="h-9 rounded-full">
                                   <Link href={`/transactions/${expense.id}`}>
                                       View Details <ArrowRight className="ml-2 h-4 w-4" />
                                   </Link>
@@ -120,13 +120,15 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
               </div>
           )}
       </div>
-      <CardFooter className="pt-4 px-0">
-        <Button asChild className="w-full" variant="outline">
-            <Link href="/transactions">
-                View All Transactions <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-        </Button>
-      </CardFooter>
+      {expenses.length > 0 && (
+        <CardFooter className="pt-4 px-0">
+          <Button asChild className="w-full" variant="outline">
+              <Link href="/transactions">
+                  View All Transactions <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+          </Button>
+        </CardFooter>
+      )}
     </>
   );
 }
