@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -14,15 +13,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { ArrowRight, Search } from 'lucide-react'
+import { ArrowRight, Search, Trash2 } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
   return iconName in Lucide;
 }
 
 export default function TransactionList() {
-  const [expenses] = useLocalStorage<Expense[]>('expenses', [])
+  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', [])
   const [categories] = useLocalStorage<Category[]>('categories', [])
   const [people] = useLocalStorage<Person[]>('people', [])
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
@@ -53,6 +63,11 @@ export default function TransactionList() {
 
   const handleItemClick = (id: string) => {
     setSelectedExpenseId(prevId => (prevId === id ? null : id));
+  };
+  
+  const handleDeleteExpense = (expenseId: string) => {
+    setExpenses(prev => prev.filter(exp => exp.id !== expenseId));
+    setSelectedExpenseId(null);
   };
 
   return (
@@ -116,8 +131,30 @@ export default function TransactionList() {
                         </div>
 
                         {isSelected && (
-                            <div className="mt-3 flex justify-end items-center animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-                                <Button asChild variant="outline" size="default" className="rounded-full h-9">
+                            <div className="mt-3 flex justify-end items-center gap-4 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                                <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
+                                  <AlertDialogTrigger asChild>
+                                      <Button variant="destructive" size="sm" className="w-9 px-0 rounded-full">
+                                          <Trash2 className="h-4 w-4" />
+                                          <span className="sr-only">Delete</span>
+                                      </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                      <AlertDialogHeader>
+                                          <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
+                                          <AlertDialogDescription>
+                                          This action cannot be undone. This will permanently delete this expense record.
+                                          </AlertDialogDescription>
+                                      </AlertDialogHeader>
+                                      <AlertDialogFooter>
+                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogAction onClick={() => handleDeleteExpense(expense.id)} className="bg-destructive hover:bg-destructive/90">
+                                          Delete
+                                          </AlertDialogAction>
+                                      </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                                <Button asChild variant="outline" size="sm" className="rounded-full">
                                     <Link href={`/transactions/${expense.id}`}>
                                         View Details <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>

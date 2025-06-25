@@ -1,4 +1,3 @@
-
 import type { Category, Expense, Person } from "@/lib/types";
 import { format } from 'date-fns';
 import * as Lucide from 'lucide-react';
@@ -54,8 +53,8 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                   <div
                       key={expense.id}
                       className={cn(
-                          "p-3 rounded-lg border border-transparent transition-all duration-200 cursor-pointer",
-                          isSelected && "border-primary bg-accent/80"
+                          "p-3 rounded-lg border transition-all duration-200 cursor-pointer",
+                          isSelected ? "border-primary bg-accent/80" : "border-transparent hover:bg-accent/50"
                       )}
                       onClick={() => handleItemClick(expense.id)}
                   >
@@ -82,10 +81,10 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                       </div>
                       
                       {isSelected && (
-                          <div className="mt-3 flex justify-end items-center gap-3 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                          <div className="mt-3 flex justify-end items-center gap-4 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                               <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
                                   <AlertDialogTrigger asChild>
-                                      <Button variant="destructive" size="icon" className="h-9 w-9 rounded-full">
+                                      <Button variant="destructive" size="sm" className="w-9 px-0 rounded-full">
                                           <Trash2 className="h-4 w-4" />
                                           <span className="sr-only">Delete</span>
                                       </Button>
@@ -105,7 +104,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                                       </AlertDialogFooter>
                                   </AlertDialogContent>
                               </AlertDialog>
-                              <Button asChild variant="outline" size="sm" className="h-9 rounded-full">
+                              <Button asChild variant="outline" size="sm" className="rounded-full">
                                   <Link href={`/transactions/${expense.id}`}>
                                       View Details <ArrowRight className="ml-2 h-4 w-4" />
                                   </Link>

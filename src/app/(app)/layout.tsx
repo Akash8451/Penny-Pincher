@@ -1,4 +1,3 @@
-
 'use client';
 import AppSidebar from '@/components/layout/app-sidebar';
 import FloatingActionButton from '@/components/layout/floating-action-button';
