@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +15,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Paperclip, PlusCircle, Users } from 'lucide-react';
 import React from 'react';
 import Confetti from 'react-confetti';
-import { useWindowSize } from 'react-use';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '../ui/scroll-area';
@@ -46,11 +44,25 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   const totalAmount = form.watch('amount') || 0;
 
   const [fileName, setFileName] = React.useState('');
-  const { width, height } = useWindowSize();
+  const [windowSize, setWindowSize] = React.useState({ width: 0, height: 0 });
   const [showConfetti, setShowConfetti] = React.useState(false);
   const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
@@ -146,7 +158,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
 
   return (
     <>
-      {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={300} />}
+      {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={300} />}
       <Card className="lg:col-span-3">
         <CardHeader>
           <CardTitle>Log Expense</CardTitle>
