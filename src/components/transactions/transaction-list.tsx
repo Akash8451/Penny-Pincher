@@ -66,8 +66,8 @@ export default function TransactionList() {
                     <div
                         key={expense.id}
                         className={cn(
-                            "p-3 rounded-lg transition-all duration-200 cursor-pointer",
-                            isSelected ? "ring-2 ring-primary bg-accent/80" : "hover:bg-accent/50"
+                            "p-3 rounded-lg border transition-all duration-200 cursor-pointer",
+                            isSelected ? "border-primary bg-accent/80" : "border-transparent hover:bg-accent/50"
                         )}
                         onClick={() => handleItemClick(expense.id)}
                     >
@@ -94,7 +94,7 @@ export default function TransactionList() {
                         </div>
 
                         {isSelected && (
-                            <div className="mt-3 flex justify-end animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                            <div className="mt-3 flex justify-end items-center animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                                 <Button asChild variant="outline" size="sm" className="rounded-full px-4">
                                     <Link href={`/transactions/${expense.id}`}>
                                         View Details <ArrowRight className="ml-2 h-4 w-4" />

@@ -62,8 +62,8 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                         <div
                             key={expense.id}
                             className={cn(
-                                "p-3 rounded-lg transition-all duration-200 cursor-pointer",
-                                isSelected ? "ring-2 ring-primary bg-accent/80" : "hover:bg-accent/50"
+                                "p-3 rounded-lg border transition-all duration-200 cursor-pointer",
+                                isSelected ? "border-primary bg-accent/80" : "border-transparent hover:bg-accent/50"
                             )}
                             onClick={() => handleItemClick(expense.id)}
                         >
@@ -90,10 +90,10 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                             </div>
                             
                             {isSelected && (
-                                <div className="mt-3 flex justify-end gap-2 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                                <div className="mt-3 flex justify-end items-center gap-2 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                                     <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
                                         <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" size="icon" className="rounded-full">
+                                            <Button variant="destructive" size="sm" className="w-9 rounded-full p-0">
                                                 <Trash2 className="h-4 w-4" />
                                                 <span className="sr-only">Delete</span>
                                             </Button>
