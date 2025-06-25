@@ -4,12 +4,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock, ScanLine } from 'lucide-react';
+import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock, ScanLine, Wand2 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-
 
 export default function AppSidebar() {
   const pathname = usePathname();
@@ -26,6 +24,7 @@ export default function AppSidebar() {
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/transactions', icon: List, label: 'Transactions' },
     { href: '/scan', icon: ScanLine, label: 'Scan Receipt' },
+    { href: '/assistant', icon: Wand2, label: 'AI Assistant' },
     { href: '/categories', icon: Shapes, label: 'Categories' },
     { href: '/people', icon: Users, label: 'People' },
     ...(isClient && isProUnlocked ? [{ href: '/vault', icon: Lock, label: 'Vault' }] : []),
@@ -40,7 +39,6 @@ export default function AppSidebar() {
   return (
     <>
       {/* Desktop Sidebar */}
-      <TooltipProvider delayDuration={0}>
         <aside 
           className={cn(
             "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-30 transition-all duration-300 ease-in-out",
@@ -110,11 +108,10 @@ export default function AppSidebar() {
             </Link>
           </div>
         </aside>
-      </TooltipProvider>
 
       {/* Mobile Bottom Nav */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-lg border-t border-border/20 z-20 flex items-center justify-around">
-         {[...navItems, { href: '/settings', icon: Settings, label: 'Settings' }].map((item) => (
+         {[...navItems.filter(i => i.href !== '/assistant'), { href: '/settings', icon: Settings, label: 'Settings' }].map((item) => (
             <Link
                 key={item.href}
                 href={item.href}

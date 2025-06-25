@@ -1,11 +1,14 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Wand2, Sparkles, Lock, Mic, Send, Loader2 } from 'lucide-react';
+import { Wand2, Sparkles, Lock, Mic, Send, Loader2, ExternalLink } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
+import { marked } from 'marked';
 import { askAssistant } from '@/ai/flows/assistant-flow';
 import type { Category, Expense, Person } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -17,6 +20,7 @@ interface AIAssistantProps {
     categories: Category[];
     people: Person[];
     onLogExpense: (details: { amount: number; categoryId: string; note: string }) => void;
+    isFullPage?: boolean;
 }
 
 interface Message {
@@ -24,7 +28,7 @@ interface Message {
   text: string;
 }
 
-export default function AIAssistant({ expenses, categories, people, onLogExpense }: AIAssistantProps) {
+export default function AIAssistant({ expenses, categories, people, onLogExpense, isFullPage = false }: AIAssistantProps) {
   const { toast } = useToast();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +38,6 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Scroll to the bottom when messages change
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTo({
         top: scrollAreaRef.current.scrollHeight,
@@ -45,7 +48,6 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
 
   const handleVoiceResult = (transcript: string) => {
     setQuery(transcript);
-    // Automatically submit when speech recognition finishes
     handleAsk(transcript);
   };
   
@@ -74,7 +76,6 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
     try {
         const result = await askAssistant({ query: queryToSubmit, expenses, categories, people });
         
-        // Speak the response
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(result.answer);
             speechSynthesis.speak(utterance);
@@ -82,7 +83,6 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
         
         setMessages(prev => [...prev, { role: 'ai', text: result.answer }]);
 
-        // Handle the action if it exists
         if (result.action?.name === 'logExpense') {
             onLogExpense(result.action.parameters);
         }
@@ -98,13 +98,25 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
   };
 
   return (
-    <Card className="h-full flex flex-col transition-all duration-300 bg-secondary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
+    <Card className={cn(
+        "h-full flex flex-col transition-all duration-300",
+        !isFullPage && "bg-secondary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10"
+    )}>
       <CardHeader>
-        <CardTitle className='flex items-center gap-2 text-xl'>
-            <Lock className='h-4 w-4 text-muted-foreground' />
-            <Wand2 className='text-primary' />
-            AI Assistant
-        </CardTitle>
+        <div className="flex items-center justify-between">
+            <CardTitle className='flex items-center gap-2 text-xl'>
+                <Lock className='h-4 w-4 text-muted-foreground' />
+                <Wand2 className='text-primary' />
+                AI Assistant
+            </CardTitle>
+            {!isFullPage && (
+                <Link href="/assistant" passHref>
+                    <Button variant="ghost" size="icon" aria-label="Expand chat">
+                        <ExternalLink className="h-5 w-5" />
+                    </Button>
+                </Link>
+            )}
+        </div>
         <CardDescription>Your voice-powered financial assistant. Your data is processed securely on-device.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
@@ -122,7 +134,7 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
                     ? 'bg-primary/20' 
                     : 'bg-background/50'
                 )}>
-                  <p className="my-0" dangerouslySetInnerHTML={{ __html: message.text.replace(/\n/g, '<br />') }} />
+                  <div dangerouslySetInnerHTML={{ __html: marked.parse(message.text) }} />
                 </div>
               </div>
             ))}
