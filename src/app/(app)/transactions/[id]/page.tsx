@@ -14,10 +14,43 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit } from 'lucide-react';
 import * as Lucide from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+
+
+function TransactionDetailsSkeleton() {
+    return (
+        <>
+            <AppHeader title="Loading Transaction..." />
+            <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex justify-between items-start">
+                             <div className="flex items-center gap-4">
+                                <Skeleton className="h-12 w-12 rounded-lg" />
+                                <div className='space-y-2'>
+                                    <Skeleton className="h-6 w-48" />
+                                    <Skeleton className="h-4 w-64" />
+                                </div>
+                            </div>
+                            <Skeleton className="h-8 w-24" />
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                         <div className="space-y-2">
+                            <Skeleton className="h-16 w-full rounded-lg" />
+                            <Skeleton className="h-16 w-full rounded-lg" />
+                         </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </>
+    );
+}
 
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
@@ -28,19 +61,26 @@ export default function TransactionDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  
+  const [isLoading, setIsLoading] = useState(true);
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
   const [categories] = useLocalStorage<Category[]>('categories', []);
   const [people] = useLocalStorage<Person[]>('people', []);
 
   const [isEditing, setIsEditing] = useState(false);
   const [editableSplits, setEditableSplits] = useState<Record<string, number>>({});
+  
+  useEffect(() => {
+    // Component has mounted, localStorage data is now available.
+    setIsLoading(false);
+  }, []);
 
   const expenseId = params.id as string;
-  const expense = expenses.find(e => e.id === expenseId);
+  const expense = !isLoading ? expenses.find(e => e.id === expenseId) : undefined;
 
   const categoryMap = new Map(categories.map(c => [c.id, c]));
   const peopleMap = new Map(people.map(p => [p.id, p.name]));
-
+  
   const othersAmount = expense?.splitWith?.reduce((sum, s) => sum + s.amount, 0) ?? 0;
   const myShare = expense ? expense.amount - othersAmount : 0;
   
@@ -135,6 +175,10 @@ export default function TransactionDetailsPage() {
       description: `${personName}'s payment of $${settleAmount.toFixed(2)} has been recorded.`,
     });
   };
+
+  if (isLoading) {
+    return <TransactionDetailsSkeleton />;
+  }
 
   if (!expense) {
     return (
@@ -289,3 +333,4 @@ export default function TransactionDetailsPage() {
     </>
   );
 }
+
