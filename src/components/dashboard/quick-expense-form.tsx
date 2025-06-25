@@ -7,20 +7,25 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { Category, Expense } from '@/lib/types';
+import type { Category, Expense, Person } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Paperclip, PlusCircle } from 'lucide-react';
+import { Paperclip, PlusCircle, Users } from 'lucide-react';
 import React from 'react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '../ui/scroll-area';
+import { Badge } from '../ui/badge';
 
 
 interface QuickExpenseFormProps {
   categories: Category[];
+  people: Person[];
   onAddExpense: (expense: Omit<Expense, 'id' | 'date'>) => void;
 }
 
@@ -31,7 +36,7 @@ const expenseSchema = z.object({
   receipt: z.any().optional(),
 });
 
-export default function QuickExpenseForm({ categories, onAddExpense }: QuickExpenseFormProps) {
+export default function QuickExpenseForm({ categories, people, onAddExpense }: QuickExpenseFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -41,6 +46,8 @@ export default function QuickExpenseForm({ categories, onAddExpense }: QuickExpe
   const [fileName, setFileName] = React.useState('');
   const { width, height } = useWindowSize();
   const [showConfetti, setShowConfetti] = React.useState(false);
+  const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
+  const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
 
 
   const categoryGroups = React.useMemo(() => {
@@ -51,16 +58,22 @@ export default function QuickExpenseForm({ categories, onAddExpense }: QuickExpe
   }, [categories]);
 
   const onSubmit = (values: z.infer<typeof expenseSchema>) => {
+    const expenseData: Omit<Expense, 'id'|'date'> = {
+      ...values,
+      amount: values.amount,
+      splitWith: selectedPeople.length > 0 ? selectedPeople : undefined,
+    }
+
     // Basic file to data URL conversion for local storage
     if (values.receipt && values.receipt.length > 0) {
       const file = values.receipt[0];
       const reader = new FileReader();
       reader.onload = (e) => {
-        onAddExpense({ ...values, amount: values.amount, receipt: e.target?.result as string });
+        onAddExpense({ ...expenseData, receipt: e.target?.result as string });
       };
       reader.readAsDataURL(file);
     } else {
-      onAddExpense({ ...values, amount: values.amount });
+      onAddExpense(expenseData);
     }
 
     toast({
@@ -69,9 +82,19 @@ export default function QuickExpenseForm({ categories, onAddExpense }: QuickExpe
     });
     form.reset();
     setFileName('');
+    setSelectedPeople([]);
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 4000);
   };
+  
+  const togglePersonSelection = (personId: string) => {
+    setSelectedPeople(prev => 
+      prev.includes(personId) 
+        ? prev.filter(id => id !== personId)
+        : [...prev, personId]
+    );
+  };
+
 
   return (
     <>
@@ -172,6 +195,51 @@ export default function QuickExpenseForm({ categories, onAddExpense }: QuickExpe
                     </FormItem>
                   )}
                 />
+
+                <Dialog open={isSplitBillOpen} onOpenChange={setSplitBillOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      <Users className="mr-2 h-4 w-4" />
+                       {selectedPeople.length > 0 
+                        ? `Split with ${selectedPeople.length} people` 
+                        : "Split Bill"}
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Split Bill</DialogTitle>
+                      <DialogDescription>
+                        Select who you shared this expense with. The amount will be divided equally.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-64">
+                    <div className="space-y-2 py-2">
+                      {people.length > 0 ? people.map(person => (
+                        <div key={person.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-accent" onClick={() => togglePersonSelection(person.id)}>
+                          <Checkbox
+                            id={`person-${person.id}`}
+                            checked={selectedPeople.includes(person.id)}
+                            onCheckedChange={() => togglePersonSelection(person.id)}
+                          />
+                          <Label htmlFor={`person-${person.id}`} className="flex-1 cursor-pointer">{person.name}</Label>
+                        </div>
+                      )) : <p className='text-sm text-muted-foreground text-center'>Add some people in the 'People' tab first.</p>}
+                    </div>
+                    </ScrollArea>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button>Done</Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+
+                {selectedPeople.length > 0 && (
+                  <div className='flex flex-wrap gap-1 items-center text-sm text-muted-foreground'>
+                    Splitting with: {people.filter(p => selectedPeople.includes(p.id)).map(p => <Badge key={p.id} variant="secondary">{p.name}</Badge>)}
+                  </div>
+                )}
+
               <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                 <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
               </Button>

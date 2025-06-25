@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Shapes, Settings, Wallet } from 'lucide-react';
+import { LayoutDashboard, Shapes, Settings, Wallet, Users } from 'lucide-react';
 
 import {
   Tooltip,
@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/categories', icon: Shapes, label: 'Categories' },
+  { href: '/people', icon: Users, label: 'People' },
   { href: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -24,7 +25,7 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 h-screen left-0 hidden border-r bg-card p-2 sm:flex flex-col gap-4">
+    <aside className="sticky top-0 h-screen left-0 hidden border-r bg-card p-2 sm:flex flex-col gap-4 z-20">
       <Link href="/dashboard" className="flex items-center gap-2 justify-center p-2">
         <Button variant="ghost" size="icon" aria-label="PennyPincher Home">
           <Wallet className="h-6 w-6 text-primary" />

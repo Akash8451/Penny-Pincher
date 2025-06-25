@@ -6,6 +6,7 @@ export interface Expense {
   note: string;
   date: string; // ISO string
   receipt?: string; // data URL for the image
+  splitWith?: string[]; // Array of person IDs
 }
 
 export interface Category {
@@ -13,6 +14,12 @@ export interface Category {
   name: string;
   group: string;
   icon: string; // lucide-react icon name
+}
+
+export interface Person {
+  id: string;
+  name: string;
+  tags?: string[];
 }
 
 export interface Settings {
