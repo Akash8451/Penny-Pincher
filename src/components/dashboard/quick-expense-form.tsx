@@ -41,7 +41,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
     resolver: zodResolver(expenseSchema),
     defaultValues: { amount: undefined, categoryId: '', note: '' },
   });
-  const totalAmount = form.watch('amount') || 0;
+  const totalAmount = Number(form.watch('amount')) || 0;
 
   const [fileName, setFileName] = React.useState('');
   const [windowSize, setWindowSize] = React.useState({ width: 0, height: 0 });
@@ -51,17 +51,20 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
 
   React.useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    
-    return () => window.removeEventListener('resize', handleResize);
+    // This check is important to prevent this code from running on the server
+    if (typeof window !== 'undefined') {
+      const handleResize = () => {
+        setWindowSize({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      };
+      
+      handleResize(); // Set initial size
+      window.addEventListener('resize', handleResize);
+      
+      return () => window.removeEventListener('resize', handleResize);
+    }
   }, []);
 
   const categoryGroups = React.useMemo(() => {
