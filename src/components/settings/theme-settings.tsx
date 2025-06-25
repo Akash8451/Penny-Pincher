@@ -50,12 +50,12 @@ export default function ThemeSettings() {
         <CardDescription>Customize the look and feel of the app.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-between rounded-lg border p-4">
+        <div className="flex flex-col justify-between gap-4 rounded-lg border p-4 md:flex-row md:items-center">
             <div>
                 <h3 className="font-medium">Theme</h3>
                 <p className="text-sm text-muted-foreground">Select a theme or sync with your system.</p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex shrink-0 flex-col items-start gap-4 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-2 rounded-md bg-muted p-1">
                     <Button variant={currentTheme === 'light' ? 'default' : 'ghost'} size="sm" onClick={() => setTheme('light')}>
                         <Sun className="h-4 w-4" />
