@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -6,13 +5,6 @@ import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
@@ -54,7 +46,7 @@ export default function AppSidebar() {
       >
         <div className={cn(
           "flex h-16 items-center border-b px-4",
-          isExpanded ? "justify-between" : "justify-end"
+          isExpanded ? "justify-between" : "justify-center"
         )}>
           <Link href="/dashboard" className={cn("flex items-center gap-2", !isExpanded && "hidden")}>
             <div className="flex items-center gap-2">
@@ -68,56 +60,43 @@ export default function AppSidebar() {
         </div>
         
         <nav className="flex-1 px-2 py-4 space-y-2">
-          <TooltipProvider delayDuration={0}>
-            {navItems.map((item) => {
-              const isActive = pathname.startsWith(item.href);
-              return (
-                <Tooltip key={item.href}>
-                  <TooltipTrigger asChild>
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        'flex items-center h-10 rounded-lg transition-colors relative',
-                        !isExpanded ? 'justify-center w-full' : 'px-4 justify-start gap-3',
-                        isActive
-                          ? 'bg-primary/20 text-primary'
-                          : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                      )}
-                    >
-                      {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
-                      <item.icon className="h-5 w-5" />
-                      <span className={cn("truncate", !isExpanded && "sr-only")}>{item.label}</span>
-                    </Link>
-                  </TooltipTrigger>
-                  {!isExpanded && <TooltipContent side="right">{item.label}</TooltipContent>}
-                </Tooltip>
-              )
-            })}
-          </TooltipProvider>
+          {navItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center h-10 rounded-lg transition-colors relative',
+                  !isExpanded ? 'justify-center w-full' : 'px-4 justify-start gap-3',
+                  isActive
+                    ? 'bg-primary/20 text-primary'
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                )}
+              >
+                {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
+                <item.icon className="h-5 w-5" />
+                <span className={cn("truncate", !isExpanded && "sr-only")}>{item.label}</span>
+              </Link>
+            )
+          })}
         </nav>
 
         <div className="mt-auto p-2 border-t">
-          <TooltipProvider delayDuration={0}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Link
-                    href="/settings"
-                    className={cn(
-                        'flex items-center h-10 rounded-lg transition-colors relative',
-                        !isExpanded ? 'justify-center w-full' : 'px-4 justify-start gap-3',
-                        pathname.startsWith("/settings")
-                          ? 'bg-primary/20 text-primary'
-                          : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                      )}
-                  >
-                    {pathname.startsWith("/settings") && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
-                    <Settings className="h-5 w-5" />
-                    <span className={cn(!isExpanded && "sr-only")}>Settings</span>
-                  </Link>
-                </TooltipTrigger>
-                {!isExpanded && <TooltipContent side="right">Settings</TooltipContent>}
-              </Tooltip>
-            </TooltipProvider>
+          <Link
+            href="/settings"
+            className={cn(
+                'flex items-center h-10 rounded-lg transition-colors relative',
+                !isExpanded ? 'justify-center w-full' : 'px-4 justify-start gap-3',
+                pathname.startsWith("/settings")
+                  ? 'bg-primary/20 text-primary'
+                  : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              )}
+          >
+            {pathname.startsWith("/settings") && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
+            <Settings className="h-5 w-5" />
+            <span className={cn(!isExpanded && "sr-only")}>Settings</span>
+          </Link>
         </div>
       </aside>
 
