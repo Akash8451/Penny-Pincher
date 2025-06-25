@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,6 +50,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
+  const [splitGroupName, setSplitGroupName] = React.useState('');
 
   React.useEffect(() => {
     // This check is important to prevent this code from running on the server
@@ -111,6 +113,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
       ...values,
       type: 'expense',
       amount: values.amount,
+      note: splitGroupName || values.note || '',
       splitWith: splitWithData,
     }
 
@@ -133,6 +136,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
     setFileName('');
     setSelectedPeople([]);
     setCustomSplits({});
+    setSplitGroupName('');
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 4000);
   };
@@ -278,6 +282,17 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
                         Select people and specify how to split the ${totalAmount.toFixed(2)}.
                       </DialogDescription>
                     </DialogHeader>
+                     <div className="space-y-1.5">
+                        <Label htmlFor="split-group-name">Group/Event Name (Optional)</Label>
+                        <Input 
+                            id="split-group-name"
+                            placeholder="e.g. Weekend Trip, Team Lunch" 
+                            value={splitGroupName}
+                            onChange={(e) => setSplitGroupName(e.target.value)}
+                        />
+                        <p className="text-xs text-muted-foreground">This will be used as the transaction note.</p>
+                    </div>
+                    <Separator />
                     <ScrollArea className="max-h-40">
                     <div className="space-y-2 py-2 pr-4">
                       {people.length > 0 ? people.map(person => (
