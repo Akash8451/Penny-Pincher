@@ -51,13 +51,13 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                     const splitWithNames = expense.splitWith?.map(split => peopleMap.get(split.personId)?.name).filter(Boolean).join(', ');
 
                     return (
-                        <div key={expense.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 group">
-                           <Link href={`/transactions/${expense.id}`} className="flex items-start flex-1 min-w-0 gap-3">
-                                <div className="h-9 w-9 bg-accent rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                        <div key={expense.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/50 group">
+                           <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 gap-4">
+                                <div className="h-10 w-10 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
                                 <Icon className="h-5 w-5 text-accent-foreground" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium leading-tight truncate">
+                                    <p className="text-sm font-medium truncate">
                                         {expense.note || category?.name || 'Uncategorized'}
                                     </p>
                                     <div className="flex items-baseline justify-between gap-2">
