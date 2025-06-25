@@ -46,6 +46,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import React from 'react';
 
 const iconList = Object.keys(Lucide).filter(k => typeof Lucide[k as keyof typeof Lucide] === 'object');
 
@@ -136,7 +137,7 @@ export default function CategoryManager() {
   }, {} as Record<string, Category[]>);
 
   return (
-    <Card className="neumorphic-shadow">
+    <Card>
       <CardHeader>
         <CardTitle>Your Categories</CardTitle>
         <CardDescription>Organize your spending by creating and managing categories.</CardDescription>

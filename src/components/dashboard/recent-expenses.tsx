@@ -19,7 +19,7 @@ export default function RecentExpenses({ expenses, categories }: RecentExpensesP
   const categoryMap = new Map(categories.map((c) => [c.id, c]));
 
   return (
-    <Card className="lg:col-span-4 neumorphic-shadow">
+    <Card className="lg:col-span-4">
       <CardHeader>
         <CardTitle>Recent Transactions</CardTitle>
         <CardDescription>

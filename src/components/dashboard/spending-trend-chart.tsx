@@ -42,7 +42,7 @@ export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps
   }, [expenses]);
   
   return (
-    <Card className="lg:col-span-4 neumorphic-shadow">
+    <Card className="lg:col-span-4">
       <CardHeader>
         <CardTitle>Spending Trend</CardTitle>
         <CardDescription>Your spending over the last 7 days.</CardDescription>

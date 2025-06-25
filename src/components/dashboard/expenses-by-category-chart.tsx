@@ -36,7 +36,7 @@ export default function ExpensesByCategoryChart({ expenses, categories }: Expens
   }, [expenses, categoryMap])
 
   return (
-    <Card className="lg:col-span-3 neumorphic-shadow">
+    <Card className="lg:col-span-3">
       <CardHeader>
         <CardTitle>Expenses by Category</CardTitle>
         <CardDescription>Spending distribution for the current month.</CardDescription>

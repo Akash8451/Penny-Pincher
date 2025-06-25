@@ -55,7 +55,7 @@ export default function DataManagement() {
   };
 
   return (
-    <Card className="neumorphic-shadow">
+    <Card>
       <CardHeader>
         <CardTitle>Data Management</CardTitle>
         <CardDescription>Backup or restore your application data.</CardDescription>
