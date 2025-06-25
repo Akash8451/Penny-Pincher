@@ -61,7 +61,7 @@ const LogExpenseActionSchema = z.object({
 
 const AssistantOutputSchema = z.object({
   answer: z.string().describe("The AI's answer to the user's question, formatted in Markdown. If an action is taken, this should be a confirmation message."),
-  action: LogExpenseActionSchema.optional().describe("ONLY use this field if the user explicitly asks to log, add, or create a new expense. Do NOT use it for answering questions."),
+  action: LogExpenseActionSchema.optional().describe("An action to perform. ONLY use this field if the user explicitly asks to log, add, or create a new expense. For ALL other queries (e.g., asking questions, requesting summaries), this field MUST be omitted."),
 });
 export type AssistantOutput = z.infer<typeof AssistantOutputSchema>;
 
@@ -84,34 +84,32 @@ const prompt = ai.definePrompt({
   name: 'assistantPrompt',
   input: {schema: AssistantFlowInputSchema},
   output: {schema: AssistantOutputSchema},
-  prompt: `You are a friendly and helpful financial assistant for the PennyPincher app.
-Your task is to analyze the user's financial data, provided as a JSON string, to answer their questions OR to help them log a new expense.
-The current date is {{currentDate}}.
+  prompt: `You are a financial assistant. Your primary job is to answer questions about a user's financial data. You can also log new expenses, but only when explicitly asked.
 
-Here is the user's data, including available categories for logging expenses:
+The current date is {{currentDate}}.
+User's data:
 \`\`\`json
 {{{jsonData}}}
 \`\`\`
 
-Here is the user's request:
+User's request:
 "{{{query}}}"
 
-Please adhere to the following rules:
-1.  **Dual Capability**: You can either answer questions about the data OR log a new expense.
-2.  **Answering Questions**:
-    *   Provide clear, concise, and accurate answers based ONLY on the provided data.
-    *   Format your answers in simple Markdown. Use lists, bold text, and italics to improve readability.
-    *   If a question is ambiguous or the data is insufficient, ask for clarification.
-    *   Do not perform any calculations that are not directly supported by the data (e.g., forecasting).
-3.  **Logging Expenses**:
-    *   Only use the 'action' field if the user's intent is clearly and explicitly to create a new expense. Look for keywords like "log", "add", "new expense", "charge", "put".
-    *   If the user is asking a question about past expenses (e.g., "what was my biggest expense?", "how much did I spend on food?"), DO NOT use the 'action' field. The 'action' field is exclusively for creating new records.
-    *   When you do log an expense, extract the amount, a descriptive note, and map the expense to the most appropriate category ID from the data.
-    *   Populate the 'action.parameters' object with these details.
-    *   When an action is taken, your 'answer' field should be a simple confirmation message, like "Okay, I've logged the expense for [note]."
-4.  **Always Respond**: Always provide a text-based 'answer', even when performing an action.
+***IMPORTANT RULES***
+1.  **Default to Answering:** Your main goal is to provide helpful answers based on the data.
+2.  **Strict Action Condition:** You MUST ONLY use the 'action' field if the user's request contains clear, explicit keywords for creating a new expense. These keywords include "log", "add", "new expense", "charge", or "put".
+3.  **DO NOT USE ACTION FOR QUESTIONS:** For any request that is a question (e.g., "What was...", "How much did I spend...", "Show me..."), you MUST NOT use the 'action' field. Your response should only be in the 'answer' field.
+4.  **Confirmation Message:** When you do use the 'action' field, the 'answer' field should contain a simple confirmation, like "Done. I've logged that for you."
 
-Now, analyze the request and provide your response.`,
+**Example Scenarios:**
+- If user asks: "What was my biggest expense last month?"
+  - Your response: 'answer' contains the analysis, 'action' is OMITTED.
+- If user says: "Add a $25 charge for gasoline."
+  - Your response: 'answer' is "Okay, I've logged the expense for gasoline.", 'action' is POPULATED with amount: 25, note: "gasoline", and the correct categoryId.
+- If user asks: "Did I spend more on food or transport?"
+  - Your response: 'answer' contains the comparison, 'action' is OMITTED.
+
+Now, analyze the user's request and respond according to these strict rules.`,
 });
 
 const assistantFlow = ai.defineFlow(
