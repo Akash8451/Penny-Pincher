@@ -1,4 +1,3 @@
-
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -24,7 +23,7 @@ export default function TransactionList() {
   const [people] = useLocalStorage<Person[]>('people', [])
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
 
-  const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
   const peopleMap = useMemo(() => new Map(people.map((p) => [p.id, p.name])), [people]);
 
   const filteredExpenses = useMemo(() => {
@@ -56,27 +55,26 @@ export default function TransactionList() {
                 const splitWithNames = expense.splitWith?.map(split => peopleMap.get(split.personId) || 'Unknown').filter(Boolean).join(', ');
 
                 return (
-                    <div key={expense.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 group">
-                        <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 mr-4 overflow-hidden">
-                            <div className="h-9 w-9 bg-accent rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                    <div key={expense.id} className="p-2 rounded-lg hover:bg-accent/50">
+                        <Link href={`/transactions/${expense.id}`} className="flex items-start flex-1 min-w-0 gap-3">
+                            <div className="h-9 w-9 bg-accent rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                             <Icon className="h-5 w-5 text-accent-foreground" />
                             </div>
-                            <div className="flex-1 space-y-1 min-w-0">
-                                <p className="text-sm font-medium leading-none truncate">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium leading-tight truncate">
                                     {expense.note || category?.name || 'Uncategorized'}
                                 </p>
-                                <p className="text-sm text-muted-foreground truncate">
-                                    {expense.type === 'expense' && splitWithNames 
-                                        ? `Split with: ${splitWithNames}`
-                                        : format(new Date(expense.date), "PPP")
-                                    }
-                                </p>
-                            </div>
-                            <div className="ml-auto font-medium text-right flex-shrink-0 pl-2">
-                                <p className={`${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'} font-semibold`}>
-                                    {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{format(new Date(expense.date), "MMM d")}</p>
+                                <div className="flex items-baseline justify-between gap-2">
+                                     <p className="text-sm text-muted-foreground truncate">
+                                        {expense.type === 'expense' && splitWithNames 
+                                            ? `Split with: ${splitWithNames}`
+                                            : format(new Date(expense.date), "MMM d, yyyy")
+                                        }
+                                    </p>
+                                    <p className={`font-semibold text-base whitespace-nowrap ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
+                                        {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
+                                    </p>
+                                </div>
                             </div>
                         </Link>
                     </div>

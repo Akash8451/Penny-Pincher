@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import type { Category, Expense, Person } from "@/lib/types";
 import { format } from 'date-fns';
@@ -31,8 +30,8 @@ function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
 }
 
 export default function RecentExpenses({ expenses, categories, people, onDeleteExpense }: RecentExpensesProps) {
-  const categoryMap = new Map(categories.map((c) => [c.id, c]));
-  const peopleMap = new Map(people.map((p) => [p.id, p]));
+  const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+  const peopleMap = new Map(people.map((p) => [p.id, p.name]));
 
 
   return (
@@ -53,26 +52,25 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
 
                     return (
                         <div key={expense.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 group">
-                           <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 mr-4 overflow-hidden">
-                                <div className="h-9 w-9 bg-accent rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                           <Link href={`/transactions/${expense.id}`} className="flex items-start flex-1 min-w-0 gap-3">
+                                <div className="h-9 w-9 bg-accent rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                                 <Icon className="h-5 w-5 text-accent-foreground" />
                                 </div>
-                                <div className="flex-1 space-y-1 min-w-0">
-                                    <p className="text-sm font-medium leading-none truncate">
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium leading-tight truncate">
                                         {expense.note || category?.name || 'Uncategorized'}
                                     </p>
-                                    <p className="text-sm text-muted-foreground truncate">
-                                        {expense.type === 'expense' && splitWithNames 
-                                            ? `Split with: ${splitWithNames}`
-                                            : format(new Date(expense.date), "PPP")
-                                        }
-                                    </p>
-                                </div>
-                                <div className="ml-auto font-medium text-right flex-shrink-0 pl-2">
-                                    <p className={`${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'} font-semibold`}>
-                                        {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
-                                    </p>
-                                    <p className="text-xs text-muted-foreground">{format(new Date(expense.date), "MMM d")}</p>
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <p className="text-sm text-muted-foreground truncate">
+                                            {expense.type === 'expense' && splitWithNames 
+                                                ? `Split with: ${splitWithNames}`
+                                                : format(new Date(expense.date), "MMM d, yyyy")
+                                            }
+                                        </p>
+                                        <p className={`font-semibold text-base whitespace-nowrap ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
+                                            {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
+                                        </p>
+                                    </div>
                                 </div>
                             </Link>
 
