@@ -51,7 +51,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                     const splitWithNames = expense.splitWith?.map(split => peopleMap.get(split.personId)?.name).filter(Boolean).join(', ');
 
                     return (
-                        <div key={expense.id} className="flex items-center justify-between p-3 rounded-lg hover:bg-accent/50 group">
+                        <div key={expense.id} className="flex items-center p-3 rounded-lg hover:bg-accent/50 group">
                            <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 gap-4">
                                 <div className="h-10 w-10 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
                                 <Icon className="h-5 w-5 text-accent-foreground" />
@@ -76,7 +76,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
 
                              <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive flex-shrink-0 ml-2">
                                         <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </AlertDialogTrigger>
