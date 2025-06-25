@@ -1,15 +1,16 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Expense } from "@/lib/types";
 import { DollarSign, ReceiptText, TrendingUp } from "lucide-react";
-import { useMemo } from "react";
+import { useState, useEffect } from "react";
 
 interface SummaryCardsProps {
   expenses: Expense[];
 }
 
 export default function SummaryCards({ expenses }: SummaryCardsProps) {
-  const { total, count, average } = useMemo(() => {
+  const [summary, setSummary] = useState({ total: 0, count: 0, average: 0 });
+
+  useEffect(() => {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -21,7 +22,7 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
     const count = monthlyExpenses.length;
     const average = count > 0 ? total / count : 0;
     
-    return { total, count, average };
+    setSummary({ total, count, average });
   }, [expenses]);
   
   return (
@@ -34,7 +35,7 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${total.toFixed(2)}</div>
+          <div className="text-2xl font-bold">${summary.total.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">
             Total expenses this month
           </p>
@@ -46,7 +47,7 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
           <ReceiptText className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+{count}</div>
+          <div className="text-2xl font-bold">+{summary.count}</div>
           <p className="text-xs text-muted-foreground">
             Transactions made this month
           </p>
@@ -58,7 +59,7 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">${average.toFixed(2)}</div>
+          <div className="text-2xl font-bold">${summary.average.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">
             Average transaction value this month
           </p>

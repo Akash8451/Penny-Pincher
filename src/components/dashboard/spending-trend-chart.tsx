@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -12,7 +11,9 @@ interface SpendingTrendChartProps {
 }
 
 export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps) {
-  const data = React.useMemo(() => {
+  const [data, setData] = React.useState<Array<{ name: string; total: number }>>([]);
+
+  React.useEffect(() => {
     const dailyTotals: { [key: string]: number } = {};
     const today = new Date();
     
@@ -34,10 +35,10 @@ export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps
       }
     });
 
-    return Object.entries(dailyTotals).map(([name, total]) => ({
+    setData(Object.entries(dailyTotals).map(([name, total]) => ({
       name,
       total,
-    }));
+    })));
   }, [expenses]);
   
   return (
