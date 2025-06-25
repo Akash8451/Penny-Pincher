@@ -18,7 +18,7 @@ export interface Expense {
 }
 
 export interface Category {
-  id: string;
+  id:string;
   name: string;
   group: string;
   icon: string; // lucide-react icon name

@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Download, Upload, Lock, Unlock, Loader2, ShieldCheck, AlertTriangle } from 'lucide-react';
-import type { Expense, Category, Person } from '@/lib/types';
+import type { Expense, Category, Person, SavingsGoal, VaultNote } from '@/lib/types';
 import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -20,12 +20,18 @@ type BackupData = {
   expenses: Expense[];
   categories: Category[];
   people: Person[];
+  savingsGoals: SavingsGoal[];
+  vaultNotes: VaultNote[];
+  proUnlocked: boolean;
 };
 
 export default function DataManagement() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
   const [categories, setCategories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
   const [people, setPeople] = useLocalStorage<Person[]>('people', []);
+  const [savingsGoals, setSavingsGoals] = useLocalStorage<SavingsGoal[]>('savings-goals', []);
+  const [vaultNotes, setVaultNotes] = useLocalStorage<VaultNote[]>('vault-notes', []);
+  const [proUnlocked, setProUnlocked] = useLocalStorage<boolean>('pro-features-unlocked', false);
   const { toast } = useToast();
   const [password, setPassword] = useState('');
   
@@ -48,7 +54,7 @@ export default function DataManagement() {
 
     setTimeout(() => {
       try {
-        const data = { expenses, categories, people };
+        const data: BackupData = { expenses, categories, people, savingsGoals, vaultNotes, proUnlocked };
         const jsonString = JSON.stringify(data, null, 2);
         const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
 
@@ -98,6 +104,8 @@ export default function DataManagement() {
                 }
 
                 const data: BackupData = JSON.parse(decryptedJson);
+                
+                // Basic validation of the imported data structure
                 if (data.expenses && Array.isArray(data.expenses) && data.categories && Array.isArray(data.categories) && data.people && Array.isArray(data.people)) {
                     setPreviewData(data);
                     setImportOpen(false);
@@ -120,9 +128,13 @@ export default function DataManagement() {
 
   const confirmImport = () => {
     if (!previewData) return;
-    setExpenses(previewData.expenses);
-    setCategories(previewData.categories);
-    setPeople(previewData.people);
+    setExpenses(previewData.expenses || []);
+    setCategories(previewData.categories || DEFAULT_CATEGORIES);
+    setPeople(previewData.people || []);
+    setSavingsGoals(previewData.savingsGoals || []);
+    setVaultNotes(previewData.vaultNotes || []);
+    setProUnlocked(previewData.proUnlocked || false);
+
     toast({ title: 'Success', description: 'Your data has been restored.' });
     
     setPreviewOpen(false);
@@ -245,6 +257,9 @@ export default function DataManagement() {
                 <div className="flex justify-between"><span>Transactions:</span> <span className="font-medium">{previewData?.expenses.length ?? 0}</span></div>
                 <div className="flex justify-between"><span>Categories:</span> <span className="font-medium">{previewData?.categories.length ?? 0}</span></div>
                 <div className="flex justify-between"><span>People:</span> <span className="font-medium">{previewData?.people.length ?? 0}</span></div>
+                <div className="flex justify-between"><span>Savings Goals:</span> <span className="font-medium">{previewData?.savingsGoals.length ?? 0}</span></div>
+                <div className="flex justify-between"><span>Secure Notes:</span> <span className="font-medium">{previewData?.vaultNotes.length ?? 0}</span></div>
+                <div className="flex justify-between"><span>Pro Status:</span> <span className="font-medium">{previewData?.proUnlocked ? 'Unlocked' : 'Locked'}</span></div>
             </div>
             <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setPreviewData(null)}>Cancel</AlertDialogCancel>

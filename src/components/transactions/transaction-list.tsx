@@ -11,6 +11,7 @@ import autoTable from 'jspdf-autotable'
 
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import type { Expense, Category, Person } from '@/lib/types'
+import { DEFAULT_CATEGORIES } from '@/lib/constants'
 import { DateRangePicker } from './date-range-picker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -37,7 +38,7 @@ function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
 
 export default function TransactionList() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', [])
-  const [categories] = useLocalStorage<Category[]>('categories', [])
+  const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES)
   const [people] = useLocalStorage<Person[]>('people', [])
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
@@ -192,7 +193,7 @@ export default function TransactionList() {
                             <div className="mt-3 flex justify-end items-center gap-4 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                                 <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
                                   <AlertDialogTrigger asChild>
-                                      <Button variant="destructive" size="sm" className="w-9 px-0 rounded-full">
+                                      <Button variant="destructive" size="sm" className="w-9 h-9 px-0 rounded-full">
                                           <Trash2 className="h-4 w-4" />
                                           <span className="sr-only">Delete</span>
                                       </Button>
@@ -208,11 +209,11 @@ export default function TransactionList() {
                                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                                           <AlertDialogAction onClick={() => handleDeleteExpense(expense.id)} className="bg-destructive hover:bg-destructive/90">
                                           Delete
-                                          </Action>
+                                          </AlertDialogAction>
                                       </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
-                                <Button asChild variant="outline" size="sm" className="rounded-full">
+                                <Button asChild variant="outline" size="sm" className="h-9 rounded-full">
                                     <Link href={`/transactions/${expense.id}`}>
                                         View Details <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>
