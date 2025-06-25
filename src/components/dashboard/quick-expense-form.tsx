@@ -21,6 +21,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
+import { Separator } from '../ui/separator';
 
 
 interface QuickExpenseFormProps {
@@ -42,13 +43,14 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
     resolver: zodResolver(expenseSchema),
     defaultValues: { amount: undefined, categoryId: '', note: '' },
   });
+  const totalAmount = form.watch('amount') || 0;
 
   const [fileName, setFileName] = React.useState('');
   const { width, height } = useWindowSize();
   const [showConfetti, setShowConfetti] = React.useState(false);
   const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
-
+  const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
 
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
@@ -58,13 +60,42 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   }, [categories]);
 
   const onSubmit = (values: z.infer<typeof expenseSchema>) => {
+    let splitWithData: {personId: string, amount: number}[] | undefined = undefined;
+
+    if (selectedPeople.length > 0) {
+      const customTotal = Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
+
+      // If there are custom splits, validate them
+      if (Object.keys(customSplits).length > 0) {
+        if (Math.abs(customTotal - values.amount) > 0.01) {
+             toast({
+                variant: 'destructive',
+                title: "Split Error",
+                description: `The split amounts ($${customTotal.toFixed(2)}) do not add up to the total expense ($${values.amount.toFixed(2)}).`,
+            });
+            return;
+        }
+         splitWithData = selectedPeople.map(personId => ({
+            personId,
+            amount: parseFloat(customSplits[personId]) || 0
+        }));
+      } else {
+        // Equal split
+        const equalAmount = values.amount / selectedPeople.length;
+        splitWithData = selectedPeople.map(personId => ({
+            personId,
+            amount: equalAmount
+        }));
+      }
+    }
+
+
     const expenseData: Omit<Expense, 'id'|'date'> = {
       ...values,
       amount: values.amount,
-      splitWith: selectedPeople.length > 0 ? selectedPeople : undefined,
+      splitWith: splitWithData,
     }
 
-    // Basic file to data URL conversion for local storage
     if (values.receipt && values.receipt.length > 0) {
       const file = values.receipt[0];
       const reader = new FileReader();
@@ -83,17 +114,34 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
     form.reset();
     setFileName('');
     setSelectedPeople([]);
+    setCustomSplits({});
     setShowConfetti(true);
     setTimeout(() => setShowConfetti(false), 4000);
   };
   
   const togglePersonSelection = (personId: string) => {
-    setSelectedPeople(prev => 
-      prev.includes(personId) 
-        ? prev.filter(id => id !== personId)
-        : [...prev, personId]
-    );
+    const newSelectedPeople = selectedPeople.includes(personId)
+      ? selectedPeople.filter(id => id !== personId)
+      : [...selectedPeople, personId];
+    setSelectedPeople(newSelectedPeople);
+    
+    // Clear custom splits if selection changes
+    setCustomSplits({});
   };
+
+  const handleSplitEqually = () => {
+    if (selectedPeople.length === 0 || totalAmount === 0) return;
+    const equalAmount = (totalAmount / selectedPeople.length).toFixed(2);
+    const newSplits = selectedPeople.reduce((acc, personId) => {
+        acc[personId] = equalAmount;
+        return acc;
+    }, {} as Record<string, string>);
+    setCustomSplits(newSplits);
+  }
+  
+  const currentSplitTotal = React.useMemo(() => {
+    return Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
+  }, [customSplits]);
 
 
   return (
@@ -198,24 +246,24 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
 
                 <Dialog open={isSplitBillOpen} onOpenChange={setSplitBillOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" disabled={!totalAmount || totalAmount <= 0}>
                       <Users className="mr-2 h-4 w-4" />
                        {selectedPeople.length > 0 
                         ? `Split with ${selectedPeople.length} people` 
                         : "Split Bill"}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>Split Bill</DialogTitle>
                       <DialogDescription>
-                        Select who you shared this expense with. The amount will be divided equally.
+                        Select people and specify how to split the ${totalAmount.toFixed(2)}.
                       </DialogDescription>
                     </DialogHeader>
-                    <ScrollArea className="max-h-64">
-                    <div className="space-y-2 py-2">
+                    <ScrollArea className="max-h-40">
+                    <div className="space-y-2 py-2 pr-4">
                       {people.length > 0 ? people.map(person => (
-                        <div key={person.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-accent" onClick={() => togglePersonSelection(person.id)}>
+                        <div key={person.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-accent" >
                           <Checkbox
                             id={`person-${person.id}`}
                             checked={selectedPeople.includes(person.id)}
@@ -223,9 +271,49 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
                           />
                           <Label htmlFor={`person-${person.id}`} className="flex-1 cursor-pointer">{person.name}</Label>
                         </div>
-                      )) : <p className='text-sm text-muted-foreground text-center'>Add some people in the 'People' tab first.</p>}
+                      )) : <p className='text-sm text-muted-foreground text-center'>Add people in the 'People' tab first.</p>}
                     </div>
                     </ScrollArea>
+                    {selectedPeople.length > 0 && (
+                      <>
+                        <Separator />
+                        <div className="space-y-4">
+                           <div className='flex justify-between items-center'>
+                             <h4 className="font-medium">Custom Amounts</h4>
+                             <Button variant="secondary" size="sm" onClick={handleSplitEqually}>Split Equally</Button>
+                           </div>
+                           <ScrollArea className="max-h-48">
+                            <div className="space-y-3 pr-4">
+                                {selectedPeople.map(personId => {
+                                    const person = people.find(p => p.id === personId);
+                                    return (
+                                        <div key={personId} className="flex items-center gap-3">
+                                            <Label htmlFor={`split-${personId}`} className="w-24 truncate">{person?.name}</Label>
+                                            <div className="relative flex-1">
+                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                                                <Input 
+                                                    id={`split-${personId}`} 
+                                                    type="number" 
+                                                    placeholder="0.00"
+                                                    className="pl-6"
+                                                    value={customSplits[personId] || ''}
+                                                    onChange={(e) => setCustomSplits(prev => ({...prev, [personId]: e.target.value }))}
+                                                />
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
+                           </ScrollArea>
+                           <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
+                                <span>Total Split:</span>
+                                <span className={Math.abs(currentSplitTotal - totalAmount) > 0.01 ? 'text-destructive' : 'text-green-500'}>
+                                    ${currentSplitTotal.toFixed(2)}
+                                </span>
+                           </div>
+                        </div>
+                      </>
+                    )}
                     <DialogFooter>
                       <DialogClose asChild>
                         <Button>Done</Button>

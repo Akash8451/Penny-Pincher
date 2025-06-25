@@ -26,6 +26,11 @@ export default function DashboardPage() {
     setExpenses(prev => [newExpense, ...prev]);
   };
 
+  const handleDeleteExpense = (expenseId: string) => {
+    setExpenses(prev => prev.filter(exp => exp.id !== expenseId));
+  };
+
+
   return (
     <>
       <AppHeader title="Dashboard" />
@@ -33,7 +38,7 @@ export default function DashboardPage() {
         <SummaryCards expenses={expenses} />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             <QuickExpenseForm categories={categories} people={people} onAddExpense={handleAddExpense} />
-            <RecentExpenses expenses={expenses} categories={categories} people={people} />
+            <RecentExpenses expenses={expenses} categories={categories} people={people} onDeleteExpense={handleDeleteExpense} />
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
             <ExpensesByCategoryChart expenses={expenses} categories={categories} />

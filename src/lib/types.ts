@@ -6,7 +6,7 @@ export interface Expense {
   note: string;
   date: string; // ISO string
   receipt?: string; // data URL for the image
-  splitWith?: string[]; // Array of person IDs
+  splitWith?: { personId: string; amount: number }[]; // Array of person IDs and their custom amount
 }
 
 export interface Category {
