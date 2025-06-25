@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -10,8 +11,6 @@ import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { Target, PlusCircle, Edit, Trash2 } from 'lucide-react';
-import Confetti from 'react-confetti';
-import { useWindowSize } from 'react-use';
 import { format, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import {
   Dialog,
@@ -31,8 +30,6 @@ interface SavingsGoalProps {
 export default function SavingsGoal({ expenses }: SavingsGoalProps) {
   const [goals, setGoals] = useLocalStorage<SavingsGoal[]>('savings-goals', []);
   const { toast } = useToast();
-  const { width, height } = useWindowSize();
-  const [showConfetti, setShowConfetti] = useState(false);
   
   const [isFormOpen, setFormOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
@@ -62,11 +59,6 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
 
     return { savedAmount: saved, progress: progressPercentage };
   }, [expenses, currentGoal]);
-
-  if (progress >= 100 && !showConfetti) {
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
-  }
 
   const handleOpenForm = (goal: SavingsGoal | null) => {
     setEditingGoal(goal);
@@ -109,7 +101,6 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
 
   return (
     <Card>
-      {showConfetti && <Confetti width={width} height={height} recycle={false} />}
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <Target className="text-primary" />

@@ -1,7 +1,6 @@
 
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,7 +14,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { Paperclip, PlusCircle, Users, Mic, MicOff, Loader } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
-import Confetti from 'react-confetti';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '../ui/scroll-area';
@@ -23,11 +21,14 @@ import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
 import { cn } from '@/lib/utils';
+import { DialogTitle as FormDialogTitle, DialogDescription as FormDialogDescription, DialogHeader as FormDialogHeader } from '@/components/ui/dialog';
+
 
 interface QuickExpenseFormProps {
   categories: Category[];
   people: Person[];
   onAddExpense: (expense: Omit<Expense, 'id' | 'date'>) => void;
+  onSuccess: () => void;
 }
 
 const expenseSchema = z.object({
@@ -86,7 +87,7 @@ const useSpeechRecognition = ({ onResult, onError }: { onResult: (text: string) 
 };
 
 
-export default function QuickExpenseForm({ categories, people, onAddExpense }: QuickExpenseFormProps) {
+export default function QuickExpenseForm({ categories, people, onAddExpense, onSuccess }: QuickExpenseFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
@@ -96,8 +97,6 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   const [isAILoading, setAILoading] = useState(false);
 
   const [fileName, setFileName] = React.useState('');
-  const [windowSize, setWindowSize] = React.useState({ width: 0, height: 0 });
-  const [showConfetti, setShowConfetti] = React.useState(false);
   const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
@@ -126,15 +125,6 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   
   const { isListening, toggleListening } = useSpeechRecognition({ onResult: handleVoiceResult, onError: handleVoiceError });
 
-
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
-      handleResize();
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  }, []);
 
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
@@ -204,8 +194,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
     setSelectedPeople([]);
     setCustomSplits({});
     setSplitGroupName('');
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 4000);
+    onSuccess();
   };
   
   const togglePersonSelection = (personId: string) => {
@@ -249,14 +238,12 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
 
   return (
     <>
-      {showConfetti && <Confetti width={windowSize.width} height={windowSize.height} recycle={false} numberOfPieces={300} />}
-      <Card className="lg:col-span-3">
-        <CardHeader>
-          <CardTitle>Log Expense</CardTitle>
-          <CardDescription>Quickly add a new transaction manually or with your voice.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
+      <FormDialogHeader>
+          <FormDialogTitle>Log Expense</FormDialogTitle>
+          <FormDialogDescription>Quickly add a new transaction manually or with your voice.</FormDialogDescription>
+      </FormDialogHeader>
+      <div className='py-4'>
+        <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
@@ -459,7 +446,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
                   </div>
                 )}
                 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pt-4">
                     <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || isAILoading || isListening}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
                     </Button>
@@ -476,8 +463,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
                 </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
+        </div>
     </>
   );
 }
