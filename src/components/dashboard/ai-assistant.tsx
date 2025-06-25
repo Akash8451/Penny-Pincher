@@ -66,7 +66,7 @@ export default function AIAssistant({ expenses, categories, people }: AIAssistan
   return (
     <Card className="h-full transition-all duration-300 bg-secondary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
       <CardHeader>
-        <CardTitle className='flex items-center gap-2'>
+        <CardTitle className='flex items-center gap-2 text-xl'>
             <Lock className='h-4 w-4 text-muted-foreground' />
             <Wand2 className='text-primary' />
             AI Assistant

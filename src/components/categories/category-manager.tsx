@@ -47,6 +47,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import React from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 const iconList = Object.keys(Lucide).filter(k => typeof Lucide[k as keyof typeof Lucide] === 'object');
 
@@ -116,12 +117,15 @@ export default function CategoryManager() {
   const [categories, setCategories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const { toast } = useToast();
 
   const handleSave = (categoryData: Omit<Category, 'id'>) => {
     if (editingCategory) {
       setCategories(categories.map((c) => (c.id === editingCategory.id ? { ...c, ...categoryData } : c)));
+      toast({ title: `✔ Updated "${categoryData.name}" category` });
     } else {
       setCategories([...categories, { id: `cat-${new Date().getTime()}`, ...categoryData }]);
+      toast({ title: `✔ Saved "${categoryData.name}" category` });
     }
     setEditingCategory(null);
     setDialogOpen(false);

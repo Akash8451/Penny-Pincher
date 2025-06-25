@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 function PersonForm({
   person,
@@ -55,12 +56,15 @@ export default function PeopleManager() {
   const [people, setPeople] = useLocalStorage<Person[]>('people', []);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
+  const { toast } = useToast();
 
   const handleSave = (personData: Omit<Person, 'id'>) => {
     if (editingPerson) {
       setPeople(people.map((p) => (p.id === editingPerson.id ? { ...p, ...personData } : p)));
+      toast({ title: `✔ Updated ${personData.name}` });
     } else {
       setPeople([...people, { id: `person-${new Date().getTime()}`, ...personData }]);
+      toast({ title: `✔ Added ${personData.name}` });
     }
     setEditingPerson(null);
     setDialogOpen(false);

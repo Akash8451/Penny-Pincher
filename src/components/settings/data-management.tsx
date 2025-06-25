@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Upload, Lock, Unlock } from 'lucide-react';
+import { Download, Upload, Lock, Unlock, Loader2 } from 'lucide-react';
 import type { Expense, Category, Person } from '@/lib/types';
 import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
@@ -20,8 +20,13 @@ export default function DataManagement() {
   const [people, setPeople] = useLocalStorage<Person[]>('people', []);
   const { toast } = useToast();
   const [password, setPassword] = useState('');
+  
   const [isExportOpen, setExportOpen] = useState(false);
   const [isImportOpen, setImportOpen] = useState(false);
+
+  const [isExporting, setExporting] = useState(false);
+  const [isImporting, setImporting] = useState(false);
+
   const [fileToImport, setFileToImport] = useState<File | null>(null);
 
   const handleExport = () => {
@@ -29,29 +34,35 @@ export default function DataManagement() {
       toast({ variant: 'destructive', title: 'Error', description: 'Please enter a password to encrypt your backup.' });
       return;
     }
+    setExporting(true);
 
-    try {
-      const data = { expenses, categories, people };
-      const jsonString = JSON.stringify(data, null, 2);
-      const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
+    // Simulate async operation
+    setTimeout(() => {
+      try {
+        const data = { expenses, categories, people };
+        const jsonString = JSON.stringify(data, null, 2);
+        const encrypted = CryptoJS.AES.encrypt(jsonString, password).toString();
 
-      const blob = new Blob([encrypted], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `pennypincher_backup_encrypted_${new Date().toISOString().split('T')[0]}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+        const blob = new Blob([encrypted], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `pennypincher_backup_encrypted_${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
 
-      toast({ title: 'Success', description: 'Your encrypted data has been exported.' });
-      setExportOpen(false);
-      setPassword('');
-    } catch (error) {
-      console.error(error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to export data.' });
-    }
+        toast({ title: 'Success', description: 'Your encrypted data has been exported.' });
+      } catch (error) {
+        console.error(error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to export data.' });
+      } finally {
+        setExportOpen(false);
+        setPassword('');
+        setExporting(false);
+      }
+    }, 500);
   };
 
   const handleImport = () => {
@@ -64,35 +75,40 @@ export default function DataManagement() {
         return;
     }
     
+    setImporting(true);
     const reader = new FileReader();
     reader.onload = (e) => {
-        try {
-            const encryptedData = e.target?.result as string;
-            const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, password);
-            const decryptedJson = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        // Simulate async operation
+        setTimeout(() => {
+            try {
+                const encryptedData = e.target?.result as string;
+                const decryptedBytes = CryptoJS.AES.decrypt(encryptedData, password);
+                const decryptedJson = decryptedBytes.toString(CryptoJS.enc.Utf8);
 
-            if (!decryptedJson) {
-                throw new Error('Decryption failed. Check your password.');
-            }
+                if (!decryptedJson) {
+                    throw new Error('Decryption failed. Check your password.');
+                }
 
-            const data = JSON.parse(decryptedJson);
-            if (data.expenses && Array.isArray(data.expenses) && data.categories && Array.isArray(data.categories) && data.people && Array.isArray(data.people)) {
-                setExpenses(data.expenses);
-                setCategories(data.categories);
-                setPeople(data.people);
-                toast({ title: 'Success', description: 'Your data has been imported successfully.' });
-            } else {
-                throw new Error('Invalid file format after decryption.');
+                const data = JSON.parse(decryptedJson);
+                if (data.expenses && Array.isArray(data.expenses) && data.categories && Array.isArray(data.categories) && data.people && Array.isArray(data.people)) {
+                    setExpenses(data.expenses);
+                    setCategories(data.categories);
+                    setPeople(data.people);
+                    toast({ title: 'Success', description: 'Your data has been imported successfully.' });
+                } else {
+                    throw new Error('Invalid file format after decryption.');
+                }
+            } catch (error) {
+                console.error(error);
+                const errorMessage = error instanceof Error ? error.message : 'Failed to import data. Please check the file and password.';
+                toast({ variant: 'destructive', title: 'Import Error', description: errorMessage });
+            } finally {
+                setImportOpen(false);
+                setFileToImport(null);
+                setPassword('');
+                setImporting(false);
             }
-        } catch (error) {
-            console.error(error);
-            const errorMessage = error instanceof Error ? error.message : 'Failed to import data. Please check the file and password.';
-            toast({ variant: 'destructive', title: 'Import Error', description: errorMessage });
-        } finally {
-            setImportOpen(false);
-            setFileToImport(null);
-            setPassword('');
-        }
+        }, 500);
     };
     reader.readAsText(fileToImport);
   };
@@ -142,8 +158,12 @@ export default function DataManagement() {
                 </div>
                 <DialogFooter>
                     <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
-                    <Button onClick={handleExport} disabled={!password}>
-                        <Lock className="mr-2 h-4 w-4" /> Encrypt & Export
+                    <Button onClick={handleExport} disabled={!password || isExporting}>
+                        {isExporting ? (
+                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Encrypting...</>
+                        ) : (
+                            <><Lock className="mr-2 h-4 w-4" /> Encrypt & Export</>
+                        )}
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -182,8 +202,12 @@ export default function DataManagement() {
                 </div>
                 <DialogFooter>
                     <DialogClose asChild><Button variant="ghost" onClick={() => { setPassword(''); setFileToImport(null); }}>Cancel</Button></DialogClose>
-                    <Button onClick={handleImport} disabled={!password}>
-                       <Unlock className="mr-2 h-4 w-4" /> Decrypt & Restore
+                    <Button onClick={handleImport} disabled={!password || isImporting}>
+                       {isImporting ? (
+                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Decrypting...</>
+                       ) : (
+                            <><Unlock className="mr-2 h-4 w-4" /> Decrypt & Restore</>
+                       )}
                     </Button>
                 </DialogFooter>
             </DialogContent>

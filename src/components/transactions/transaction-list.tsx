@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -13,7 +14,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Search } from 'lucide-react'
+import { Input } from '@/components/ui/input'
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
   return iconName in Lucide;
@@ -25,18 +27,29 @@ export default function TransactionList() {
   const [people] = useLocalStorage<Person[]>('people', [])
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
   const peopleMap = useMemo(() => new Map(people.map((p) => [p.id, p.name])), [people]);
 
   const filteredExpenses = useMemo(() => {
+    const lowercasedTerm = searchTerm.toLowerCase();
     return expenses.filter((expense) => {
-      if (!dateRange || !dateRange.from) return true
-      const expenseDate = new Date(expense.date)
-      const toDate = dateRange.to || dateRange.from;
-      return isWithinInterval(expenseDate, { start: startOfDay(dateRange.from), end: endOfDay(toDate) })
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  }, [expenses, dateRange])
+      const isDateInRange = (() => {
+        if (!dateRange || !dateRange.from) return true;
+        const expenseDate = new Date(expense.date);
+        const toDate = dateRange.to || dateRange.from;
+        return isWithinInterval(expenseDate, { start: startOfDay(dateRange.from), end: endOfDay(toDate) });
+      })();
+
+      const matchesSearch = lowercasedTerm === '' ||
+        expense.note?.toLowerCase().includes(lowercasedTerm) ||
+        (categoryMap.get(expense.categoryId) || '').toLowerCase().includes(lowercasedTerm);
+
+      return isDateInRange && matchesSearch;
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [expenses, dateRange, searchTerm, categoryMap]);
+
 
   const handleItemClick = (id: string) => {
     setSelectedExpenseId(prevId => (prevId === id ? null : id));
@@ -48,8 +61,17 @@ export default function TransactionList() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <CardTitle>History</CardTitle>
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by note or category..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full sm:w-[300px] pl-10"
+                  />
+                </div>
                 <DateRangePicker date={dateRange} onDateChange={setDateRange} />
-                <Button variant="ghost" onClick={() => setDateRange(undefined)}>Reset</Button>
+                <Button variant="ghost" onClick={() => { setDateRange(undefined); setSearchTerm(''); }}>Reset</Button>
             </div>
         </div>
       </CardHeader>
@@ -95,7 +117,7 @@ export default function TransactionList() {
 
                         {isSelected && (
                             <div className="mt-3 flex justify-end items-center animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-                                <Button asChild variant="outline" size="default" className="rounded-full">
+                                <Button asChild variant="outline" size="default" className="rounded-full h-9">
                                     <Link href={`/transactions/${expense.id}`}>
                                         View Details <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>

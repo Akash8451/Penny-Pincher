@@ -102,7 +102,7 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
   return (
     <Card className="h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-xl">
             <Target className="text-primary" />
             This Month's Savings Goal
         </CardTitle>

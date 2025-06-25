@@ -26,7 +26,21 @@ function DashboardSkeleton() {
           <Skeleton className="h-[210px] rounded-lg md:col-span-1 lg:col-span-3" />
           <Skeleton className="h-[210px] rounded-lg md:col-span-1 lg:col-span-4" />
         </div>
-        <Skeleton className="h-[350px] w-full rounded-lg" />
+        <Card>
+            <CardHeader>
+                <Skeleton className="h-8 w-32" />
+                <Skeleton className="h-4 w-48" />
+            </CardHeader>
+            <CardContent>
+                <div className="grid w-full grid-cols-2 gap-2 mb-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="flex items-center justify-center h-[250px] w-full">
+                    <Skeleton className="h-48 w-48 rounded-full" />
+                </div>
+            </CardContent>
+        </Card>
         <Skeleton className="h-[200px] w-full rounded-lg" />
       </div>
     </>
