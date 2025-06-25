@@ -50,7 +50,7 @@ export default function TransactionList() {
         <ScrollArea className="h-[60vh]">
           <div className="space-y-1 pr-4">
             {filteredExpenses.map((expense) => {
-                const category = categoryMap.get(expense.categoryId);
+                const category = categories.find(c => c.id === expense.categoryId);
                 const Icon = category && isValidIcon(category.icon) ? Lucide[category.icon] as React.ElementType : Lucide.Package;
                 const splitWithNames = expense.splitWith?.map(split => peopleMap.get(split.personId) || 'Unknown').filter(Boolean).join(', ');
 
@@ -64,14 +64,14 @@ export default function TransactionList() {
                                 <p className="text-sm font-medium truncate">
                                     {expense.note || category?.name || 'Uncategorized'}
                                 </p>
-                                <div className="flex items-baseline justify-between gap-2">
+                                <div className="flex items-baseline gap-2">
                                      <p className="text-sm text-muted-foreground truncate">
                                         {expense.type === 'expense' && splitWithNames 
                                             ? `Split with: ${splitWithNames}`
                                             : format(new Date(expense.date), "MMM d, yyyy")
                                         }
                                     </p>
-                                    <p className={`font-semibold text-base whitespace-nowrap ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
+                                    <p className={`ml-auto font-semibold text-base ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
                                         {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
                                     </p>
                                 </div>
