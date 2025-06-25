@@ -10,16 +10,41 @@ import AIAssistant from '@/components/dashboard/ai-assistant';
 import SavingsGoal from '@/components/dashboard/savings-goal';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, ReceiptText, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { ReceiptText, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import AnalyticsOverview from '@/components/dashboard/analytics-overview';
+import { Skeleton } from '@/components/ui/skeleton';
+
+function DashboardSkeleton() {
+  return (
+    <>
+      <AppHeader title="Dashboard" />
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 animate-pulse">
+        <Skeleton className="h-[125px] w-full rounded-lg" />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Skeleton className="h-[210px] rounded-lg md:col-span-1 lg:col-span-3" />
+          <Skeleton className="h-[210px] rounded-lg md:col-span-1 lg:col-span-4" />
+        </div>
+        <Skeleton className="h-[350px] w-full rounded-lg" />
+        <Skeleton className="h-[200px] w-full rounded-lg" />
+      </div>
+    </>
+  );
+}
 
 export default function DashboardPage() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
   const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
   const [people] = useLocalStorage<Person[]>('people', []);
   const [summary, setSummary] = useState({ total: 0, count: 0, average: 0 });
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    // This effect runs only on the client, after the component has mounted.
+    setIsClient(true);
+  }, []);
+
 
   useEffect(() => {
     const allTransactions = expenses;
@@ -40,7 +65,10 @@ export default function DashboardPage() {
   const handleDeleteExpense = (expenseId: string) => {
     setExpenses(prev => prev.filter(exp => exp.id !== expenseId));
   };
-
+  
+  if (!isClient) {
+    return <DashboardSkeleton />;
+  }
 
   return (
     <>
