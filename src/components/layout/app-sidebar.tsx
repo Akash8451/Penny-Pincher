@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock, ScanLine, Wand2, FileImport } from 'lucide-react';
+import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock, ScanLine, Wand2, Import } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,7 +25,7 @@ export default function AppSidebar() {
     { href: '/transactions', icon: List, label: 'Transactions' },
     { href: '/scan', icon: ScanLine, label: 'Scan Receipt' },
     { href: '/assistant', icon: Wand2, label: 'AI Assistant' },
-    { href: '/import', icon: FileImport, label: 'Import' },
+    { href: '/import', icon: Import, label: 'Import' },
     { href: '/categories', icon: Shapes, label: 'Categories' },
     { href: '/people', icon: Users, label: 'People' },
     ...(isClient && isProUnlocked ? [{ href: '/vault', icon: Lock, label: 'Vault' }] : []),
@@ -116,7 +116,7 @@ export default function AppSidebar() {
            { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
            { href: '/transactions', icon: List, label: 'Transactions' },
            { href: '/scan', icon: ScanLine, label: 'Scan' },
-           { href: '/import', icon: FileImport, label: 'Import' },
+           { href: '/import', icon: Import, label: 'Import' },
            { href: '/settings', icon: Settings, label: 'Settings' }
          ].map((item) => (
             <Link
