@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
 import { cn } from '@/lib/utils';
 import { SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 
 interface QuickExpenseFormProps {
@@ -41,6 +43,7 @@ const expenseSchema = z.object({
 
 export default function QuickExpenseForm({ categories, people, onAddExpense, onSuccess }: QuickExpenseFormProps) {
   const { toast } = useToast();
+  const formatCurrency = useCurrencyFormatter();
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: { amount: undefined, categoryId: '', note: '' },
@@ -103,7 +106,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
            toast({
               variant: 'destructive',
               title: "Split Error",
-              description: `The assigned splits for others ($${customTotal.toFixed(2)}) cannot exceed the total expense ($${values.amount.toFixed(2)}).`,
+              description: `The assigned splits for others (${formatCurrency(customTotal)}) cannot exceed the total expense (${formatCurrency(values.amount)}).`,
           });
           return;
       }
@@ -210,7 +213,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="$0.00"
+                        placeholder="0.00"
                         {...field}
                         value={field.value ?? ''}
                         onChange={(e) =>
@@ -313,7 +316,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                     <DialogHeader>
                       <DialogTitle>Split Bill</DialogTitle>
                       <DialogDescription>
-                        Select people and specify how to split the ${totalAmount.toFixed(2)}.
+                        Select people and specify how to split the {formatCurrency(totalAmount)}.
                       </DialogDescription>
                     </DialogHeader>
                      <div className="space-y-1.5">
@@ -376,13 +379,13 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                            <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
                                 <span>You (Your Share):</span>
                                 <span className={myShare < 0 ? 'text-destructive' : 'text-foreground'}>
-                                    ${myShare.toFixed(2)}
+                                    {formatCurrency(myShare)}
                                 </span>
                            </div>
                            <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
                                 <span>Total Assigned to Others:</span>
                                 <span className={currentSplitTotalForOthers > totalAmount ? 'text-destructive' : 'text-foreground'}>
-                                    ${currentSplitTotalForOthers.toFixed(2)}
+                                    {formatCurrency(currentSplitTotalForOthers)}
                                 </span>
                            </div>
                         </div>

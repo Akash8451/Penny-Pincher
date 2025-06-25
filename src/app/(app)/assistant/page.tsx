@@ -9,6 +9,7 @@ import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 function AssistantSkeleton() {
   return (
@@ -24,6 +25,7 @@ export default function AssistantPage() {
   const [people] = useLocalStorage<Person[]>('people', []);
   const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
+  const formatCurrency = useCurrencyFormatter();
 
   useEffect(() => {
     setIsClient(true);
@@ -40,7 +42,7 @@ export default function AssistantPage() {
 
     const categoryName = categories.find(c => c.id === details.categoryId)?.name || 'a category';
     toast({
-        title: `✔️ $${details.amount.toFixed(2)} added`,
+        title: `✔️ ${formatCurrency(details.amount)} added`,
         description: `Logged to ${categoryName}.`,
     });
   };

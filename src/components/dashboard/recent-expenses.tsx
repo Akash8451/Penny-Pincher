@@ -1,3 +1,4 @@
+
 import type { Category, Expense, Person } from "@/lib/types";
 import { format } from 'date-fns';
 import * as Lucide from 'lucide-react';
@@ -18,6 +19,7 @@ import { ArrowRight, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { CardFooter } from "../ui/card";
+import { useCurrencyFormatter } from "@/hooks/use-currency-formatter";
 
 interface RecentExpensesProps {
   expenses: Expense[];
@@ -34,6 +36,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
   const peopleMap = new Map(people.map((p) => [p.id, p.name]));
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
+  const formatCurrency = useCurrencyFormatter();
 
   const handleItemClick = (id: string) => {
     setSelectedExpenseId(prevId => (prevId === id ? null : id));
@@ -74,7 +77,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                                       }
                                   </p>
                                   <p className={`ml-auto font-semibold text-base ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
-                                      {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
+                                      {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
                                   </p>
                               </div>
                           </div>

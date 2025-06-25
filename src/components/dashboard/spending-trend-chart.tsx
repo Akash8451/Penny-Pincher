@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import type { Expense } from '@/lib/types';
 import { format, subDays } from 'date-fns';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 interface SpendingTrendChartProps {
   expenses: Expense[];
@@ -12,6 +13,7 @@ interface SpendingTrendChartProps {
 
 export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps) {
   const [data, setData] = React.useState<Array<{ name: string; total: number }>>([]);
+  const formatCurrency = useCurrencyFormatter();
 
   React.useEffect(() => {
     const dailyTotals: { [key: string]: number } = {};
@@ -59,7 +61,7 @@ export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${value}`}
+              tickFormatter={(value) => formatCurrency(Number(value)).replace(/\.00$/, '')}
             />
             <Tooltip
               cursor={{ fill: 'hsl(var(--accent))' }}
@@ -68,6 +70,7 @@ export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps
                   border: '1px solid hsl(var(--border))',
                   borderRadius: 'var(--radius)',
               }}
+              formatter={(value) => formatCurrency(Number(value))}
             />
             <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
           </BarChart>

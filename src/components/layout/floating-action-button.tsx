@@ -12,6 +12,7 @@ import QuickExpenseForm from '@/components/dashboard/quick-expense-form';
 import { useToast } from '@/hooks/use-toast';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 export default function FloatingActionButton() {
     const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +21,7 @@ export default function FloatingActionButton() {
     const [people] = useLocalStorage<Person[]>('people', []);
     const { toast } = useToast();
     const pathname = usePathname();
+    const formatCurrency = useCurrencyFormatter();
 
     const isHidden = pathname === '/assistant';
     
@@ -33,7 +35,7 @@ export default function FloatingActionButton() {
 
         const categoryName = categories.find(c => c.id === expense.categoryId)?.name || 'a category';
         toast({
-            title: `✔️ $${expense.amount.toFixed(2)} added`,
+            title: `✔️ ${formatCurrency(expense.amount)} added`,
             description: `Logged to ${categoryName}.`,
         })
       };

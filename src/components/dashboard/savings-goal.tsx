@@ -22,6 +22,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 interface SavingsGoalProps {
     expenses: Expense[];
@@ -30,6 +31,7 @@ interface SavingsGoalProps {
 export default function SavingsGoal({ expenses }: SavingsGoalProps) {
   const [goals, setGoals] = useLocalStorage<SavingsGoalType[]>('savings-goals', []);
   const { toast } = useToast();
+  const formatCurrency = useCurrencyFormatter();
   
   const [isFormOpen, setFormOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<SavingsGoalType | null>(null);
@@ -76,7 +78,7 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
     
     if (editingGoal) {
       setGoals(goals.map(g => g.id === editingGoal.id ? { ...g, name: goalName, amount } : g));
-      toast({ title: 'Goal Updated!', description: `Your goal to save $${amount} has been updated.` });
+      toast({ title: 'Goal Updated!', description: `Your goal to save ${formatCurrency(amount)} has been updated.` });
     } else {
       const newGoal: SavingsGoalType = {
         id: `goal-${Date.now()}`,
@@ -85,7 +87,7 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
         month: currentMonthStr
       };
       setGoals([...goals, newGoal]);
-      toast({ title: 'Goal Set!', description: `You're aiming to save $${amount} this month. You can do it!` });
+      toast({ title: 'Goal Set!', description: `You're aiming to save ${formatCurrency(amount)} this month. You can do it!` });
     }
     
     setFormOpen(false);
@@ -114,10 +116,10 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
               <Progress value={progress} className="h-3" />
               <div className="flex justify-between items-center text-sm">
                 <span className="font-medium text-muted-foreground">
-                    Saved: <span className="text-foreground font-bold">${savedAmount.toFixed(2)}</span>
+                    Saved: <span className="text-foreground font-bold">{formatCurrency(savedAmount)}</span>
                 </span>
                 <span className="font-medium text-muted-foreground">
-                    Goal: <span className="text-foreground font-bold">${currentGoal.amount.toFixed(2)}</span>
+                    Goal: <span className="text-foreground font-bold">{formatCurrency(currentGoal.amount)}</span>
                 </span>
               </div>
               {progress >= 100 && <p className="text-center font-semibold text-green-500">Goal Achieved!</p>}

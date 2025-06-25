@@ -19,6 +19,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Camera, Upload, ScanLine, Loader2, Sparkles, X, ListPlus, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 export default function ReceiptScanner() {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -26,6 +27,7 @@ export default function ReceiptScanner() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const formatCurrency = useCurrencyFormatter();
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -255,7 +257,7 @@ export default function ReceiptScanner() {
                       <Checkbox checked={selectedItems[index]} onCheckedChange={(checked) => setSelectedItems(p => ({...p, [index]: Boolean(checked)}))} />
                     </TableCell>
                     <TableCell className="font-medium">{item.description}</TableCell>
-                    <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(item.price)}</TableCell>
                     <TableCell>
                        <Select 
                           onValueChange={(value) => setItemCategories(p => ({...p, [index]: value}))} 

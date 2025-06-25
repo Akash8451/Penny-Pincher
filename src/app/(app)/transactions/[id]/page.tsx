@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 
 function TransactionDetailsSkeleton() {
@@ -61,6 +62,7 @@ export default function TransactionDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const formatCurrency = useCurrencyFormatter();
   
   const [isLoading, setIsLoading] = useState(true);
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
@@ -112,7 +114,7 @@ export default function TransactionDetailsPage() {
         toast({
             variant: 'destructive',
             title: 'Split Error',
-            description: `The total split for others ($${newTotalForOthers.toFixed(2)}) cannot exceed the total expense amount ($${expense.amount.toFixed(2)}).`,
+            description: `The total split for others (${formatCurrency(newTotalForOthers)}) cannot exceed the total expense amount (${formatCurrency(expense.amount)}).`,
         });
         return;
     }
@@ -173,7 +175,7 @@ export default function TransactionDetailsPage() {
 
     toast({
       title: 'Settled!',
-      description: `${personName}'s payment of $${settleAmount.toFixed(2)} has been recorded.`,
+      description: `${personName}'s payment of ${formatCurrency(settleAmount)} has been recorded.`,
     });
   };
 
@@ -222,7 +224,7 @@ export default function TransactionDetailsPage() {
                 </div>
               </div>
               <span className={`text-2xl font-bold ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
-                {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
+                {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
               </span>
             </CardTitle>
           </CardHeader>
@@ -281,7 +283,7 @@ export default function TransactionDetailsPage() {
                                 <div className="relative flex-1">
                                     <Input
                                         type="text"
-                                        value={`$${myEditedShare.toFixed(2)}`}
+                                        value={formatCurrency(myEditedShare)}
                                         disabled
                                         className="pl-3 bg-transparent border-none text-right"
                                     />
@@ -298,14 +300,14 @@ export default function TransactionDetailsPage() {
                       <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                         <span className='font-medium'>You (Your Share)</span>
                         <div className="flex items-center gap-4">
-                            <span className='text-muted-foreground'>${myShare.toFixed(2)}</span>
+                            <span className='text-muted-foreground'>{formatCurrency(myShare)}</span>
                         </div>
                       </div>
                     {expense.splitWith.map(split => (
                         <div key={split.personId} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                         <span className='font-medium'>{peopleMap.get(split.personId) || 'Unknown Person'}</span>
                         <div className="flex items-center gap-4">
-                            <span className='text-muted-foreground'>${split.amount.toFixed(2)}</span>
+                            <span className='text-muted-foreground'>{formatCurrency(split.amount)}</span>
                             {split.settled ? (
                             <Badge variant="secondary" className='border-green-500/50 text-green-600'>Settled</Badge>
                             ) : (

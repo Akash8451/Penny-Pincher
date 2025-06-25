@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -30,6 +31,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter'
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
   return iconName in Lucide;
@@ -42,6 +44,7 @@ export default function TransactionList() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const formatCurrency = useCurrencyFormatter();
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
   const peopleMap = useMemo(() => new Map(people.map((p) => [p.id, p.name])), [people]);
@@ -105,7 +108,7 @@ export default function TransactionList() {
       format(new Date(exp.date), 'yyyy-MM-dd'),
       exp.note || '-',
       categoryMap.get(exp.categoryId) || 'Uncategorized',
-      `$${exp.amount.toFixed(2)}`,
+      formatCurrency(exp.amount),
       exp.type,
     ]);
 
@@ -188,7 +191,7 @@ export default function TransactionList() {
                                         }
                                     </p>
                                     <p className={`ml-auto font-semibold text-base ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
-                                        {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
+                                        {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
                                     </p>
                                 </div>
                             </div>

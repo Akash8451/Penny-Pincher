@@ -16,6 +16,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import AnalyticsOverview from '@/components/dashboard/analytics-overview';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 function DashboardSkeleton() {
   return (
@@ -55,6 +56,7 @@ export default function DashboardPage() {
   const [summary, setSummary] = useState({ total: 0, count: 0, average: 0 });
   const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
+  const formatCurrency = useCurrencyFormatter();
 
   useEffect(() => {
     // This effect runs only on the client, after the component has mounted.
@@ -93,7 +95,7 @@ export default function DashboardPage() {
 
     const categoryName = categories.find(c => c.id === details.categoryId)?.name || 'a category';
     toast({
-        title: `✔️ $${details.amount.toFixed(2)} added`,
+        title: `✔️ ${formatCurrency(details.amount)} added`,
         description: `Logged to ${categoryName}.`,
     });
   };
@@ -123,7 +125,7 @@ export default function DashboardPage() {
                 <div>
                     <p className="text-xs text-muted-foreground">Net Spending</p>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-bold">${summary.total.toFixed(2)}</span>
+                        <span className="text-2xl font-bold">{formatCurrency(summary.total)}</span>
                         <span className={`flex items-center text-xs ${summary.total > 0 ? 'text-destructive' : 'text-green-500'}`}>
                            {summary.total > 0 ? <ArrowUpRight className="h-4 w-4" /> : <ArrowDownRight className="h-4 w-4" />}
                            vs last period
@@ -133,7 +135,7 @@ export default function DashboardPage() {
                 <div>
                     <p className="text-xs text-muted-foreground">Average Expense</p>
                     <div className="flex items-baseline gap-2">
-                        <span className="text-2xl font-bold">${summary.average.toFixed(2)}</span>
+                        <span className="text-2xl font-bold">{formatCurrency(summary.average)}</span>
                          <span className="flex items-center text-xs text-muted-foreground">
                            <TrendingUp className="h-4 w-4" />
                            Steady

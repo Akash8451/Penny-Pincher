@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Label } from '@/components/ui/label';
 import { Upload, Loader2, Sparkles, X, ListPlus, AlertTriangle, FileUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 
 type ParsedTransaction = {
     description: string;
@@ -34,6 +35,7 @@ export default function StatementImporter() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
+  const formatCurrency = useCurrencyFormatter();
 
   const [, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
   const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
@@ -241,7 +243,7 @@ export default function StatementImporter() {
                     <TableCell>{tx.date}</TableCell>
                     <TableCell className="font-medium">{tx.description}</TableCell>
                     <TableCell className={cn("text-right font-semibold", tx.type === 'income' ? 'text-green-500' : 'text-destructive')}>
-                      {tx.type === 'income' ? '+' : '-'} ${tx.amount.toFixed(2)}
+                      {tx.type === 'income' ? '+' : '-'} {formatCurrency(tx.amount)}
                     </TableCell>
                     <TableCell>
                        <Select 
