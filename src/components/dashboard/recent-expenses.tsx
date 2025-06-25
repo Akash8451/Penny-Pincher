@@ -17,6 +17,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from "../ui/button";
 import { ArrowRight, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 interface RecentExpensesProps {
   expenses: Expense[];
@@ -32,6 +34,11 @@ function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
 export default function RecentExpenses({ expenses, categories, people, onDeleteExpense }: RecentExpensesProps) {
   const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
   const peopleMap = new Map(people.map((p) => [p.id, p.name]));
+  const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
+
+  const handleItemClick = (id: string) => {
+    setSelectedExpenseId(prevId => (prevId === id ? null : id));
+  };
 
 
   return (
@@ -39,20 +46,28 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
       <CardHeader>
         <CardTitle>Recent Transactions</CardTitle>
         <CardDescription>
-          Your last 10 expenses. Click to view details.
+          Your last 10 expenses. Click an item to see actions.
         </CardDescription>
       </CardHeader>
       <CardContent>
          <ScrollArea className="h-[350px]">
-            <div className="space-y-1">
+            <div className="space-y-2 pr-2">
                 {expenses.slice(0, 10).map((expense) => {
                     const category = categories.find(c => c.id === expense.categoryId);
                     const Icon = category && isValidIcon(category.icon) ? Lucide[category.icon] as React.ElementType : Lucide.Package;
                     const splitWithNames = expense.splitWith?.map(split => peopleMap.get(split.personId)).filter(Boolean).join(', ');
+                    const isSelected = selectedExpenseId === expense.id;
 
                     return (
-                        <div key={expense.id} className="flex items-center p-3 rounded-lg hover:bg-accent/50 group">
-                           <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 gap-4">
+                        <div
+                            key={expense.id}
+                            className={cn(
+                                "p-3 rounded-lg transition-all duration-200 cursor-pointer",
+                                isSelected ? "ring-2 ring-primary bg-accent/80" : "hover:bg-accent/50"
+                            )}
+                            onClick={() => handleItemClick(expense.id)}
+                        >
+                           <div className="flex items-center flex-1 min-w-0 gap-4">
                                 <div className="h-10 w-10 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
                                 <Icon className="h-5 w-5 text-accent-foreground" />
                                 </div>
@@ -72,29 +87,38 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                                         </p>
                                     </div>
                                 </div>
-                            </Link>
-
-                             <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive flex-shrink-0 ml-2">
-                                        <Trash2 className="h-4 w-4" />
+                            </div>
+                            
+                            {isSelected && (
+                                <div className="mt-3 flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                    <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
+                                        <AlertDialogTrigger asChild>
+                                            <Button variant="destructive" size="sm">
+                                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                            </Button>
+                                        </AlertDialogTrigger>
+                                        <AlertDialogContent>
+                                            <AlertDialogHeader>
+                                                <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
+                                                <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete this expense record.
+                                                </AlertDialogDescription>
+                                            </AlertDialogHeader>
+                                            <AlertDialogFooter>
+                                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                <AlertDialogAction onClick={() => onDeleteExpense(expense.id)} className="bg-destructive hover:bg-destructive/90">
+                                                Delete
+                                                </AlertDialogAction>
+                                            </AlertDialogFooter>
+                                        </AlertDialogContent>
+                                    </AlertDialog>
+                                    <Button asChild variant="outline" size="sm">
+                                        <Link href={`/transactions/${expense.id}`}>
+                                            View Details <ArrowRight className="ml-2 h-4 w-4" />
+                                        </Link>
                                     </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete Transaction?</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this expense record.
-                                    </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => onDeleteExpense(expense.id)} className="bg-destructive hover:bg-destructive/90">
-                                    Delete
-                                    </AlertDialogAction>
-                                </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                                </div>
+                            )}
                         </div>
                     );
                 })}

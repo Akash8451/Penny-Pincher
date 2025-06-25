@@ -12,6 +12,8 @@ import { DateRangePicker } from './date-range-picker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
+import { ArrowRight } from 'lucide-react'
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
   return iconName in Lucide;
@@ -22,6 +24,7 @@ export default function TransactionList() {
   const [categories] = useLocalStorage<Category[]>('categories', [])
   const [people] = useLocalStorage<Person[]>('people', [])
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
+  const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
   const peopleMap = useMemo(() => new Map(people.map((p) => [p.id, p.name])), [people]);
@@ -34,6 +37,10 @@ export default function TransactionList() {
       return isWithinInterval(expenseDate, { start: startOfDay(dateRange.from), end: endOfDay(toDate) })
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   }, [expenses, dateRange])
+
+  const handleItemClick = (id: string) => {
+    setSelectedExpenseId(prevId => (prevId === id ? null : id));
+  };
 
   return (
     <Card>
@@ -48,15 +55,23 @@ export default function TransactionList() {
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[60vh]">
-          <div className="space-y-1 pr-4">
+          <div className="space-y-2 pr-2">
             {filteredExpenses.map((expense) => {
                 const category = categories.find(c => c.id === expense.categoryId);
                 const Icon = category && isValidIcon(category.icon) ? Lucide[category.icon] as React.ElementType : Lucide.Package;
                 const splitWithNames = expense.splitWith?.map(split => peopleMap.get(split.personId) || 'Unknown').filter(Boolean).join(', ');
+                const isSelected = selectedExpenseId === expense.id;
 
                 return (
-                    <div key={expense.id} className="p-3 rounded-lg hover:bg-accent/50">
-                        <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 gap-4">
+                    <div
+                        key={expense.id}
+                        className={cn(
+                            "p-3 rounded-lg transition-all duration-200 cursor-pointer",
+                            isSelected ? "ring-2 ring-primary bg-accent/80" : "hover:bg-accent/50"
+                        )}
+                        onClick={() => handleItemClick(expense.id)}
+                    >
+                        <div className="flex items-center flex-1 min-w-0 gap-4">
                             <div className="h-10 w-10 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
                             <Icon className="h-5 w-5 text-accent-foreground" />
                             </div>
@@ -76,7 +91,17 @@ export default function TransactionList() {
                                     </p>
                                 </div>
                             </div>
-                        </Link>
+                        </div>
+
+                        {isSelected && (
+                            <div className="mt-3 flex justify-end" onClick={(e) => e.stopPropagation()}>
+                                <Button asChild variant="outline" size="sm">
+                                    <Link href={`/transactions/${expense.id}`}>
+                                        View Details <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 );
             })}
