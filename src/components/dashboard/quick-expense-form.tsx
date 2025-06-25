@@ -13,15 +13,16 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Paperclip, PlusCircle, Users } from 'lucide-react';
-import React from 'react';
+import { Paperclip, PlusCircle, Users, Mic, MicOff, Loader } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import Confetti from 'react-confetti';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
-
+import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
+import { cn } from '@/lib/utils';
 
 interface QuickExpenseFormProps {
   categories: Category[];
@@ -36,6 +37,55 @@ const expenseSchema = z.object({
   receipt: z.any().optional(),
 });
 
+// Speech Recognition Hook
+const useSpeechRecognition = ({ onResult, onError }: { onResult: (text: string) => void; onError: (error: string) => void }) => {
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      onError("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => setIsListening(true);
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = (event) => {
+        setIsListening(false);
+        onError(event.error);
+    };
+    recognition.onresult = (event) => {
+      const transcript = event.results[event.results.length - 1][0].transcript.trim();
+      onResult(transcript);
+    };
+
+    recognitionRef.current = recognition;
+
+    return () => {
+      recognition.stop();
+    };
+  }, [onResult, onError]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+    }
+  };
+
+  return { isListening, toggleListening };
+};
+
+
 export default function QuickExpenseForm({ categories, people, onAddExpense }: QuickExpenseFormProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof expenseSchema>>({
@@ -43,6 +93,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
     defaultValues: { amount: undefined, categoryId: '', note: '' },
   });
   const totalAmount = Number(form.watch('amount')) || 0;
+  const [isAILoading, setAILoading] = useState(false);
 
   const [fileName, setFileName] = React.useState('');
   const [windowSize, setWindowSize] = React.useState({ width: 0, height: 0 });
@@ -52,19 +103,35 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
   const [splitGroupName, setSplitGroupName] = React.useState('');
 
+  const handleVoiceResult = async (query: string) => {
+    setAILoading(true);
+    toast({ title: "Processing your voice command...", description: `Heard: "${query}"` });
+    try {
+        const result = await logExpenseFromVoice({ query, categories });
+        if (result.amount) form.setValue('amount', result.amount);
+        if (result.categoryId) form.setValue('categoryId', result.categoryId);
+        if (result.note) form.setValue('note', result.note);
+        toast({ title: "Success!", description: "Expense details have been filled in." });
+    } catch (error) {
+        console.error("Voice processing error:", error);
+        toast({ variant: 'destructive', title: "AI Error", description: "Couldn't process the voice command." });
+    } finally {
+        setAILoading(false);
+    }
+  };
+
+  const handleVoiceError = (error: string) => {
+    toast({ variant: 'destructive', title: 'Speech Recognition Error', description: error });
+  };
+  
+  const { isListening, toggleListening } = useSpeechRecognition({ onResult: handleVoiceResult, onError: handleVoiceError });
+
+
   React.useEffect(() => {
-    // This check is important to prevent this code from running on the server
     if (typeof window !== 'undefined') {
-      const handleResize = () => {
-        setWindowSize({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        });
-      };
-      
-      handleResize(); // Set initial size
+      const handleResize = () => setWindowSize({ width: window.innerWidth, height: window.innerHeight });
+      handleResize();
       window.addEventListener('resize', handleResize);
-      
       return () => window.removeEventListener('resize', handleResize);
     }
   }, []);
@@ -90,8 +157,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
           });
           return;
       }
-
-      // If custom splits are defined and valid, use them
+      
       if (Object.keys(customSplits).length > 0) {
          splitWithData = selectedPeople.map(personId => ({
             personId,
@@ -99,8 +165,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
             settled: false,
         })).filter(split => split.amount > 0);
       } else {
-        // Equal split if no custom splits
-        const numberOfParticipants = selectedPeople.length + 1; // including user
+        const numberOfParticipants = selectedPeople.length + 1;
         const equalAmount = values.amount / numberOfParticipants;
         splitWithData = selectedPeople.map(personId => ({
             personId,
@@ -148,8 +213,6 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
       ? selectedPeople.filter(id => id !== personId)
       : [...selectedPeople, personId];
     setSelectedPeople(newSelectedPeople);
-    
-    // Clear custom splits if selection changes for simplicity
     setCustomSplits({});
   };
 
@@ -190,7 +253,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
       <Card className="lg:col-span-3">
         <CardHeader>
           <CardTitle>Log Expense</CardTitle>
-          <CardDescription>Quickly add a new transaction.</CardDescription>
+          <CardDescription>Quickly add a new transaction manually or with your voice.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -395,10 +458,22 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
                     Splitting with: {people.filter(p => selectedPeople.includes(p.id)).map(p => <Badge key={p.id} variant="secondary">{p.name}</Badge>)}
                   </div>
                 )}
-
-              <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
-              </Button>
+                
+                <div className="flex items-center gap-2">
+                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || isAILoading || isListening}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+                    </Button>
+                    <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={toggleListening}
+                        disabled={isAILoading}
+                        className={cn(isListening && "bg-destructive text-destructive-foreground")}
+                    >
+                        {isAILoading ? <Loader className="animate-spin" /> : isListening ? <MicOff /> : <Mic />}
+                    </Button>
+                </div>
             </form>
           </Form>
         </CardContent>

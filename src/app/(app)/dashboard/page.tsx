@@ -11,6 +11,7 @@ import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import ExpensesByCategoryChart from '@/components/dashboard/expenses-by-category-chart';
 import SpendingTrendChart from '@/components/dashboard/spending-trend-chart';
 import AIAssistant from '@/components/dashboard/ai-assistant';
+import SavingsGoal from '@/components/dashboard/savings-goal';
 
 export default function DashboardPage() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
@@ -37,7 +38,8 @@ export default function DashboardPage() {
       <AppHeader title="Dashboard" />
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <SummaryCards expenses={expenses} />
-        <div className="grid gap-4 md:grid-cols-1">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <SavingsGoal expenses={expenses} />
             <AIAssistant expenses={expenses} categories={categories} people={people} />
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

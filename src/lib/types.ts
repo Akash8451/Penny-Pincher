@@ -36,3 +36,10 @@ export interface Settings {
   // Manual exchange rates relative to the base currency
   exchangeRates: { [currency: string]: number };
 }
+
+export interface SavingsGoal {
+  id: string;
+  name: string;
+  amount: number;
+  month: string; // YYYY-MM
+}

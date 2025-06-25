@@ -64,7 +64,7 @@ export default function AIAssistant({ expenses, categories, people }: AIAssistan
   }
 
   return (
-    <Card className="lg:col-span-7">
+    <Card>
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
             <Wand2 className='text-primary' />
