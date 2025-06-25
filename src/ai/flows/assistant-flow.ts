@@ -50,7 +50,7 @@ const AssistantFlowInputSchema = z.object({
 });
 
 const LogExpenseActionSchema = z.object({
-    name: z.literal('logExpense'),
+    name: z.enum(['logExpense']),
     parameters: z.object({
         amount: z.number().describe('The numeric amount of the expense.'),
         categoryId: z.string().describe('The ID of the most relevant category for the expense.'),
