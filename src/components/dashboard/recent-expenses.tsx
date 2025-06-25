@@ -1,5 +1,5 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import type { Category, Expense, Person } from "@/lib/types";
 import { format } from 'date-fns';
 import * as Lucide from 'lucide-react';
@@ -17,7 +17,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from "../ui/button";
-import { Trash2 } from "lucide-react";
+import { ArrowRight, Trash2 } from "lucide-react";
 
 interface RecentExpensesProps {
   expenses: Expense[];
@@ -53,7 +53,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
 
                     return (
                         <div key={expense.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 group">
-                           <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 mr-4">
+                           <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 mr-4 overflow-hidden">
                                 <div className="h-9 w-9 bg-accent rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                                 <Icon className="h-5 w-5 text-accent-foreground" />
                                 </div>
@@ -108,6 +108,13 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
             </div>
          </ScrollArea>
       </CardContent>
+      <CardFooter>
+        <Button asChild className="w-full" variant="outline">
+            <Link href="/transactions">
+                View All Transactions <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

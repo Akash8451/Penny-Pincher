@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Shapes, Settings, Wallet, Users } from 'lucide-react';
+import { LayoutDashboard, Shapes, Settings, Wallet, Users, List } from 'lucide-react';
 
 import {
   Tooltip,
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/transactions', icon: List, label: 'Transactions' },
   { href: '/categories', icon: Shapes, label: 'Categories' },
   { href: '/people', icon: Users, label: 'People' },
   { href: '/settings', icon: Settings, label: 'Settings' },

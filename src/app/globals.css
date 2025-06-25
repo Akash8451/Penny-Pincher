@@ -34,31 +34,31 @@
   }
  
   .dark {
-    /* Dark Mode: Midnight Charcoal base with Electric Violet accents */
+    /* Dark Mode: Midnight Charcoal base with Electric Blue accents */
     --background: 0 0% 10%; /* #1A1A1A */
     --foreground: 0 0% 83%; /* #D3D3D3 */
     --card: 0 0% 12%;
     --card-foreground: 0 0% 83%;
     --popover: 0 0% 10%;
     --popover-foreground: 0 0% 83%;
-    --primary: 262 85% 62%; /* #8A4AF3 */
-    --primary-foreground: 262 85% 98%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 262 85% 15%;
-    --accent-foreground: 262 85% 75%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 22%;
     --input: 0 0% 15%;
-    --ring: 262 85% 62%;
-    --chart-1: 262 70% 50%;
-    --chart-2: 282 60% 55%;
-    --chart-3: 302 80% 55%;
-    --chart-4: 322 65% 60%;
-    --chart-5: 342 75% 55%;
+    --ring: 221 83% 53%;
+    --chart-1: 221 70% 50%;
+    --chart-2: 217 60% 55%;
+    --chart-3: 212 80% 55%;
+    --chart-4: 208 65% 60%;
+    --chart-5: 204 75% 55%;
   }
 }
 

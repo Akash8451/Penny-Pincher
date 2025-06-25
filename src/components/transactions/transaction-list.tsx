@@ -1,0 +1,95 @@
+
+'use client'
+
+import { useState, useMemo } from 'react'
+import type { DateRange } from 'react-day-picker'
+import Link from 'next/link'
+import * as Lucide from 'lucide-react'
+import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns'
+
+import { useLocalStorage } from '@/hooks/use-local-storage'
+import type { Expense, Category, Person } from '@/lib/types'
+import { DateRangePicker } from './date-range-picker'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+
+function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
+  return iconName in Lucide;
+}
+
+export default function TransactionList() {
+  const [expenses] = useLocalStorage<Expense[]>('expenses', [])
+  const [categories] = useLocalStorage<Category[]>('categories', [])
+  const [people] = useLocalStorage<Person[]>('people', [])
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
+
+  const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const peopleMap = useMemo(() => new Map(people.map((p) => [p.id, p.name])), [people]);
+
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter((expense) => {
+      if (!dateRange || !dateRange.from) return true
+      const expenseDate = new Date(expense.date)
+      const toDate = dateRange.to || dateRange.from;
+      return isWithinInterval(expenseDate, { start: startOfDay(dateRange.from), end: endOfDay(toDate) })
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  }, [expenses, dateRange])
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <CardTitle>History</CardTitle>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <DateRangePicker date={dateRange} onDateChange={setDateRange} />
+                <Button variant="ghost" onClick={() => setDateRange(undefined)}>Reset</Button>
+            </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[60vh]">
+          <div className="space-y-1 pr-4">
+            {filteredExpenses.map((expense) => {
+                const category = categoryMap.get(expense.categoryId);
+                const Icon = category && isValidIcon(category.icon) ? Lucide[category.icon] as React.ElementType : Lucide.Package;
+                const splitWithNames = expense.splitWith?.map(split => peopleMap.get(split.personId) || 'Unknown').filter(Boolean).join(', ');
+
+                return (
+                    <div key={expense.id} className="flex items-center justify-between p-2 rounded-lg hover:bg-accent/50 group">
+                        <Link href={`/transactions/${expense.id}`} className="flex items-center flex-1 min-w-0 mr-4 overflow-hidden">
+                            <div className="h-9 w-9 bg-accent rounded-full flex items-center justify-center mr-4 flex-shrink-0">
+                            <Icon className="h-5 w-5 text-accent-foreground" />
+                            </div>
+                            <div className="flex-1 space-y-1 min-w-0">
+                                <p className="text-sm font-medium leading-none truncate">
+                                    {expense.note || category?.name || 'Uncategorized'}
+                                </p>
+                                <p className="text-sm text-muted-foreground truncate">
+                                    {expense.type === 'expense' && splitWithNames 
+                                        ? `Split with: ${splitWithNames}`
+                                        : format(new Date(expense.date), "PPP")
+                                    }
+                                </p>
+                            </div>
+                            <div className="ml-auto font-medium text-right flex-shrink-0 pl-2">
+                                <p className={`${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'} font-semibold`}>
+                                    {expense.type === 'expense' ? '-' : '+'} ${expense.amount.toFixed(2)}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{format(new Date(expense.date), "MMM d")}</p>
+                            </div>
+                        </Link>
+                    </div>
+                );
+            })}
+            {filteredExpenses.length === 0 && (
+                <div className="text-center text-muted-foreground py-10">
+                    No transactions found for the selected period.
+                </div>
+            )}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  )
+}
