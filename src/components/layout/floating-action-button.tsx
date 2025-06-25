@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import QuickExpenseForm from '@/components/dashboard/quick-expense-form';
 import { useToast } from '@/hooks/use-toast';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function FloatingActionButton() {
     const [isOpen, setIsOpen] = useState(false);
@@ -17,6 +19,9 @@ export default function FloatingActionButton() {
     const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
     const [people] = useLocalStorage<Person[]>('people', []);
     const { toast } = useToast();
+    const pathname = usePathname();
+
+    const isHidden = pathname === '/assistant';
     
     const handleAddExpense = (expense: Omit<Expense, 'id' | 'date'>) => {
         const newExpense: Expense = {
@@ -36,7 +41,13 @@ export default function FloatingActionButton() {
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-                <Button className="fixed bottom-20 sm:bottom-6 right-6 h-16 w-16 rounded-full shadow-lg z-30 transition-transform hover:scale-110 active:scale-95 animate-bounce-sm" size="icon">
+                <Button 
+                    className={cn(
+                        "fixed bottom-20 sm:bottom-6 right-6 h-16 w-16 rounded-full shadow-lg z-30 transition-all hover:scale-110 active:scale-95 animate-bounce-sm",
+                        isHidden && "scale-0"
+                    )}
+                    size="icon"
+                >
                     <Plus className="h-8 w-8" />
                     <span className="sr-only">Log Expense</span>
                 </Button>

@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock, ScanLine, Wand2 } from 'lucide-react';
+import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock, ScanLine, Wand2, FileImport } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ export default function AppSidebar() {
     { href: '/transactions', icon: List, label: 'Transactions' },
     { href: '/scan', icon: ScanLine, label: 'Scan Receipt' },
     { href: '/assistant', icon: Wand2, label: 'AI Assistant' },
+    { href: '/import', icon: FileImport, label: 'Import' },
     { href: '/categories', icon: Shapes, label: 'Categories' },
     { href: '/people', icon: Users, label: 'People' },
     ...(isClient && isProUnlocked ? [{ href: '/vault', icon: Lock, label: 'Vault' }] : []),
@@ -110,13 +111,19 @@ export default function AppSidebar() {
         </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-lg border-t border-border/20 z-20 flex items-center justify-around">
-         {[...navItems.filter(i => i.href !== '/assistant'), { href: '/settings', icon: Settings, label: 'Settings' }].map((item) => (
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-lg border-t border-border/20 z-20 grid grid-cols-5 items-center justify-around">
+         {[
+           { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+           { href: '/transactions', icon: List, label: 'Transactions' },
+           { href: '/scan', icon: ScanLine, label: 'Scan' },
+           { href: '/import', icon: FileImport, label: 'Import' },
+           { href: '/settings', icon: Settings, label: 'Settings' }
+         ].map((item) => (
             <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                    'flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors hover:text-foreground w-16',
+                    'flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors hover:text-foreground w-full h-full',
                     pathname.startsWith(item.href)
                     ? 'text-primary'
                     : 'text-muted-foreground'
