@@ -1,114 +1,164 @@
-
 'use client';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Wand2, Sparkles, Lock } from 'lucide-react';
-import React from 'react';
+import { Wand2, Sparkles, Lock, Mic, MicOff, Send, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
 import { askAssistant } from '@/ai/flows/assistant-flow';
 import type { Category, Expense, Person } from '@/lib/types';
-import { Skeleton } from '../ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 
 interface AIAssistantProps {
     expenses: Expense[];
     categories: Category[];
     people: Person[];
+    onLogExpense: (details: { amount: number; categoryId: string; note: string }) => void;
 }
 
-export default function AIAssistant({ expenses, categories, people }: AIAssistantProps) {
-  const { toast } = useToast();
-  const [query, setQuery] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [response, setResponse] = React.useState('');
+interface Message {
+  role: 'user' | 'ai';
+  text: string;
+}
 
-  const handleAsk = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!query.trim()) {
-        toast({
-            variant: 'destructive',
-            title: 'Empty Query',
-            description: 'Please ask a question.',
-        });
-        return;
+export default function AIAssistant({ expenses, categories, people, onLogExpense }: AIAssistantProps) {
+  const { toast } = useToast();
+  const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([
+    { role: 'ai', text: "Hello! How can I help you today? You can ask me about your finances or tell me to log an expense." }
+  ]);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Scroll to the bottom when messages change
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
     }
+  }, [messages]);
+
+  const handleVoiceResult = (transcript: string) => {
+    setQuery(transcript);
+    // Automatically submit when speech recognition finishes
+    handleAsk(transcript);
+  };
+  
+  const handleVoiceError = (error: string) => {
+    let description = 'An unknown error occurred.';
+    if (error === 'not-allowed' || error === 'service-not-allowed') {
+      description = 'Microphone access denied. Please enable it in your browser settings.';
+    } else if (error === 'no-speech') {
+      description = 'No speech was detected. Please try again.';
+    }
+    toast({ variant: 'destructive', title: 'Speech Recognition Error', description });
+  };
+  
+  const { isListening, toggleListening } = useSpeechRecognition({ onResult: handleVoiceResult, onError: handleVoiceError });
+
+  const handleAsk = async (currentQuery?: string) => {
+    const queryToSubmit = (typeof currentQuery === 'string' ? currentQuery : query).trim();
+    if (!queryToSubmit) return;
 
     setIsLoading(true);
-    setResponse('');
+    setQuery('');
+    setMessages(prev => [...prev, { role: 'user', text: queryToSubmit }]);
 
     try {
-        const result = await askAssistant({ query, expenses, categories, people });
-        setResponse(result.answer);
+        const result = await askAssistant({ query: queryToSubmit, expenses, categories, people });
+        
+        // Speak the response
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(result.answer);
+            speechSynthesis.speak(utterance);
+        }
+        
+        setMessages(prev => [...prev, { role: 'ai', text: result.answer }]);
+
+        // Handle the action if it exists
+        if (result.action?.name === 'logExpense') {
+            onLogExpense(result.action.parameters);
+        }
+
     } catch (error) {
         console.error("AI Assistant Error:", error);
-        toast({
-            variant: 'destructive',
-            title: 'AI Assistant Error',
-            description: 'There was a problem getting a response. Please try again.',
-        });
+        const errorMessage = "There was a problem getting a response. Please try again.";
+        setMessages(prev => [...prev, { role: 'ai', text: errorMessage }]);
+        toast({ variant: 'destructive', title: 'AI Assistant Error', description: 'Could not get a response.'});
     } finally {
         setIsLoading(false);
     }
   };
-  
-  const exampleQueries = [
-    "What was my total spending last month?",
-    "Show me all transactions in the 'Food & Drinks' category.",
-    "What's my biggest expense so far?",
-    "How much money do I owe from split bills?",
-  ];
-
-  const handleExampleClick = (exampleQuery: string) => {
-    setQuery(exampleQuery);
-  }
 
   return (
-    <Card className="h-full transition-all duration-300 bg-secondary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
+    <Card className="h-full flex flex-col transition-all duration-300 bg-secondary/40 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
       <CardHeader>
         <CardTitle className='flex items-center gap-2 text-xl'>
             <Lock className='h-4 w-4 text-muted-foreground' />
             <Wand2 className='text-primary' />
             AI Assistant
         </CardTitle>
-        <CardDescription>Ask questions about your finances. Your data is processed securely on-device.</CardDescription>
+        <CardDescription>Your voice-powered financial assistant. Your data is processed securely on-device.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <form onSubmit={handleAsk} className="flex gap-2 mb-4">
+      <CardContent className="flex-grow flex flex-col">
+        <ScrollArea className="flex-grow h-48 mb-4 pr-4" ref={scrollAreaRef}>
+          <div className="space-y-4">
+            {messages.map((message, index) => (
+              <div key={index} className={cn(
+                "flex items-start gap-3",
+                message.role === 'user' ? 'justify-end' : 'justify-start'
+              )}>
+                {message.role === 'ai' && <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-1" />}
+                <div className={cn(
+                  "p-3 rounded-lg max-w-sm prose prose-sm dark:prose-invert",
+                  message.role === 'user' 
+                    ? 'bg-primary/20' 
+                    : 'bg-background/50'
+                )}>
+                  <p className="my-0" dangerouslySetInnerHTML={{ __html: message.text.replace(/\n/g, '<br />') }} />
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex items-start gap-3 justify-start">
+                  <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                  <div className="p-3 rounded-lg bg-background/50">
+                      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </CardContent>
+      <CardFooter>
+        <form onSubmit={(e) => { e.preventDefault(); handleAsk(); }} className="flex w-full gap-2">
+            <Button 
+                type="button" 
+                variant="outline" 
+                size="icon" 
+                onClick={toggleListening}
+                className={cn(isListening && "bg-destructive text-destructive-foreground")}
+            >
+                {isListening ? <MicOff /> : <Mic />}
+                <span className="sr-only">Use Microphone</span>
+            </Button>
             <Input 
-                placeholder='e.g., "How much did I spend on coffee?"'
+                placeholder='Ask a question or log an expense...'
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                disabled={isLoading}
+                disabled={isLoading || isListening}
             />
-            <Button type="submit" disabled={isLoading}>
-                <Sparkles className="mr-2 h-4 w-4" />
-                {isLoading ? 'Thinking...' : 'Ask'}
+            <Button type="submit" disabled={isLoading || isListening || !query.trim()}>
+                <Send />
+                <span className="sr-only">Submit</span>
             </Button>
         </form>
-        <div className="text-xs text-muted-foreground mb-4">
-            Try an example: {exampleQueries.map((ex, i) => (
-                <React.Fragment key={i}>
-                    <button onClick={() => handleExampleClick(ex)} className="underline hover:text-primary mx-1 disabled:text-muted-foreground disabled:no-underline" disabled={isLoading}>{ex}</button>
-                    {i < exampleQueries.length - 1 && '•'}
-                </React.Fragment>
-            ))}
-        </div>
-
-        {isLoading && (
-            <div className="space-y-2 pt-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-                <Skeleton className="h-4 w-2/3" />
-            </div>
-        )}
-
-        {response && (
-            <div className="p-4 bg-background/50 rounded-lg prose prose-sm dark:prose-invert max-w-none">
-                <div dangerouslySetInnerHTML={{ __html: response.replace(/\n/g, '<br />') }} />
-            </div>
-        )}
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 }

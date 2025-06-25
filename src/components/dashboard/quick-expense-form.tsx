@@ -11,8 +11,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Paperclip, PlusCircle, Users, Mic, MicOff, Loader } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { Paperclip, PlusCircle, Users, Mic, MicOff, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '../ui/scroll-area';
@@ -21,6 +21,7 @@ import { Separator } from '../ui/separator';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
 import { cn } from '@/lib/utils';
 import { SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 
 
 interface QuickExpenseFormProps {
@@ -36,54 +37,6 @@ const expenseSchema = z.object({
   note: z.string().max(100, "Note is too long.").optional(),
   receipt: z.any().optional(),
 });
-
-// Speech Recognition Hook
-const useSpeechRecognition = ({ onResult, onError }: { onResult: (text: string) => void; onError: (error: string) => void }) => {
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      onError("Speech recognition is not supported in this browser.");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.lang = 'en-US';
-    recognition.interimResults = false;
-
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onerror = (event) => {
-        setIsListening(false);
-        onError(event.error);
-    };
-    recognition.onresult = (event) => {
-      const transcript = event.results[event.results.length - 1][0].transcript.trim();
-      onResult(transcript);
-    };
-
-    recognitionRef.current = recognition;
-
-    return () => {
-      recognition.stop();
-    };
-  }, [onResult, onError]);
-
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-    } else {
-      recognitionRef.current?.start();
-    }
-  };
-
-  return { isListening, toggleListening };
-};
 
 
 export default function QuickExpenseForm({ categories, people, onAddExpense, onSuccess }: QuickExpenseFormProps) {
@@ -461,7 +414,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                         disabled={isAILoading}
                         className={cn(isListening && "bg-destructive text-destructive-foreground")}
                     >
-                        {isAILoading ? <Loader className="animate-spin" /> : isListening ? <MicOff /> : <Mic />}
+                        {isAILoading ? <Loader2 className="animate-spin" /> : isListening ? <MicOff /> : <Mic />}
                     </Button>
                 </div>
             </form>

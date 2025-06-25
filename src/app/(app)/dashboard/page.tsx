@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import AnalyticsOverview from '@/components/dashboard/analytics-overview';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 function DashboardSkeleton() {
   return (
@@ -53,6 +54,7 @@ export default function DashboardPage() {
   const [people] = useLocalStorage<Person[]>('people', []);
   const [summary, setSummary] = useState({ total: 0, count: 0, average: 0 });
   const [isClient, setIsClient] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     // This effect runs only on the client, after the component has mounted.
@@ -80,6 +82,22 @@ export default function DashboardPage() {
     setExpenses(prev => prev.filter(exp => exp.id !== expenseId));
   };
   
+  const handleLogExpense = (details: { amount: number, categoryId: string, note: string }) => {
+    const newExpense: Expense = {
+      ...details,
+      id: `exp-${new Date().getTime()}`,
+      type: 'expense',
+      date: new Date().toISOString(),
+    };
+    setExpenses(prev => [newExpense, ...prev]);
+
+    const categoryName = categories.find(c => c.id === details.categoryId)?.name || 'a category';
+    toast({
+        title: `✔️ $${details.amount.toFixed(2)} added`,
+        description: `Logged to ${categoryName}.`,
+    });
+  };
+
   if (!isClient) {
     return <DashboardSkeleton />;
   }
@@ -132,7 +150,12 @@ export default function DashboardPage() {
                 <SavingsGoal expenses={expenses} />
             </div>
              <div className="md:col-span-1 lg:col-span-4">
-                <AIAssistant expenses={expenses} categories={categories} people={people} />
+                <AIAssistant 
+                    expenses={expenses} 
+                    categories={categories} 
+                    people={people}
+                    onLogExpense={handleLogExpense}
+                />
             </div>
         </div>
 
