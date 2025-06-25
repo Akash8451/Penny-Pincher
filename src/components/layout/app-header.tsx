@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Lock, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import AppTour from './app-tour';
 
 interface AppHeaderProps {
   title: string;
@@ -20,6 +21,8 @@ export function AppHeader({ title, children }: AppHeaderProps) {
             <span>Secure Mode On</span>
         </Badge>
         
+        <AppTour />
+
         <Popover>
           <PopoverTrigger asChild>
             <Button variant="outline" size="icon" className="rounded-full">
