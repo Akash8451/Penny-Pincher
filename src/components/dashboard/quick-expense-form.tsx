@@ -82,24 +82,26 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
     if (selectedPeople.length > 0) {
       const customTotal = Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
 
-      // If there are custom splits, validate them
+      if (customTotal > values.amount) {
+           toast({
+              variant: 'destructive',
+              title: "Split Error",
+              description: `The assigned splits for others ($${customTotal.toFixed(2)}) cannot exceed the total expense ($${values.amount.toFixed(2)}).`,
+          });
+          return;
+      }
+
+      // If custom splits are defined and valid, use them
       if (Object.keys(customSplits).length > 0) {
-        if (Math.abs(customTotal - values.amount) > 0.01) {
-             toast({
-                variant: 'destructive',
-                title: "Split Error",
-                description: `The split amounts ($${customTotal.toFixed(2)}) do not add up to the total expense ($${values.amount.toFixed(2)}).`,
-            });
-            return;
-        }
          splitWithData = selectedPeople.map(personId => ({
             personId,
             amount: parseFloat(customSplits[personId]) || 0,
             settled: false,
-        }));
+        })).filter(split => split.amount > 0);
       } else {
-        // Equal split
-        const equalAmount = values.amount / selectedPeople.length;
+        // Equal split if no custom splits
+        const numberOfParticipants = selectedPeople.length + 1; // including user
+        const equalAmount = values.amount / numberOfParticipants;
         splitWithData = selectedPeople.map(personId => ({
             personId,
             amount: equalAmount,
@@ -147,24 +149,40 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
       : [...selectedPeople, personId];
     setSelectedPeople(newSelectedPeople);
     
-    // Clear custom splits if selection changes
+    // Clear custom splits if selection changes for simplicity
     setCustomSplits({});
   };
 
   const handleSplitEqually = () => {
-    if (selectedPeople.length === 0 || totalAmount === 0) return;
-    const equalAmount = (totalAmount / selectedPeople.length).toFixed(2);
-    const newSplits = selectedPeople.reduce((acc, personId) => {
-        acc[personId] = equalAmount;
-        return acc;
-    }, {} as Record<string, string>);
+    if (totalAmount <= 0 || selectedPeople.length === 0) return;
+    const numberOfParticipants = selectedPeople.length + 1;
+    const amountPerPerson = totalAmount / numberOfParticipants;
+
+    const newSplits: Record<string, string> = {};
+    let totalAssignedToOthers = 0;
+
+    for (let i = 0; i < selectedPeople.length - 1; i++) {
+        const personId = selectedPeople[i];
+        const roundedAmount = parseFloat(amountPerPerson.toFixed(2));
+        newSplits[personId] = roundedAmount.toString();
+        totalAssignedToOthers += roundedAmount;
+    }
+
+    if (selectedPeople.length > 0) {
+        const lastPersonId = selectedPeople[selectedPeople.length - 1];
+        const myShare = parseFloat(amountPerPerson.toFixed(2));
+        const lastPersonAmount = totalAmount - myShare - totalAssignedToOthers;
+        newSplits[lastPersonId] = lastPersonAmount.toFixed(2);
+    }
+    
     setCustomSplits(newSplits);
   }
   
-  const currentSplitTotal = React.useMemo(() => {
+  const currentSplitTotalForOthers = React.useMemo(() => {
     return Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
   }, [customSplits]);
 
+  const myShare = totalAmount - currentSplitTotalForOthers;
 
   return (
     <>
@@ -338,10 +356,17 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
                                 })}
                             </div>
                            </ScrollArea>
+                           <Separator />
                            <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
-                                <span>Total Split:</span>
-                                <span className={Math.abs(currentSplitTotal - totalAmount) > 0.01 ? 'text-destructive' : 'text-green-500'}>
-                                    ${currentSplitTotal.toFixed(2)}
+                                <span>You (Your Share):</span>
+                                <span className={myShare < 0 ? 'text-destructive' : 'text-foreground'}>
+                                    ${myShare.toFixed(2)}
+                                </span>
+                           </div>
+                           <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
+                                <span>Total Assigned to Others:</span>
+                                <span className={currentSplitTotalForOthers > totalAmount ? 'text-destructive' : 'text-foreground'}>
+                                    ${currentSplitTotalForOthers.toFixed(2)}
                                 </span>
                            </div>
                         </div>

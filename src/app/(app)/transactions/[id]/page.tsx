@@ -17,6 +17,7 @@ import * as Lucide from 'lucide-react';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
@@ -40,6 +41,12 @@ export default function TransactionDetailsPage() {
   const categoryMap = new Map(categories.map(c => [c.id, c]));
   const peopleMap = new Map(people.map(p => [p.id, p.name]));
 
+  const othersAmount = expense?.splitWith?.reduce((sum, s) => sum + s.amount, 0) ?? 0;
+  const myShare = expense ? expense.amount - othersAmount : 0;
+  
+  const othersSplitTotal = Object.values(editableSplits).reduce((sum, amount) => sum + Number(amount || 0), 0);
+  const myEditedShare = expense ? expense.amount - othersSplitTotal : 0;
+
   const handleEditClick = () => {
     if (!expense?.splitWith) return;
     const initialSplits = expense.splitWith.reduce((acc, split) => {
@@ -58,13 +65,13 @@ export default function TransactionDetailsPage() {
   const handleSaveEdit = () => {
     if (!expense) return;
 
-    const newTotal = Object.values(editableSplits).reduce((sum, amount) => sum + Number(amount || 0), 0);
+    const newTotalForOthers = Object.values(editableSplits).reduce((sum, amount) => sum + Number(amount || 0), 0);
 
-    if (Math.abs(newTotal - expense.amount) > 0.01) {
+    if (newTotalForOthers > expense.amount) {
         toast({
             variant: 'destructive',
             title: 'Split Error',
-            description: `The new split amounts ($${newTotal.toFixed(2)}) must add up to the total expense ($${expense.amount.toFixed(2)}).`,
+            description: `The total split for others ($${newTotalForOthers.toFixed(2)}) cannot exceed the total expense amount ($${expense.amount.toFixed(2)}).`,
         });
         return;
     }
@@ -221,6 +228,20 @@ export default function TransactionDetailsPage() {
                                 </div>
                                 )
                             })}
+                             <Separator />
+                             <div className="flex items-center gap-3">
+                                <Label className="w-1/3 truncate font-medium text-muted-foreground">
+                                    You (Your Share)
+                                </Label>
+                                <div className="relative flex-1">
+                                    <Input
+                                        type="text"
+                                        value={`$${myEditedShare.toFixed(2)}`}
+                                        disabled
+                                        className="pl-3 bg-transparent border-none text-right"
+                                    />
+                                </div>
+                            </div>
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button variant="ghost" onClick={handleCancelEdit}>Cancel</Button>
@@ -229,6 +250,12 @@ export default function TransactionDetailsPage() {
                     </div>
                 ) : (
                     <div className="space-y-2">
+                      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                        <span className='font-medium'>You (Your Share)</span>
+                        <div className="flex items-center gap-4">
+                            <span className='text-muted-foreground'>${myShare.toFixed(2)}</span>
+                        </div>
+                      </div>
                     {expense.splitWith.map(split => (
                         <div key={split.personId} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                         <span className='font-medium'>{peopleMap.get(split.personId) || 'Unknown Person'}</span>
@@ -262,4 +289,3 @@ export default function TransactionDetailsPage() {
     </>
   );
 }
-

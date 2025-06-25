@@ -14,17 +14,21 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
     const now = new Date();
     const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
-    const monthlyExpenses = expenses.filter(
+    const monthlyTransactions = expenses.filter(
       (exp) => new Date(exp.date) >= firstDayOfMonth
     );
     
-    const onlySpending = monthlyExpenses.filter(exp => exp.type === 'expense');
+    const monthlySpending = monthlyTransactions.filter(exp => exp.type === 'expense');
+    const monthlyIncome = monthlyTransactions.filter(exp => exp.type === 'income');
 
-    const total = onlySpending.reduce((sum, exp) => sum + exp.amount, 0);
-    const count = onlySpending.length;
-    const average = count > 0 ? total / count : 0;
+    const totalSpending = monthlySpending.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalIncome = monthlyIncome.reduce((sum, exp) => sum + exp.amount, 0);
     
-    setSummary({ total, count, average });
+    const netSpending = totalSpending - totalIncome;
+    const transactionCount = monthlyTransactions.length;
+    const averageSpending = monthlySpending.length > 0 ? totalSpending / monthlySpending.length : 0;
+
+    setSummary({ total: netSpending, count: transactionCount, average: averageSpending });
   }, [expenses]);
   
   return (
@@ -32,14 +36,14 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            This Month's Spending
+            This Month's Net Spending
           </CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">${summary.total.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">
-            Total expenses this month
+            Total expenses minus income this month
           </p>
         </CardContent>
       </Card>
@@ -49,7 +53,7 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
           <ReceiptText className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+{summary.count}</div>
+          <div className="text-2xl font-bold">{summary.count}</div>
           <p className="text-xs text-muted-foreground">
             Transactions made this month
           </p>
@@ -57,13 +61,13 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Average Expense</CardTitle>
+          <CardTitle className="text-sm font-medium">Average Spending</CardTitle>
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">${summary.average.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">
-            Average transaction value this month
+            Average value of spending transactions
           </p>
         </CardContent>
       </Card>
