@@ -3,6 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import {
@@ -14,11 +15,6 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-interface AppSidebarProps {
-  isCollapsed: boolean;
-  onToggle: () => void;
-}
-
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/transactions', icon: List, label: 'Transactions' },
@@ -26,29 +22,41 @@ const navItems = [
   { href: '/people', icon: Users, label: 'People' },
 ];
 
-export default function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
+export default function AppSidebar() {
   const pathname = usePathname();
+  const [isPinned, setIsPinned] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const isExpanded = isPinned || isHovering;
+
+  const handleTogglePin = () => {
+    setIsPinned(prev => !prev);
+  }
 
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className={cn(
-        "sticky top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-20 transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-[68px]" : "w-[220px]"
-      )}>
+      <aside 
+        className={cn(
+          "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-30 transition-all duration-300 ease-in-out",
+          isExpanded ? "w-[220px]" : "w-[68px]"
+        )}
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
         <div className={cn(
           "flex items-center",
-          isCollapsed ? "justify-center" : "justify-between",
+          isExpanded ? "justify-between" : "justify-center",
           "p-4 border-b"
         )}>
-          <Link href="/dashboard" className={cn(isCollapsed && "hidden")}>
+          <Link href="/dashboard" className={cn(!isExpanded && "hidden")}>
             <div className="flex items-center gap-2">
               <Wallet className="h-6 w-6 text-primary" />
               <span className="font-bold">PennyPincher</span>
             </div>
           </Link>
-          <Button variant="ghost" size="icon" onClick={onToggle} aria-label="Toggle sidebar">
-            {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+          <Button variant="ghost" size="icon" onClick={handleTogglePin} aria-label="Toggle sidebar">
+            {isExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
           </Button>
         </div>
         
@@ -63,7 +71,7 @@ export default function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                       href={item.href}
                       className={cn(
                         'flex items-center h-10 rounded-lg transition-colors relative',
-                        isCollapsed ? 'justify-center w-full' : 'px-4 justify-start gap-3',
+                        !isExpanded ? 'justify-center w-full' : 'px-4 justify-start gap-3',
                         isActive
                           ? 'bg-primary/20 text-primary'
                           : 'text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -71,10 +79,10 @@ export default function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                     >
                       {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
                       <item.icon className="h-5 w-5" />
-                      <span className={cn("truncate", isCollapsed && "sr-only")}>{item.label}</span>
+                      <span className={cn("truncate", !isExpanded && "sr-only")}>{item.label}</span>
                     </Link>
                   </TooltipTrigger>
-                  {isCollapsed && <TooltipContent side="right">{item.label}</TooltipContent>}
+                  {!isExpanded && <TooltipContent side="right">{item.label}</TooltipContent>}
                 </Tooltip>
               )
             })}
@@ -89,7 +97,7 @@ export default function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                     href="/settings"
                     className={cn(
                         'flex items-center h-10 rounded-lg transition-colors relative',
-                        isCollapsed ? 'justify-center w-full' : 'px-4 justify-start gap-3',
+                        !isExpanded ? 'justify-center w-full' : 'px-4 justify-start gap-3',
                         pathname.startsWith("/settings")
                           ? 'bg-primary/20 text-primary'
                           : 'text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -97,10 +105,10 @@ export default function AppSidebar({ isCollapsed, onToggle }: AppSidebarProps) {
                   >
                     {pathname.startsWith("/settings") && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
                     <Settings className="h-5 w-5" />
-                    <span className={cn(isCollapsed && "sr-only")}>Settings</span>
+                    <span className={cn(!isExpanded && "sr-only")}>Settings</span>
                   </Link>
                 </TooltipTrigger>
-                {isCollapsed && <TooltipContent side="right">Settings</TooltipContent>}
+                {!isExpanded && <TooltipContent side="right">Settings</TooltipContent>}
               </Tooltip>
             </TooltipProvider>
         </div>
