@@ -17,9 +17,11 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
     const monthlyExpenses = expenses.filter(
       (exp) => new Date(exp.date) >= firstDayOfMonth
     );
+    
+    const onlySpending = monthlyExpenses.filter(exp => exp.type === 'expense');
 
-    const total = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const count = monthlyExpenses.length;
+    const total = onlySpending.reduce((sum, exp) => sum + exp.amount, 0);
+    const count = onlySpending.length;
     const average = count > 0 ? total / count : 0;
     
     setSummary({ total, count, average });

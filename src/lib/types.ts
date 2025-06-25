@@ -1,12 +1,20 @@
 
+export interface Split {
+  personId: string;
+  amount: number;
+  settled: boolean;
+}
+
 export interface Expense {
   id: string;
+  type: 'expense' | 'income';
   amount: number;
   categoryId: string;
   note: string;
   date: string; // ISO string
   receipt?: string; // data URL for the image
-  splitWith?: { personId: string; amount: number }[]; // Array of person IDs and their custom amount
+  splitWith?: Split[];
+  relatedExpenseId?: string; // To link income to original expense
 }
 
 export interface Category {

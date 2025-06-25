@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { Category, Expense, Person } from '@/lib/types';
+import type { Category, Expense, Person, Split } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -75,7 +75,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
   }, [categories]);
 
   const onSubmit = (values: z.infer<typeof expenseSchema>) => {
-    let splitWithData: {personId: string, amount: number}[] | undefined = undefined;
+    let splitWithData: Split[] | undefined = undefined;
 
     if (selectedPeople.length > 0) {
       const customTotal = Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
@@ -92,14 +92,16 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
         }
          splitWithData = selectedPeople.map(personId => ({
             personId,
-            amount: parseFloat(customSplits[personId]) || 0
+            amount: parseFloat(customSplits[personId]) || 0,
+            settled: false,
         }));
       } else {
         // Equal split
         const equalAmount = values.amount / selectedPeople.length;
         splitWithData = selectedPeople.map(personId => ({
             personId,
-            amount: equalAmount
+            amount: equalAmount,
+            settled: false,
         }));
       }
     }
@@ -107,6 +109,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense }: Q
 
     const expenseData: Omit<Expense, 'id'|'date'> = {
       ...values,
+      type: 'expense',
       amount: values.amount,
       splitWith: splitWithData,
     }
