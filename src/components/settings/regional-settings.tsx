@@ -1,11 +1,11 @@
 
 'use client';
 
-import { useLocalStorage } from '@/hooks/use-local-storage';
+import { useSettings } from '@/contexts/settings-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Languages, CircleDollarSign } from 'lucide-react';
+import { Languages } from 'lucide-react';
 
 const languages = [
   { value: 'en-US', label: 'English (United States)' },
@@ -179,8 +179,7 @@ const currencies = [
 ];
 
 export default function RegionalSettings() {
-  const [language, setLanguage] = useLocalStorage('language', 'en-US');
-  const [currency, setCurrency] = useLocalStorage('currency', 'USD');
+  const { language, setLanguage, currency, setCurrency } = useSettings();
 
   return (
     <Card>

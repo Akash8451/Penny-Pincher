@@ -2,11 +2,10 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useLocalStorage } from './use-local-storage';
+import { useSettings } from '@/contexts/settings-context';
 
 export function useCurrencyFormatter() {
-  const [language] = useLocalStorage('language', 'en-US');
-  const [currency] = useLocalStorage('currency', 'USD');
+  const { language, currency } = useSettings();
 
   const formatter = useCallback(
     (amount: number) => {
@@ -16,9 +15,12 @@ export function useCurrencyFormatter() {
           currency: currency,
         }).format(amount);
       } catch (error) {
-        console.error("Currency formatting error:", error);
+        console.warn(`Currency formatting error for currency code "${currency}". Falling back to default.`, error);
         // Fallback to a simple format if the currency code is invalid
-        return `$${amount.toFixed(2)}`;
+        return new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(amount);
       }
     },
     [language, currency]
