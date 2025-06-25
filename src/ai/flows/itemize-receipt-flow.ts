@@ -11,7 +11,7 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const ItemizeReceiptInputSchema = z.object({
+const ItemizeReceiptInputSchema = z.object({
   photoDataUri: z.string().describe("A photo of a receipt, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
 });
 export type ItemizeReceiptInput = z.infer<typeof ItemizeReceiptInputSchema>;
@@ -21,7 +21,7 @@ const ItemizedItemSchema = z.object({
   price: z.number().describe("The price of the line item."),
 });
 
-export const ItemizeReceiptOutputSchema = z.object({
+const ItemizeReceiptOutputSchema = z.object({
   items: z.array(ItemizedItemSchema).describe("A list of all items found on the receipt."),
   total: z.number().optional().describe("The total amount from the receipt, if found."),
 });
