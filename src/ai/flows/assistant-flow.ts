@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI assistant that can answer questions and log expenses.
@@ -60,7 +61,7 @@ const LogExpenseActionSchema = z.object({
 
 const AssistantOutputSchema = z.object({
   answer: z.string().describe("The AI's answer to the user's question, formatted in Markdown. If an action is taken, this should be a confirmation message."),
-  action: LogExpenseActionSchema.optional().describe("If the user's query implies an action like logging an expense, define that action here."),
+  action: LogExpenseActionSchema.optional().describe("ONLY use this field if the user explicitly asks to log, add, or create a new expense. Do NOT use it for answering questions."),
 });
 export type AssistantOutput = z.infer<typeof AssistantOutputSchema>;
 
@@ -103,10 +104,11 @@ Please adhere to the following rules:
     *   If a question is ambiguous or the data is insufficient, ask for clarification.
     *   Do not perform any calculations that are not directly supported by the data (e.g., forecasting).
 3.  **Logging Expenses**:
-    *   If the user's request is to add or log a new expense (e.g., "log a new transaction", "add 5 dollars for coffee"), you MUST use the 'action' field in your response.
-    *   Extract the amount, a descriptive note, and map the expense to the most appropriate category ID from the data.
+    *   Only use the 'action' field if the user's intent is clearly and explicitly to create a new expense. Look for keywords like "log", "add", "new expense", "charge", "put".
+    *   If the user is asking a question about past expenses (e.g., "what was my biggest expense?", "how much did I spend on food?"), DO NOT use the 'action' field. The 'action' field is exclusively for creating new records.
+    *   When you do log an expense, extract the amount, a descriptive note, and map the expense to the most appropriate category ID from the data.
     *   Populate the 'action.parameters' object with these details.
-    *   Your 'answer' field should be a simple confirmation, like "Okay, I've logged the expense for [note]."
+    *   When an action is taken, your 'answer' field should be a simple confirmation message, like "Okay, I've logged the expense for [note]."
 4.  **Always Respond**: Always provide a text-based 'answer', even when performing an action.
 
 Now, analyze the request and provide your response.`,
