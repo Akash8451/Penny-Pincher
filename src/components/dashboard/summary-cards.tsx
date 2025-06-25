@@ -11,22 +11,17 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
   const [summary, setSummary] = useState({ total: 0, count: 0, average: 0 });
 
   useEffect(() => {
-    const now = new Date();
-    const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    const monthlyTransactions = expenses.filter(
-      (exp) => new Date(exp.date) >= firstDayOfMonth
-    );
+    const allTransactions = expenses;
     
-    const monthlySpending = monthlyTransactions.filter(exp => exp.type === 'expense');
-    const monthlyIncome = monthlyTransactions.filter(exp => exp.type === 'income');
+    const allSpending = allTransactions.filter(exp => exp.type === 'expense');
+    const allIncome = allTransactions.filter(exp => exp.type === 'income');
 
-    const totalSpending = monthlySpending.reduce((sum, exp) => sum + exp.amount, 0);
-    const totalIncome = monthlyIncome.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalSpending = allSpending.reduce((sum, exp) => sum + exp.amount, 0);
+    const totalIncome = allIncome.reduce((sum, exp) => sum + exp.amount, 0);
     
     const netSpending = totalSpending - totalIncome;
-    const transactionCount = monthlyTransactions.length;
-    const averageSpending = monthlySpending.length > 0 ? totalSpending / monthlySpending.length : 0;
+    const transactionCount = allTransactions.length;
+    const averageSpending = allSpending.length > 0 ? totalSpending / allSpending.length : 0;
 
     setSummary({ total: netSpending, count: transactionCount, average: averageSpending });
   }, [expenses]);
@@ -36,38 +31,38 @@ export default function SummaryCards({ expenses }: SummaryCardsProps) {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">
-            This Month's Net Spending
+            Net Spending
           </CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">${summary.total.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">
-            Total expenses minus income this month
+            Total expenses minus total income
           </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Transactions</CardTitle>
+          <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
           <ReceiptText className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{summary.count}</div>
           <p className="text-xs text-muted-foreground">
-            Transactions made this month
+            All recorded income and expenses
           </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Average Spending</CardTitle>
+          <CardTitle className="text-sm font-medium">Average Expense</CardTitle>
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">${summary.average.toFixed(2)}</div>
           <p className="text-xs text-muted-foreground">
-            Average value of spending transactions
+            Average value of all expense transactions
           </p>
         </CardContent>
       </Card>
