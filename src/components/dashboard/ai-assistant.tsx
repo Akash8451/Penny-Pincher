@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Wand2, Sparkles, Lock, Mic, MicOff, Send, Loader2 } from 'lucide-react';
+import { Wand2, Sparkles, Lock, Mic, Send, Loader2 } from 'lucide-react';
 import React, { useState, useEffect, useRef } from 'react';
 import { askAssistant } from '@/ai/flows/assistant-flow';
 import type { Category, Expense, Person } from '@/lib/types';
@@ -138,27 +138,43 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
         </ScrollArea>
       </CardContent>
       <CardFooter>
-        <form onSubmit={(e) => { e.preventDefault(); handleAsk(); }} className="flex w-full gap-2">
-            <Button 
-                type="button" 
-                variant="outline" 
-                size="icon" 
-                onClick={toggleListening}
-                className={cn(isListening && "bg-destructive text-destructive-foreground")}
-            >
-                {isListening ? <MicOff /> : <Mic />}
-                <span className="sr-only">Use Microphone</span>
-            </Button>
-            <Input 
-                placeholder='Ask a question or log an expense...'
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                disabled={isLoading || isListening}
-            />
-            <Button type="submit" disabled={isLoading || isListening || !query.trim()}>
-                <Send />
-                <span className="sr-only">Submit</span>
-            </Button>
+        <form 
+            onSubmit={(e) => { e.preventDefault(); handleAsk(); }} 
+            className="flex w-full items-center gap-2"
+        >
+            {isListening ? (
+                <Button
+                    type="button"
+                    variant="destructive"
+                    onClick={toggleListening}
+                    className="w-full animate-pulse"
+                >
+                    <Mic className="mr-2 h-4 w-4" /> Listening... Tap to stop
+                </Button>
+            ) : (
+                <>
+                    <Button 
+                        type="button" 
+                        variant="outline" 
+                        size="icon" 
+                        onClick={toggleListening}
+                        disabled={isLoading}
+                    >
+                        <Mic />
+                        <span className="sr-only">Use Microphone</span>
+                    </Button>
+                    <Input 
+                        placeholder='Ask a question or log an expense...'
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    <Button type="submit" disabled={isLoading || !query.trim()}>
+                        <Send />
+                        <span className="sr-only">Submit</span>
+                    </Button>
+                </>
+            )}
         </form>
       </CardFooter>
     </Card>
