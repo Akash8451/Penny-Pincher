@@ -43,3 +43,10 @@ export interface SavingsGoal {
   amount: number;
   month: string; // YYYY-MM
 }
+
+export interface VaultNote {
+  id: string;
+  encryptedContent: string;
+  hint: string;
+  date: string; // ISO string
+}

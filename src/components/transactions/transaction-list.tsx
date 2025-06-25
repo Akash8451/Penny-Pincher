@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useMemo } from 'react'
@@ -5,6 +6,8 @@ import type { DateRange } from 'react-day-picker'
 import Link from 'next/link'
 import * as Lucide from 'lucide-react'
 import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import type { Expense, Category, Person } from '@/lib/types'
@@ -13,7 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { ArrowRight, Search, Trash2 } from 'lucide-react'
+import { ArrowRight, Search, Trash2, FileDown } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import {
   AlertDialog,
@@ -26,6 +29,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
   return iconName in Lucide;
@@ -69,6 +73,51 @@ export default function TransactionList() {
     setExpenses(prev => prev.filter(exp => exp.id !== expenseId));
     setSelectedExpenseId(null);
   };
+  
+  const handleExportCSV = () => {
+    const headers = ['Date', 'Type', 'Amount', 'Category', 'Note', 'Split With'];
+    const rows = filteredExpenses.map(exp => {
+      const splitWithNames = exp.splitWith?.map(s => peopleMap.get(s.personId) || 'Unknown').join(', ') || '';
+      return [
+        format(new Date(exp.date), 'yyyy-MM-dd'),
+        exp.type,
+        exp.amount.toFixed(2),
+        categoryMap.get(exp.categoryId) || 'Uncategorized',
+        `"${exp.note || ''}"`, // handle commas in notes
+        `"${splitWithNames}"`,
+      ].join(',');
+    });
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "pennypincher_export.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    const tableColumns = ["Date", "Note", "Category", "Amount", "Type"];
+    const tableRows = filteredExpenses.map(exp => [
+      format(new Date(exp.date), 'yyyy-MM-dd'),
+      exp.note || '-',
+      categoryMap.get(exp.categoryId) || 'Uncategorized',
+      `$${exp.amount.toFixed(2)}`,
+      exp.type,
+    ]);
+
+    doc.setFontSize(18);
+    doc.text("Transaction Report", 14, 22);
+    autoTable(doc, {
+      startY: 30,
+      head: [tableColumns],
+      body: tableRows,
+    });
+    doc.save("pennypincher_report.pdf");
+  };
 
   return (
     <Card>
@@ -86,6 +135,15 @@ export default function TransactionList() {
                   />
                 </div>
                 <DateRangePicker date={dateRange} onDateChange={setDateRange} />
+                 <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline"><FileDown className="mr-2 h-4 w-4" /> Export</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={handleExportPDF}>Export as PDF</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportCSV}>Export as CSV</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <Button variant="ghost" onClick={() => { setDateRange(undefined); setSearchTerm(''); }}>Reset</Button>
             </div>
         </div>
@@ -150,7 +208,7 @@ export default function TransactionList() {
                                           <AlertDialogCancel>Cancel</AlertDialogCancel>
                                           <AlertDialogAction onClick={() => handleDeleteExpense(expense.id)} className="bg-destructive hover:bg-destructive/90">
                                           Delete
-                                          </AlertDialogAction>
+                                          </Action>
                                       </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>

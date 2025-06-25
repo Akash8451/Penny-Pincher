@@ -9,10 +9,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Download, Upload, Lock, Unlock, Loader2 } from 'lucide-react';
+import { Download, Upload, Lock, Unlock, Loader2, ShieldCheck, AlertTriangle } from 'lucide-react';
 import type { Expense, Category, Person } from '@/lib/types';
 import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+
+type BackupData = {
+  expenses: Expense[];
+  categories: Category[];
+  people: Person[];
+};
 
 export default function DataManagement() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
@@ -23,11 +31,13 @@ export default function DataManagement() {
   
   const [isExportOpen, setExportOpen] = useState(false);
   const [isImportOpen, setImportOpen] = useState(false);
+  const [isPreviewOpen, setPreviewOpen] = useState(false);
 
   const [isExporting, setExporting] = useState(false);
   const [isImporting, setImporting] = useState(false);
 
   const [fileToImport, setFileToImport] = useState<File | null>(null);
+  const [previewData, setPreviewData] = useState<BackupData | null>(null);
 
   const handleExport = () => {
     if (!password) {
@@ -36,7 +46,6 @@ export default function DataManagement() {
     }
     setExporting(true);
 
-    // Simulate async operation
     setTimeout(() => {
       try {
         const data = { expenses, categories, people };
@@ -78,7 +87,6 @@ export default function DataManagement() {
     setImporting(true);
     const reader = new FileReader();
     reader.onload = (e) => {
-        // Simulate async operation
         setTimeout(() => {
             try {
                 const encryptedData = e.target?.result as string;
@@ -89,12 +97,11 @@ export default function DataManagement() {
                     throw new Error('Decryption failed. Check your password.');
                 }
 
-                const data = JSON.parse(decryptedJson);
+                const data: BackupData = JSON.parse(decryptedJson);
                 if (data.expenses && Array.isArray(data.expenses) && data.categories && Array.isArray(data.categories) && data.people && Array.isArray(data.people)) {
-                    setExpenses(data.expenses);
-                    setCategories(data.categories);
-                    setPeople(data.people);
-                    toast({ title: 'Success', description: 'Your data has been imported successfully.' });
+                    setPreviewData(data);
+                    setImportOpen(false);
+                    setPreviewOpen(true);
                 } else {
                     throw new Error('Invalid file format after decryption.');
                 }
@@ -103,14 +110,24 @@ export default function DataManagement() {
                 const errorMessage = error instanceof Error ? error.message : 'Failed to import data. Please check the file and password.';
                 toast({ variant: 'destructive', title: 'Import Error', description: errorMessage });
             } finally {
-                setImportOpen(false);
-                setFileToImport(null);
-                setPassword('');
                 setImporting(false);
+                setPassword('');
             }
         }, 500);
     };
     reader.readAsText(fileToImport);
+  };
+
+  const confirmImport = () => {
+    if (!previewData) return;
+    setExpenses(previewData.expenses);
+    setCategories(previewData.categories);
+    setPeople(previewData.people);
+    toast({ title: 'Success', description: 'Your data has been restored.' });
+    
+    setPreviewOpen(false);
+    setPreviewData(null);
+    setFileToImport(null);
   };
   
   const onFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -123,6 +140,7 @@ export default function DataManagement() {
   };
 
   return (
+    <>
     <Card>
       <CardHeader>
         <CardTitle>Data Backup & Restore</CardTitle>
@@ -173,7 +191,7 @@ export default function DataManagement() {
           <div>
             <h3 className="font-medium">Import from Backup</h3>
             <p className="text-sm text-muted-foreground">
-              Restore data from an encrypted backup file. This will overwrite current data.
+              Restore data from an encrypted backup file.
             </p>
           </div>
             <Button asChild>
@@ -206,7 +224,7 @@ export default function DataManagement() {
                        {isImporting ? (
                             <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Decrypting...</>
                        ) : (
-                            <><Unlock className="mr-2 h-4 w-4" /> Decrypt & Restore</>
+                            <><Unlock className="mr-2 h-4 w-4" /> Decrypt & Preview</>
                        )}
                     </Button>
                 </DialogFooter>
@@ -214,5 +232,28 @@ export default function DataManagement() {
         </Dialog>
       </CardContent>
     </Card>
+
+    <AlertDialog open={isPreviewOpen} onOpenChange={setPreviewOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2"><ShieldCheck className="text-green-500" /> Restore Preview</AlertDialogTitle>
+            <AlertDialogDescription>
+                Your backup file contains the following data. Restoring will <span className="font-bold text-destructive">overwrite all current data</span> in the app.
+            </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="text-sm rounded-lg bg-muted/50 p-4 space-y-2">
+                <div className="flex justify-between"><span>Transactions:</span> <span className="font-medium">{previewData?.expenses.length ?? 0}</span></div>
+                <div className="flex justify-between"><span>Categories:</span> <span className="font-medium">{previewData?.categories.length ?? 0}</span></div>
+                <div className="flex justify-between"><span>People:</span> <span className="font-medium">{previewData?.people.length ?? 0}</span></div>
+            </div>
+            <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPreviewData(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmImport} className="bg-destructive hover:bg-destructive/90">
+                <AlertTriangle className="mr-2 h-4 w-4" /> Confirm & Overwrite
+            </AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 }

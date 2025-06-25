@@ -3,8 +3,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 import {
   Tooltip,
@@ -15,17 +16,24 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
-const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/transactions', icon: List, label: 'Transactions' },
-  { href: '/categories', icon: Shapes, label: 'Categories' },
-  { href: '/people', icon: Users, label: 'People' },
-];
-
 export default function AppSidebar() {
   const pathname = usePathname();
   const [isPinned, setIsPinned] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [isProUnlocked] = useLocalStorage('pro-features-unlocked', false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  const navItems = [
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/transactions', icon: List, label: 'Transactions' },
+    { href: '/categories', icon: Shapes, label: 'Categories' },
+    { href: '/people', icon: Users, label: 'People' },
+    ...(isClient && isProUnlocked ? [{ href: '/vault', icon: Lock, label: 'Vault' }] : []),
+  ];
 
   const isExpanded = isPinned || isHovering;
 
@@ -61,7 +69,7 @@ export default function AppSidebar() {
         </div>
         
         <nav className="flex-1 px-2 py-4 space-y-2">
-          <TooltipProvider delayDuration={0} disableHoverableContent>
+          <TooltipProvider delayDuration={0}>
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
               return (
@@ -90,7 +98,7 @@ export default function AppSidebar() {
         </nav>
 
         <div className="mt-auto p-2 border-t">
-          <TooltipProvider delayDuration={0} disableHoverableContent>
+          <TooltipProvider delayDuration={0}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Link
