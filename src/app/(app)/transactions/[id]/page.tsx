@@ -77,6 +77,7 @@ export default function TransactionDetailsPage() {
 
   const expenseId = params.id as string;
   const expense = !isLoading ? expenses.find(e => e.id === expenseId) : undefined;
+  const isAnySplitSettled = expense?.splitWith?.some(s => s.settled) ?? false;
 
   const categoryMap = new Map(categories.map(c => [c.id, c]));
   const peopleMap = new Map(people.map(p => [p.id, p.name]));
@@ -240,7 +241,7 @@ export default function TransactionDetailsPage() {
                  <div className="flex items-center justify-between mb-2">
                     <h3 className="text-base font-semibold">Bill Split Details</h3>
                     {!isEditing && (
-                        <Button variant="ghost" size="sm" onClick={handleEditClick}>
+                        <Button variant="ghost" size="sm" onClick={handleEditClick} disabled={isAnySplitSettled}>
                             <Edit className="mr-2 h-4 w-4" /> Edit Split
                         </Button>
                     )}
@@ -333,4 +334,3 @@ export default function TransactionDetailsPage() {
     </>
   );
 }
-

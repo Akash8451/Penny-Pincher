@@ -90,10 +90,10 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                             </div>
                             
                             {isSelected && (
-                                <div className="mt-3 flex justify-end items-center gap-2 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                                <div className="mt-3 flex justify-end items-center gap-3 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                                     <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
                                         <AlertDialogTrigger asChild>
-                                            <Button variant="destructive" size="sm" className="w-9 rounded-full p-0">
+                                            <Button variant="destructive" size="icon" className="rounded-full">
                                                 <Trash2 className="h-4 w-4" />
                                                 <span className="sr-only">Delete</span>
                                             </Button>
@@ -113,7 +113,7 @@ export default function RecentExpenses({ expenses, categories, people, onDeleteE
                                             </AlertDialogFooter>
                                         </AlertDialogContent>
                                     </AlertDialog>
-                                    <Button asChild variant="outline" size="sm" className="rounded-full px-4">
+                                    <Button asChild variant="outline" size="default" className="rounded-full">
                                         <Link href={`/transactions/${expense.id}`}>
                                             View Details <ArrowRight className="ml-2 h-4 w-4" />
                                         </Link>

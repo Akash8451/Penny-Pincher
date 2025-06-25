@@ -95,7 +95,7 @@ export default function TransactionList() {
 
                         {isSelected && (
                             <div className="mt-3 flex justify-end items-center animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-                                <Button asChild variant="outline" size="sm" className="rounded-full px-4">
+                                <Button asChild variant="outline" size="default" className="rounded-full">
                                     <Link href={`/transactions/${expense.id}`}>
                                         View Details <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>
