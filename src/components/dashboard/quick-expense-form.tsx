@@ -21,7 +21,7 @@ import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
 import { cn } from '@/lib/utils';
-import { DialogTitle as FormDialogTitle, DialogDescription as FormDialogDescription, DialogHeader as FormDialogHeader } from '@/components/ui/dialog';
+import { SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 
 
 interface QuickExpenseFormProps {
@@ -184,11 +184,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     } else {
       onAddExpense(expenseData);
     }
-
-    toast({
-      title: "Expense Added!",
-      description: "Your expense has been logged successfully.",
-    });
+    
     form.reset();
     setFileName('');
     setSelectedPeople([]);
@@ -238,10 +234,10 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
 
   return (
     <>
-      <FormDialogHeader>
-          <FormDialogTitle>Log Expense</FormDialogTitle>
-          <FormDialogDescription>Quickly add a new transaction manually or with your voice.</FormDialogDescription>
-      </FormDialogHeader>
+      <SheetHeader>
+          <SheetTitle>Log Expense</SheetTitle>
+          <SheetDescription>Quickly add a new transaction manually or with your voice.</SheetDescription>
+      </SheetHeader>
       <div className='py-4'>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

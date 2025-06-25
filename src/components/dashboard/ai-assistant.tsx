@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,7 +65,7 @@ export default function AIAssistant({ expenses, categories, people }: AIAssistan
   }
 
   return (
-    <Card>
+    <Card className="h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
       <CardHeader>
         <CardTitle className='flex items-center gap-2'>
             <Wand2 className='text-primary' />
@@ -75,7 +76,7 @@ export default function AIAssistant({ expenses, categories, people }: AIAssistan
       <CardContent>
         <form onSubmit={handleAsk} className="flex gap-2 mb-4">
             <Input 
-                placeholder='e.g., "How much did I spend on coffee last week?"'
+                placeholder='e.g., "How much did I spend on coffee?"'
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 disabled={isLoading}

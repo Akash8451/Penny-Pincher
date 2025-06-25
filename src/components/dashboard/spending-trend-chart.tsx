@@ -1,8 +1,8 @@
+
 'use client';
 
 import * as React from 'react';
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Expense } from '@/lib/types';
 import { format, subDays } from 'date-fns';
 
@@ -26,6 +26,7 @@ export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps
 
     // Sum expenses for the last 7 days
     expenses.forEach(expense => {
+      if (expense.type !== 'expense') return;
       const expenseDate = new Date(expense.date);
       if (expenseDate >= subDays(today, 6)) {
         const formattedDate = format(expenseDate, 'MMM d');
@@ -42,42 +43,40 @@ export default function SpendingTrendChart({ expenses }: SpendingTrendChartProps
   }, [expenses]);
   
   return (
-    <Card className="lg:col-span-4">
-      <CardHeader>
-        <CardTitle>Spending Trend</CardTitle>
-        <CardDescription>Your spending over the last 7 days.</CardDescription>
-      </CardHeader>
-      <CardContent className="pl-2">
-        <div className="h-[250px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data}>
-              <XAxis
-                dataKey="name"
-                stroke="hsl(var(--foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="hsl(var(--foreground))"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <Tooltip
-                cursor={{ fill: 'hsl(var(--accent))' }}
-                contentStyle={{ 
-                    background: 'hsl(var(--background))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: 'var(--radius)',
-                }}
-              />
-              <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+    <div className="h-[250px] w-full pl-2 pt-4">
+      {data.some(d => d.total > 0) ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={data}>
+            <XAxis
+              dataKey="name"
+              stroke="hsl(var(--foreground))"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              stroke="hsl(var(--foreground))"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              tickFormatter={(value) => `$${value}`}
+            />
+            <Tooltip
+              cursor={{ fill: 'hsl(var(--accent))' }}
+              contentStyle={{ 
+                  background: 'hsl(var(--background))',
+                  border: '1px solid hsl(var(--border))',
+                  borderRadius: 'var(--radius)',
+              }}
+            />
+            <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+          Not enough data for a 7-day trend.
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }

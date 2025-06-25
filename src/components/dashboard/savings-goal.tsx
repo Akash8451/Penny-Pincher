@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import type { Expense, SavingsGoal } from '@/lib/types';
+import type { Expense, SavingsGoal as SavingsGoalType } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,11 +28,11 @@ interface SavingsGoalProps {
 }
 
 export default function SavingsGoal({ expenses }: SavingsGoalProps) {
-  const [goals, setGoals] = useLocalStorage<SavingsGoal[]>('savings-goals', []);
+  const [goals, setGoals] = useLocalStorage<SavingsGoalType[]>('savings-goals', []);
   const { toast } = useToast();
   
   const [isFormOpen, setFormOpen] = useState(false);
-  const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null);
+  const [editingGoal, setEditingGoal] = useState<SavingsGoalType | null>(null);
   const [goalName, setGoalName] = useState('');
   const [goalAmount, setGoalAmount] = useState('');
   
@@ -60,7 +60,7 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
     return { savedAmount: saved, progress: progressPercentage };
   }, [expenses, currentGoal]);
 
-  const handleOpenForm = (goal: SavingsGoal | null) => {
+  const handleOpenForm = (goal: SavingsGoalType | null) => {
     setEditingGoal(goal);
     setGoalName(goal?.name || '');
     setGoalAmount(goal?.amount.toString() || '');
@@ -78,7 +78,7 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
       setGoals(goals.map(g => g.id === editingGoal.id ? { ...g, name: goalName, amount } : g));
       toast({ title: 'Goal Updated!', description: `Your goal to save $${amount} has been updated.` });
     } else {
-      const newGoal: SavingsGoal = {
+      const newGoal: SavingsGoalType = {
         id: `goal-${Date.now()}`,
         name: goalName,
         amount,
@@ -100,7 +100,7 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
 
 
   return (
-    <Card>
+    <Card className="h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
             <Target className="text-primary" />
@@ -120,7 +120,7 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
                     Goal: <span className="text-foreground font-bold">${currentGoal.amount.toFixed(2)}</span>
                 </span>
               </div>
-              {progress >= 100 && <p className="text-center font-semibold text-green-500">🎉 Goal Achieved! 🎉</p>}
+              {progress >= 100 && <p className="text-center font-semibold text-green-500">Goal Achieved!</p>}
             </div>
         ) : (
             <div className="text-center text-muted-foreground py-4">
@@ -131,11 +131,11 @@ export default function SavingsGoal({ expenses }: SavingsGoalProps) {
       <CardFooter className="justify-end gap-2">
          {currentGoal ? (
             <>
-                <Button variant="ghost" size="sm" onClick={handleDeleteGoal}><Trash2 className="mr-2 h-4 w-4" /> Delete Goal</Button>
-                <Button variant="outline" size="sm" onClick={() => handleOpenForm(currentGoal)}><Edit className="mr-2 h-4 w-4" /> Edit Goal</Button>
+                <Button variant="ghost" size="sm" onClick={handleDeleteGoal}><Trash2 className="mr-2 h-4 w-4" /> Delete</Button>
+                <Button variant="outline" size="sm" onClick={() => handleOpenForm(currentGoal)}><Edit className="mr-2 h-4 w-4" /> Edit</Button>
             </>
          ) : (
-             <Button size="sm" onClick={() => handleOpenForm(null)}><PlusCircle className="mr-2 h-4 w-4"/> Set a New Goal</Button>
+             <Button size="sm" onClick={() => handleOpenForm(null)}><PlusCircle className="mr-2 h-4 w-4"/> Set Goal</Button>
          )}
       </CardFooter>
 
