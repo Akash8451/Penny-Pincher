@@ -9,7 +9,7 @@ export default function AppLayout({
   return (
     <div className="flex min-h-screen w-full bg-background">
       <AppSidebar />
-      <main className="flex-1 flex flex-col">
+      <main className="flex-1 flex flex-col pb-20 sm:pb-0 animate-fade-in-up">
         {children}
       </main>
     </div>

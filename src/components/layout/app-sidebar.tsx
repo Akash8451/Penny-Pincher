@@ -25,35 +25,57 @@ export default function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 h-screen left-0 hidden border-r bg-card p-2 sm:flex flex-col gap-4 z-20">
-      <Link href="/dashboard" className="flex items-center gap-2 justify-center p-2">
-        <Button variant="ghost" size="icon" aria-label="PennyPincher Home">
-          <Wallet className="h-6 w-6 text-primary" />
-        </Button>
-      </Link>
-      <nav className="flex flex-col items-center gap-2 mt-4">
-        <TooltipProvider delayDuration={0}>
-          {navItems.map((item) => (
-            <Tooltip key={item.href}>
-              <TooltipTrigger asChild>
-                <Link
-                  href={item.href}
-                  className={cn(
-                    'flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:text-foreground',
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="sticky top-0 h-screen left-0 hidden border-r bg-card p-2 sm:flex flex-col gap-4 z-20">
+        <Link href="/dashboard" className="flex items-center gap-2 justify-center p-2">
+          <Button variant="ghost" size="icon" aria-label="PennyPincher Home">
+            <Wallet className="h-6 w-6 text-primary" />
+          </Button>
+        </Link>
+        <nav className="flex flex-col items-center gap-2 mt-4">
+          <TooltipProvider delayDuration={0}>
+            {navItems.map((item) => (
+              <Tooltip key={item.href}>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:text-foreground',
+                      pathname.startsWith(item.href)
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground'
+                    )}
+                  >
+                    <item.icon className="h-5 w-5" />
+                    <span className="sr-only">{item.label}</span>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right">{item.label}</TooltipContent>
+              </Tooltip>
+            ))}
+          </TooltipProvider>
+        </nav>
+      </aside>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-lg border-t border-border/20 z-20 flex items-center justify-around">
+         {navItems.map((item) => (
+            <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                    'flex flex-col items-center justify-center gap-1 rounded-lg p-2 transition-colors hover:text-foreground w-16',
                     pathname.startsWith(item.href)
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground'
-                  )}
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
+                )}
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="sr-only">{item.label}</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">{item.label}</TooltipContent>
-            </Tooltip>
-          ))}
-        </TooltipProvider>
+                <item.icon className="h-5 w-5" />
+                <span className="text-xs font-medium">{item.label}</span>
+            </Link>
+        ))}
       </nav>
-    </aside>
+    </>
   );
 }
