@@ -34,31 +34,31 @@
   }
  
   .dark {
-    /* Dark Mode: Midnight Charcoal base with Electric Blue accents */
-    --background: 0 0% 10%; /* #1A1A1A */
-    --foreground: 0 0% 83%; /* #D3D3D3 */
-    --card: 0 0% 12%;
-    --card-foreground: 0 0% 83%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 83%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+    /* Dark Mode: Onyx & Jade */
+    --background: 240 6% 10%;
+    --foreground: 240 5% 83%;
+    --card: 240 6% 12%;
+    --card-foreground: 240 5% 83%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 240 5% 83%;
+    --primary: 145 58% 55%;
+    --primary-foreground: 145 58% 10%;
+    --secondary: 240 4% 16%;
+    --secondary-foreground: 240 5% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 240 5% 63%;
+    --accent: 240 4% 16%;
+    --accent-foreground: 240 5% 98%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 22%;
-    --input: 0 0% 15%;
-    --ring: 221 83% 53%;
-    --chart-1: 221 70% 50%;
-    --chart-2: 217 60% 55%;
-    --chart-3: 212 80% 55%;
-    --chart-4: 208 65% 60%;
-    --chart-5: 204 75% 55%;
+    --border: 240 4% 20%;
+    --input: 240 4% 20%;
+    --ring: 145 58% 55%;
+    --chart-1: 145 60% 45%;
+    --chart-2: 145 50% 55%;
+    --chart-3: 145 40% 65%;
+    --chart-4: 145 30% 75%;
+    --chart-5: 145 20% 85%;
   }
 }
 
