@@ -52,7 +52,7 @@ export default function PaymentRequestForm({ people, onAddRequest, onSuccess }: 
   };
 
   return (
-    <div className='py-4 space-y-2'>
+    <div className='space-y-2'>
         <div className="text-center">
             <h3 className="text-lg font-medium">Request Payment</h3>
             <p className="text-sm text-muted-foreground">Create and send a payment request.</p>

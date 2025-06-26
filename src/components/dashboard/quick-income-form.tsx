@@ -52,7 +52,7 @@ export default function QuickIncomeForm({ categories, onAddIncome, onSuccess }: 
   };
 
   return (
-    <div className='py-4 space-y-2'>
+    <div className='space-y-2'>
         <div className="text-center">
             <h3 className="text-lg font-medium">Log Income</h3>
             <p className="text-sm text-muted-foreground">Add any income you've received.</p>

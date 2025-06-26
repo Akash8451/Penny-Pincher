@@ -102,34 +102,40 @@ export default function FloatingActionButton() {
                         <span className="sr-only">Log Transaction</span>
                     </Button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-lg bg-background/90 backdrop-blur-lg">
-                   <Tabs defaultValue="expense" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3">
+                <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-lg bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
+                   <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col">
+                        <TabsList className="grid w-full grid-cols-3 shrink-0 m-4 mb-0">
                             <TabsTrigger value="expense"><FilePlus className="mr-2 h-4 w-4" />Expense</TabsTrigger>
                             <TabsTrigger value="income"><HandCoins className="mr-2 h-4 w-4" />Income</TabsTrigger>
                             <TabsTrigger value="request"><Receipt className="mr-2 h-4 w-4" />Request</TabsTrigger>
                         </TabsList>
-                        <TabsContent value="expense">
-                            <QuickExpenseForm 
-                                categories={categories.filter(c => c.group !== 'Income')} 
-                                people={people} 
-                                onAddExpense={handleAddExpense}
-                                onSuccess={() => setIsOpen(false)}
-                            />
+                        <TabsContent value="expense" className="flex-grow overflow-y-auto mt-0">
+                            <div className="p-4">
+                                <QuickExpenseForm 
+                                    categories={categories.filter(c => c.group !== 'Income')} 
+                                    people={people} 
+                                    onAddExpense={handleAddExpense}
+                                    onSuccess={() => setIsOpen(false)}
+                                />
+                            </div>
                         </TabsContent>
-                        <TabsContent value="income">
-                             <QuickIncomeForm 
-                                categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
-                                onAddIncome={handleAddIncome}
-                                onSuccess={() => setIsOpen(false)}
-                            />
+                        <TabsContent value="income" className="flex-grow overflow-y-auto mt-0">
+                            <div className="p-4">
+                                 <QuickIncomeForm 
+                                    categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
+                                    onAddIncome={handleAddIncome}
+                                    onSuccess={() => setIsOpen(false)}
+                                />
+                            </div>
                         </TabsContent>
-                        <TabsContent value="request">
-                            <PaymentRequestForm
-                                people={people}
-                                onAddRequest={handleAddPaymentRequest}
-                                onSuccess={() => setIsOpen(false)}
-                             />
+                        <TabsContent value="request" className="flex-grow overflow-y-auto mt-0">
+                            <div className="p-4">
+                                <PaymentRequestForm
+                                    people={people}
+                                    onAddRequest={handleAddPaymentRequest}
+                                    onSuccess={() => setIsOpen(false)}
+                                 />
+                            </div>
                         </TabsContent>
                     </Tabs>
                 </SheetContent>

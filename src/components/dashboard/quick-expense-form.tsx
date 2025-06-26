@@ -208,7 +208,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   const myShare = totalAmount - currentSplitTotalForOthers;
 
   return (
-    <div className='py-4 space-y-2'>
+    <div className='space-y-2'>
         <div className="text-center">
             <h3 className="text-lg font-medium">Log Expense</h3>
             <p className="text-sm text-muted-foreground">Quickly add a new transaction manually or with your voice.</p>
