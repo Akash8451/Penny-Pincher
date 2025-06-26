@@ -52,7 +52,9 @@ export default function ThemeSettings() {
         <div className="flex flex-col justify-between gap-4 rounded-lg border p-4 md:flex-row md:items-center">
             <div>
                 <h3 className="font-medium">Theme</h3>
-                <p className="text-sm text-muted-foreground">Select a theme or sync with your system.</p>
+                <p className="text-sm text-muted-foreground">
+                    Currently: <span className="font-semibold capitalize text-foreground">{theme}</span>
+                </p>
             </div>
             <Select value={theme} onValueChange={setTheme}>
               <SelectTrigger className="w-full md:w-[180px]">
