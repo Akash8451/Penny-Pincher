@@ -1,4 +1,3 @@
-
 'use client';
 import AppSidebar from '@/components/layout/app-sidebar';
 import FloatingActionButton from '@/components/layout/floating-action-button';
@@ -9,7 +8,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
   const { isExpanded } = useSidebar();
   return (
     <main className={cn(
-      "flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out h-screen overflow-y-auto pb-20 sm:pb-0",
+      "flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out",
       isExpanded ? "sm:ml-[220px]" : "sm:ml-[68px]"
     )}>
       {children}
@@ -24,10 +23,12 @@ export default function AppLayout({
 }) {
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex h-screen w-full bg-background overflow-hidden">
         <AppSidebar />
         <MainContent>
-          {children}
+          <div className="flex-1 overflow-y-auto pb-20 sm:pb-0">
+            {children}
+          </div>
           <FloatingActionButton />
         </MainContent>
       </div>
