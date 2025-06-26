@@ -63,7 +63,6 @@ function ReceiptScannerInternal() {
       stream.getTracks().forEach(track => track.stop());
       videoRef.current.srcObject = null;
     }
-    setIsCameraOn(false);
   }, []);
 
   useEffect(() => {
@@ -78,11 +77,6 @@ function ReceiptScannerInternal() {
         } catch (err) {
           console.error('Error accessing camera:', err);
           setHasCameraPermission(false);
-          toast({
-            variant: 'destructive',
-            title: 'Camera Access Denied',
-            description: 'Please enable camera permissions in your browser settings.',
-          });
           stopCamera();
         }
       };
@@ -93,7 +87,7 @@ function ReceiptScannerInternal() {
     return () => {
       stopCamera();
     };
-  }, [isCameraOn, stopCamera, toast]);
+  }, [isCameraOn, stopCamera]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -114,6 +108,7 @@ function ReceiptScannerInternal() {
       canvas.height = video.videoHeight;
       canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
       setImageSrc(canvas.toDataURL('image/jpeg'));
+      setIsCameraOn(false);
       stopCamera();
     }
   };
@@ -168,6 +163,7 @@ function ReceiptScannerInternal() {
         categoryId: categoryId || 'cat-11', // Default to 'Other'
         note: item.description,
         date: new Date().toISOString(),
+        receipt: imageSrc || undefined,
       });
     });
 
@@ -195,6 +191,7 @@ function ReceiptScannerInternal() {
     setError(null);
     setSelectedItems({});
     setItemCategories({});
+    setIsCameraOn(false);
     stopCamera();
   };
 
@@ -340,17 +337,25 @@ function ReceiptScannerInternal() {
                 <CardDescription>Use your device's camera to take a new photo.</CardDescription>
             </CardHeader>
             <CardContent>
-                {isCameraOn ? (
-                    <div className='space-y-2'>
-                        <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay playsInline muted />
-                        {hasCameraPermission === false && <Alert variant="destructive"><AlertDescription>Camera access is disabled. Please enable it in your browser settings.</AlertDescription></Alert>}
-                        <div className="flex gap-2">
-                          <Button onClick={handleCapture} className='w-full' disabled={!hasCameraPermission}>Capture</Button>
-                          <Button variant="outline" onClick={() => setIsCameraOn(false)}><X className='h-4 w-4' /></Button>
-                        </div>
+                <div className={cn(isCameraOn ? 'block' : 'hidden')}>
+                    <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay playsInline muted />
+                    <div className="flex gap-2 mt-2">
+                        <Button onClick={handleCapture} className='w-full' disabled={hasCameraPermission === false}>Capture</Button>
+                        <Button variant="outline" onClick={() => setIsCameraOn(false)}><X className='h-4 w-4' /></Button>
                     </div>
-                ) : (
+                </div>
+
+                {!isCameraOn && (
                     <Button onClick={() => setIsCameraOn(true)} className='w-full'>Start Camera</Button>
+                )}
+
+                {isCameraOn && hasCameraPermission === false && (
+                    <Alert variant="destructive" className="mt-2">
+                        <AlertTitle>Camera Access Denied</AlertTitle>
+                        <AlertDescription>
+                            Please enable camera permissions in your browser settings to use this feature.
+                        </AlertDescription>
+                    </Alert>
                 )}
             </CardContent>
         </Card>

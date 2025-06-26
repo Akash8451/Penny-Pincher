@@ -35,15 +35,10 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
   const [messages, setMessages] = useState<Message[]>([
     { role: 'ai', text: "Hello! How can I help you today? You can ask me about your finances or tell me to log an expense." }
   ]);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      scrollAreaRef.current.scrollTo({
-        top: scrollAreaRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const handleVoiceResult = (transcript: string) => {
@@ -120,7 +115,7 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
         <CardDescription>Your voice-powered financial assistant. Your data is processed securely on-device.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col">
-        <ScrollArea className="flex-grow h-48 mb-4 pr-4" ref={scrollAreaRef}>
+        <ScrollArea className="flex-grow h-48 mb-4 pr-4">
           <div className="space-y-4">
             {messages.map((message, index) => (
               <div key={index} className={cn(
@@ -146,6 +141,7 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
                   </div>
               </div>
             )}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
       </CardContent>
