@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -7,7 +6,7 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { Category, Expense, Person } from '@/lib/types';
 import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import QuickExpenseForm from '@/components/dashboard/quick-expense-form';
 import QuickIncomeForm from '@/components/dashboard/quick-income-form';
 import PaymentRequestForm from '@/components/dashboard/payment-request-form';
@@ -103,6 +102,7 @@ export default function FloatingActionButton() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-lg bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
+                   <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
                    <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col">
                         <TabsList className="grid w-full grid-cols-3 shrink-0 m-4 mb-0">
                             <TabsTrigger value="expense"><FilePlus className="mr-2 h-4 w-4" />Expense</TabsTrigger>
