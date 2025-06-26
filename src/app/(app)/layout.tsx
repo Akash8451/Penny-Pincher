@@ -12,7 +12,7 @@ export default function AppLayout({
     <div className="flex min-h-screen w-full bg-background">
       <AppSidebar />
       <main className={cn(
-        "flex-1 flex flex-col pb-20 sm:pb-0 animate-fade-in-up transition-all duration-300 ease-in-out",
+        "flex-1 flex flex-col pb-20 sm:pb-0 animate-fade-in-up transition-all duration-200 ease-in-out",
         "sm:ml-[68px]"
       )}>
         {children}

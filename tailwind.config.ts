@@ -101,10 +101,10 @@ export default {
         },
       },
       animation: {
-        'accordion-down': 'accordion-down 0.2s ease-out',
-        'accordion-up': 'accordion-up 0.2s ease-out',
+        'accordion-down': 'accordion-down 0.15s ease-out',
+        'accordion-up': 'accordion-up 0.15s ease-out',
         'bounce-sm': 'bounce-sm 1s infinite',
-        'fade-in-up': 'fade-in-up 0.3s ease-out',
+        'fade-in-up': 'fade-in-up 0.2s ease-out',
       },
     },
   },

@@ -42,7 +42,7 @@ export default function AppSidebar() {
       {/* Desktop Sidebar */}
         <aside 
           className={cn(
-            "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-30 transition-all duration-300 ease-in-out",
+            "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-30 transition-all duration-200 ease-in-out",
             isExpanded ? "w-[220px]" : "w-[68px]"
           )}
           onMouseEnter={() => setIsHovering(true)}
