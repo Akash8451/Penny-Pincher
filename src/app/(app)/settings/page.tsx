@@ -2,6 +2,7 @@
 'use client';
 
 import Link from 'next/link';
+import { AppHeader } from '@/components/layout/app-header';
 import DataManagement from "@/components/settings/data-management";
 import ProFeatures from "@/components/settings/pro-features";
 import RegionalSettings from "@/components/settings/regional-settings";
