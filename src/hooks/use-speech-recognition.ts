@@ -37,7 +37,9 @@ export const useSpeechRecognition = ({ onResult, onError }: SpeechRecognitionOpt
     recognitionRef.current = recognition;
 
     return () => {
-      recognition.stop();
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
     };
   }, [onResult, onError]);
 
@@ -46,6 +48,12 @@ export const useSpeechRecognition = ({ onResult, onError }: SpeechRecognitionOpt
         onError("Speech recognition is not supported or initialized.");
         return;
     }
+
+    // If text-to-speech is currently active, cancel it before starting recognition.
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+    }
+    
     if (isListening) {
       recognitionRef.current.stop();
     } else {
