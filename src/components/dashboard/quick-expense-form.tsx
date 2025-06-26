@@ -12,15 +12,13 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Paperclip, PlusCircle, Users, Mic, Loader2, X, ZoomIn } from 'lucide-react';
+import { Paperclip, PlusCircle, Users, X, ZoomIn } from 'lucide-react';
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
-import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
-import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Image from 'next/image';
 
@@ -33,7 +31,7 @@ interface QuickExpenseFormProps {
 
 const expenseSchema = z.object({
   amount: z.preprocess(
-    (val) => (val === "" ? NaN : val), // Treat empty string as invalid for the 'positive' check
+    (val) => (val === "" ? undefined : val),
     z.coerce.number().positive({ message: "Amount must be positive." })
   ),
   categoryId: z.string().min(1, { message: "Please select a category." }),
@@ -50,46 +48,13 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     defaultValues: { amount: '', categoryId: '', note: '' },
   });
   const totalAmount = Number(form.watch('amount')) || 0;
-  const [isAILoading, setAILoading] = useState(false);
-
+  
   const [fileName, setFileName] = React.useState('');
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
   const [splitGroupName, setSplitGroupName] = React.useState('');
-
-  const handleVoiceResult = async (query: string) => {
-    setAILoading(true);
-    toast({ title: "Processing your voice command...", description: `Heard: "${query}"` });
-    try {
-        const result = await logExpenseFromVoice({ query, categories });
-        if (result.amount) form.setValue('amount', result.amount);
-        if (result.categoryId) form.setValue('categoryId', result.categoryId);
-        if (result.note) form.setValue('note', result.note);
-        toast({ title: "Success!", description: "Expense details have been filled in." });
-    } catch (error) {
-        console.error("Voice processing error:", error);
-        toast({ variant: 'destructive', title: "AI Error", description: "Couldn't process the voice command." });
-    } finally {
-        setAILoading(false);
-    }
-  };
-
-  const handleVoiceError = (error: string) => {
-    let description = 'An unknown error occurred. Please try again.';
-    if (error === 'not-allowed' || error === 'service-not-allowed') {
-      description = 'Microphone access denied. Please enable it in your browser settings.';
-    } else if (error === 'no-speech') {
-      description = 'No speech was detected. Please make sure your microphone is working.';
-    } else if (error === 'network') {
-      description = 'A network error occurred. Please check your connection and try again.';
-    }
-    toast({ variant: 'destructive', title: 'Speech Recognition Error', description });
-  };
-  
-  const { isListening, toggleListening } = useSpeechRecognition({ onResult: handleVoiceResult, onError: handleVoiceError });
-
 
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
@@ -211,7 +176,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     <div className='space-y-2'>
         <div className="text-center">
             <h3 className="text-lg font-medium">Log Expense</h3>
-            <p className="text-sm text-muted-foreground">Quickly add a new transaction manually or with your voice.</p>
+            <p className="text-sm text-muted-foreground">Quickly add a new transaction manually.</p>
         </div>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
@@ -278,14 +243,14 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
               <FormField
                   control={form.control}
                   name="receipt"
-                  render={({ field: { value, onChange, ...fieldProps } }) => (
+                  render={({ field: { onChange, ...fieldProps } }) => (
                     <FormItem>
                       <FormLabel>Receipt (Optional)</FormLabel>
                         <FormControl>
                         {!receiptPreview ? (
                             <div className="relative">
                                 <Button asChild variant="outline" className="w-full justify-start text-muted-foreground font-normal">
-                                    <Label>
+                                    <Label className="w-full">
                                     <Paperclip className="mr-2 h-4 w-4" />
                                     {fileName || "Attach a file"}
                                     </Label>
@@ -439,39 +404,9 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                 )}
                 
                 <div className="pt-4">
-                    {isListening || isAILoading ? (
-                         <Button
-                            type="button"
-                            variant="destructive"
-                            onClick={toggleListening}
-                            className="w-full animate-pulse"
-                            disabled={isAILoading}
-                        >
-                            {isAILoading ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
-                                </>
-                            ) : (
-                                <>
-                                    <Mic className="mr-2 h-4 w-4" /> Listening... Tap to stop
-                                </>
-                            )}
-                        </Button>
-                    ) : (
-                      <div className="flex items-center gap-2">
-                          <Button type="submit" className="flex-1" disabled={form.formState.isSubmitting}>
-                              <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
-                          </Button>
-                          <Button 
-                              type="button" 
-                              variant="outline" 
-                              size="icon" 
-                              onClick={toggleListening}
-                          >
-                              <Mic />
-                          </Button>
-                      </div>
-                    )}
+                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+                    </Button>
                 </div>
             </form>
           </Form>

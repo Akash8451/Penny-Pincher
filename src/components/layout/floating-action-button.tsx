@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Plus, Wand2, FilePlus, HandCoins, Receipt } from 'lucide-react';
+import { Plus, Wand2 } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { Category, Expense, Person } from '@/lib/types';
 import { DEFAULT_CATEGORIES } from '@/lib/constants';
@@ -104,39 +104,37 @@ export default function FloatingActionButton() {
                 <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-lg bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
                    <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
                    <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col">
-                        <TabsList className="grid w-full grid-cols-3 shrink-0 m-4 mb-0">
-                            <TabsTrigger value="expense"><FilePlus className="mr-2 h-4 w-4" />Expense</TabsTrigger>
-                            <TabsTrigger value="income"><HandCoins className="mr-2 h-4 w-4" />Income</TabsTrigger>
-                            <TabsTrigger value="request"><Receipt className="mr-2 h-4 w-4" />Request</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="expense" className="flex-grow overflow-y-auto mt-0">
-                            <div className="p-4">
+                        <div className="flex justify-center p-4">
+                            <TabsList>
+                                <TabsTrigger value="expense">Expense</TabsTrigger>
+                                <TabsTrigger value="income">Income</TabsTrigger>
+                                <TabsTrigger value="request">Request</TabsTrigger>
+                            </TabsList>
+                        </div>
+                        <div className="flex-grow overflow-y-auto">
+                            <TabsContent value="expense" className="p-6 pt-0 mt-0">
                                 <QuickExpenseForm 
                                     categories={categories.filter(c => c.group !== 'Income')} 
                                     people={people} 
                                     onAddExpense={handleAddExpense}
                                     onSuccess={() => setIsOpen(false)}
                                 />
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="income" className="flex-grow overflow-y-auto mt-0">
-                            <div className="p-4">
-                                 <QuickIncomeForm 
+                            </TabsContent>
+                            <TabsContent value="income" className="p-6 pt-0 mt-0">
+                                <QuickIncomeForm 
                                     categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
                                     onAddIncome={handleAddIncome}
                                     onSuccess={() => setIsOpen(false)}
                                 />
-                            </div>
-                        </TabsContent>
-                        <TabsContent value="request" className="flex-grow overflow-y-auto mt-0">
-                            <div className="p-4">
+                            </TabsContent>
+                            <TabsContent value="request" className="p-6 pt-0 mt-0">
                                 <PaymentRequestForm
                                     people={people}
                                     onAddRequest={handleAddPaymentRequest}
                                     onSuccess={() => setIsOpen(false)}
-                                 />
-                            </div>
-                        </TabsContent>
+                                    />
+                            </TabsContent>
+                        </div>
                     </Tabs>
                 </SheetContent>
             </Sheet>
