@@ -5,60 +5,60 @@
 
 @layer base {
   :root {
-    /* Light Mode: Alpine Oat base with Butter Yellow accents */
-    --background: 47 41% 88%; /* #EDE7D1 */
-    --foreground: 47 20% 20%;
-    --card: 47 41% 92%;
-    --card-foreground: 47 20% 20%;
-    --popover: 47 41% 88%;
-    --popover-foreground: 47 20% 20%;
-    --primary: 49 100% 70%; /* #FFE066 */
-    --primary-foreground: 49 100% 15%;
-    --secondary: 47 20% 96.1%;
-    --secondary-foreground: 47 20% 9%;
-    --muted: 47 20% 96.1%;
-    --muted-foreground: 47 20% 45.1%;
-    --accent: 49 100% 95%;
-    --accent-foreground: 49 100% 40%;
+    /* Light Mode: Beige and Vanilla with cool grays */
+    --background: 70 27% 86%;
+    --foreground: 75 17% 14%;
+    --card: 70 27% 90%;
+    --card-foreground: 75 17% 14%;
+    --popover: 70 27% 86%;
+    --popover-foreground: 75 17% 14%;
+    --primary: 58 55% 76%;
+    --primary-foreground: 75 17% 14%;
+    --secondary: 141 6% 92%;
+    --secondary-foreground: 75 17% 14%;
+    --muted: 141 6% 92%;
+    --muted-foreground: 80 4% 60%;
+    --accent: 58 55% 95%;
+    --accent-foreground: 58 55% 20%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 47 20% 80%;
-    --input: 47 20% 94%;
-    --ring: 49 100% 70%;
-    --chart-1: 49 80% 61%;
-    --chart-2: 40 80% 61%;
-    --chart-3: 30 80% 61%;
-    --chart-4: 20 80% 61%;
-    --chart-5: 10 80% 61%;
+    --border: 141 6% 75%;
+    --input: 141 6% 90%;
+    --ring: 58 55% 76%;
+    --chart-1: 58 55% 70%;
+    --chart-2: 58 50% 65%;
+    --chart-3: 58 45% 60%;
+    --chart-4: 58, 40%, 55%;
+    --chart-5: 58, 35%, 50%;
     --radius: 1rem;
   }
  
   .dark {
-    /* Dark Mode: Black Olive & Vanilla */
-    --background: 75 17% 14%;
-    --foreground: 77 28% 86%;
-    --card: 75 17% 16%;
-    --card-foreground: 77 28% 86%;
-    --popover: 75 17% 14%;
-    --popover-foreground: 77 28% 86%;
-    --primary: 58 64% 76%;
-    --primary-foreground: 75 17% 14%;
-    --secondary: 75 17% 20%;
-    --secondary-foreground: 77 28% 86%;
-    --muted: 75 17% 20%;
-    --muted-foreground: 80 3% 60%;
-    --accent: 75 17% 20%;
-    --accent-foreground: 77 28% 86%;
+    /* Dark Mode: Charcoal and Jade */
+    --background: 192 11% 11%;
+    --foreground: 70 27% 86%;
+    --card: 192 11% 14%;
+    --card-foreground: 70 27% 86%;
+    --popover: 192 11% 11%;
+    --popover-foreground: 70 27% 86%;
+    --primary: 153 70% 47%;
+    --primary-foreground: 153 70% 5%;
+    --secondary: 192 11% 18%;
+    --secondary-foreground: 70 27% 86%;
+    --muted: 192 11% 18%;
+    --muted-foreground: 192 11% 60%;
+    --accent: 153 70% 18%;
+    --accent-foreground: 153 70% 86%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
-    --border: 75 17% 22%;
-    --input: 75 17% 22%;
-    --ring: 58 64% 76%;
-    --chart-1: 58 60% 70%;
-    --chart-2: 58 55% 65%;
-    --chart-3: 58 50% 60%;
-    --chart-4: 58 45% 55%;
-    --chart-5: 58 40% 50%;
+    --border: 192 11% 22%;
+    --input: 192 11% 22%;
+    --ring: 153 70% 47%;
+    --chart-1: 153 70% 47%;
+    --chart-2: 153 60% 42%;
+    --chart-3: 153 50% 37%;
+    --chart-4: 153 40% 32%;
+    --chart-5: 153 30% 27%;
   }
 }
 
