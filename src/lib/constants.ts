@@ -13,6 +13,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-9', name: 'Shopping', group: 'Discretionary', icon: 'ShoppingBag' },
   { id: 'cat-10', name: 'Travel', group: 'Discretionary', icon: 'Plane' },
   { id: 'cat-11', name: 'Other', group: 'Miscellaneous', icon: 'Package' },
+  { id: 'cat-12', name: 'Payment Request', group: 'Income', icon: 'Receipt' },
 ];
 
 export const DEFAULT_CURRENCY = 'USD';

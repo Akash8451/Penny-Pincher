@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,6 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
-import { SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Image from 'next/image';
@@ -208,14 +208,13 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   const myShare = totalAmount - currentSplitTotalForOthers;
 
   return (
-    <>
-      <SheetHeader>
-          <SheetTitle>Log Expense</SheetTitle>
-          <SheetDescription>Quickly add a new transaction manually or with your voice.</SheetDescription>
-      </SheetHeader>
-      <div className='py-4'>
+    <div className='py-4 space-y-2'>
+        <div className="text-center">
+            <h3 className="text-lg font-medium">Log Expense</h3>
+            <p className="text-sm text-muted-foreground">Quickly add a new transaction manually or with your voice.</p>
+        </div>
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
               <FormField
                 control={form.control}
                 name="amount"
@@ -476,7 +475,6 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                 </div>
             </form>
           </Form>
-        </div>
-    </>
+    </div>
   );
 }
