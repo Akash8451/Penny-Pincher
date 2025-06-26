@@ -8,13 +8,14 @@ import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, Ch
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useSidebar } from '@/contexts/sidebar-context';
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const [isPinned, setIsPinned] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isProUnlocked] = useLocalStorage('pro-features-unlocked', false);
+  const { isExpanded, setIsPinned, setIsHovering } = useSidebar();
+  const [isPinned, setPinnedState] = useLocalStorage('sidebar-pinned', false);
 
   useEffect(() => {
     setIsClient(true);
@@ -31,11 +32,18 @@ export default function AppSidebar() {
     ...(isClient && isProUnlocked ? [{ href: '/vault', icon: Lock, label: 'Vault' }] : []),
   ];
 
-  const isExpanded = isPinned || isHovering;
-
   const handleTogglePin = () => {
-    setIsPinned(prev => !prev);
+    const newPinnedState = !isPinned;
+    setPinnedState(newPinnedState);
+    setIsPinned(newPinnedState);
   }
+
+  // Sync provider state with local storage state on mount
+  useEffect(() => {
+    if (isClient) {
+      setIsPinned(isPinned);
+    }
+  }, [isClient, isPinned, setIsPinned]);
 
   return (
     <>
