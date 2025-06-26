@@ -42,14 +42,14 @@ export default function SettingsPage() {
                     return (
                          <Button key={feature.href} asChild variant="ghost" className="h-auto w-full p-4 justify-start">
                             <Link href={feature.href} className="flex w-full flex-row items-center justify-between text-left">
-                                <div className="flex items-center gap-4">
+                                <div className="flex flex-1 items-center gap-4 min-w-0">
                                     <feature.icon className="h-6 w-6 text-primary flex-shrink-0" />
-                                    <div>
-                                        <p className="font-semibold">{feature.label}</p>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-semibold truncate">{feature.label}</p>
                                         <p className="text-sm text-muted-foreground">{feature.description}</p>
                                     </div>
                                 </div>
-                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                                <ChevronRight className="h-5 w-5 text-muted-foreground ml-4" />
                             </Link>
                         </Button>
                     );
