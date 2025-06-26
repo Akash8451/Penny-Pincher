@@ -41,18 +41,18 @@ export default function SettingsPage() {
                 {otherFeatures.map((feature) => {
                     if (feature.pro && !isProUnlocked) return null;
                     return (
-                         <Link key={feature.href} href={feature.href} passHref>
-                            <Button asChild variant="outline" className="h-auto w-full justify-between p-4 items-start text-left flex-col md:flex-row md:items-center">
-                               <div className="flex items-center gap-4">
-                                   <feature.icon className="h-6 w-6 text-primary flex-shrink-0" />
-                                   <div>
-                                       <p className="font-semibold">{feature.label}</p>
-                                       <p className="text-sm text-muted-foreground">{feature.description}</p>
-                                   </div>
+                         <Button key={feature.href} asChild variant="outline" className="h-auto w-full p-4">
+                            <Link href={feature.href} className="flex w-full flex-col items-start justify-between text-left md:flex-row md:items-center">
+                                <div className="flex items-center gap-4">
+                                    <feature.icon className="h-6 w-6 text-primary flex-shrink-0" />
+                                    <div>
+                                        <p className="font-semibold">{feature.label}</p>
+                                        <p className="text-sm text-muted-foreground">{feature.description}</p>
+                                    </div>
                                 </div>
                                 <ChevronRight className="h-5 w-5 text-muted-foreground mt-2 md:mt-0" />
-                            </Button>
-                        </Link>
+                            </Link>
+                        </Button>
                     );
                 })}
             </CardContent>
