@@ -18,7 +18,7 @@ export default function TransactionsPage() {
   return (
     <>
       <AppHeader title="All Transactions" />
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 sm:p-6">
         {isClient ? (
           <TransactionList />
         ) : (

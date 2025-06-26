@@ -2,7 +2,7 @@
 'use client';
 
 import { AppHeader } from '@/components/layout/app-header';
-import ReceiptScanner from '@/components/scan/receipt-scanner';
+import ScanImportManager from '@/components/scan/scan-import-manager';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,10 +16,10 @@ export default function ScanPage() {
 
   return (
     <>
-      <AppHeader title="Scan Receipt" />
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <AppHeader title="Scan & Import" />
+      <div className="flex-1 space-y-4 p-4 sm:p-6">
         {isClient ? (
-          <ReceiptScanner />
+          <ScanImportManager />
         ) : (
           <Card>
             <CardHeader>

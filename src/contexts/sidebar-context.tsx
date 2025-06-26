@@ -1,30 +1,29 @@
+
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface SidebarContextType {
   isExpanded: boolean;
   setIsPinned: (value: boolean) => void;
-  setIsHovering: (value: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: ReactNode }) {
-  const [isPinned, setIsPinned] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
+  const [isPinned, setIsPinned] = useLocalStorage('sidebar-pinned', false);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const isExpanded = useMemo(() => isClient && (isPinned || isHovering), [isClient, isPinned, isHovering]);
+  const isExpanded = useMemo(() => isClient && isPinned, [isClient, isPinned]);
 
   const value = {
     isExpanded,
     setIsPinned,
-    setIsHovering,
   };
 
   return (

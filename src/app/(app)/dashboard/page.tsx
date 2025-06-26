@@ -22,7 +22,7 @@ function DashboardSkeleton() {
   return (
     <>
       <AppHeader title="Dashboard" />
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 animate-pulse">
+      <div className="flex-1 space-y-4 p-4 sm:p-6 animate-pulse">
         <Skeleton className="h-[125px] w-full rounded-lg" />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
           <Skeleton className="h-[210px] rounded-lg md:col-span-1 lg:col-span-3" />
@@ -107,7 +107,7 @@ export default function DashboardPage() {
   return (
     <>
       <AppHeader title="Dashboard" />
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 sm:p-6">
         
         {/* Quick Stats Card */}
         <Card className="transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10">

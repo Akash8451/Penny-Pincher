@@ -17,7 +17,7 @@ export default function PeoplePage() {
   return (
     <>
       <AppHeader title="Manage People" />
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 sm:p-6">
         {isClient ? (
           <PeopleManager />
         ) : (

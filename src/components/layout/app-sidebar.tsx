@@ -3,8 +3,8 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
-import { LayoutDashboard, Shapes, Settings, Wallet, Users, List, ChevronLeft, ChevronRight, Lock, ScanLine, Wand2, Import } from 'lucide-react';
+import { useEffect } from 'react';
+import { LayoutDashboard, Settings, Wallet, List, ChevronLeft, ChevronRight, ScanLine } from 'lucide-react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -12,25 +12,22 @@ import { useSidebar } from '@/contexts/sidebar-context';
 
 export default function AppSidebar() {
   const pathname = usePathname();
-  const [isClient, setIsClient] = useState(false);
-  const [isProUnlocked] = useLocalStorage('pro-features-unlocked', false);
-  const { isExpanded, setIsPinned, setIsHovering } = useSidebar();
+  const { isExpanded, setIsPinned } = useSidebar();
   const [isPinned, setPinnedState] = useLocalStorage('sidebar-pinned', false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const navItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/transactions', icon: List, label: 'Transactions' },
-    { href: '/scan', icon: ScanLine, label: 'Scan Receipt' },
-    { href: '/assistant', icon: Wand2, label: 'AI Assistant' },
-    { href: '/import', icon: Import, label: 'Import' },
-    { href: '/categories', icon: Shapes, label: 'Categories' },
-    { href: '/people', icon: Users, label: 'People' },
-    ...(isClient && isProUnlocked ? [{ href: '/vault', icon: Lock, label: 'Vault' }] : []),
+    { href: '/scan', icon: ScanLine, label: 'Scan & Import' },
   ];
+  
+  const mobileNavItems = [
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/transactions', icon: List, label: 'Transactions' },
+    { href: '/scan', icon: ScanLine, label: 'Scan' },
+    { href: '/settings', icon: Settings, label: 'Settings' }
+  ];
+
 
   const handleTogglePin = () => {
     const newPinnedState = !isPinned;
@@ -40,10 +37,8 @@ export default function AppSidebar() {
 
   // Sync provider state with local storage state on mount
   useEffect(() => {
-    if (isClient) {
-      setIsPinned(isPinned);
-    }
-  }, [isClient, isPinned, setIsPinned]);
+    setIsPinned(isPinned);
+  }, [isPinned, setIsPinned]);
 
   return (
     <>
@@ -53,8 +48,6 @@ export default function AppSidebar() {
             "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-30 transition-all duration-200 ease-in-out",
             isExpanded ? "w-[220px]" : "w-[68px]"
           )}
-          onMouseEnter={() => setIsHovering(true)}
-          onMouseLeave={() => setIsHovering(false)}
         >
           <div className={cn(
             "flex h-16 items-center border-b px-4",
@@ -67,21 +60,13 @@ export default function AppSidebar() {
               </div>
             </Link>
             <Button variant="ghost" size="icon" onClick={handleTogglePin} aria-label="Toggle sidebar">
-              {isPinned ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+              {isExpanded ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
             </Button>
           </div>
           
           <nav className="flex-1 px-2 py-4 space-y-2">
             {navItems.map((item) => {
               const isActive = pathname.startsWith(item.href);
-              const linkContent = (
-                <>
-                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
-                  <item.icon className="h-5 w-5" />
-                  <span className={cn("truncate", !isExpanded && "sr-only")}>{item.label}</span>
-                </>
-              );
-
               return (
                 <Link
                   key={item.href}
@@ -94,7 +79,9 @@ export default function AppSidebar() {
                       : 'text-muted-foreground hover:bg-accent hover:text-foreground'
                   )}
                 >
-                  {linkContent}
+                  {isActive && <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"></div>}
+                  <item.icon className="h-5 w-5" />
+                  <span className={cn("truncate", !isExpanded && "sr-only")}>{item.label}</span>
                 </Link>
               )
             })}
@@ -119,14 +106,8 @@ export default function AppSidebar() {
         </aside>
 
       {/* Mobile Bottom Nav */}
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-lg border-t border-border/20 z-20 grid grid-cols-5 items-center justify-around">
-         {[
-           { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-           { href: '/transactions', icon: List, label: 'Transactions' },
-           { href: '/scan', icon: ScanLine, label: 'Scan' },
-           { href: '/import', icon: Import, label: 'Import' },
-           { href: '/settings', icon: Settings, label: 'Settings' }
-         ].map((item) => (
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 h-16 bg-card/80 backdrop-blur-lg border-t border-border/20 z-20 grid grid-cols-4 items-center justify-around">
+         {mobileNavItems.map((item) => (
             <Link
                 key={item.href}
                 href={item.href}
