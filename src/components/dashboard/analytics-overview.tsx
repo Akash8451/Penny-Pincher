@@ -13,11 +13,12 @@ import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, 
 interface AnalyticsOverviewProps {
   expenses: Expense[];
   categories: Category[];
+  onDeleteExpense: (id: string) => void;
 }
 
 type Period = 'week' | 'month' | 'year';
 
-export default function AnalyticsOverview({ expenses, categories }: AnalyticsOverviewProps) {
+export default function AnalyticsOverview({ expenses, categories, onDeleteExpense }: AnalyticsOverviewProps) {
   const [period, setPeriod] = React.useState<Period>('month');
   const formatCurrency = useCurrencyFormatter();
 
@@ -79,6 +80,7 @@ export default function AnalyticsOverview({ expenses, categories }: AnalyticsOve
             <RecentExpenses 
                 expenses={topExpenses} 
                 categories={categories}
+                onDeleteExpense={onDeleteExpense}
             />
         </div>
 
