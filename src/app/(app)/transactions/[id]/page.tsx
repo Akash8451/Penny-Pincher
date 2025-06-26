@@ -87,7 +87,7 @@ export default function TransactionDetailsPage() {
   const expense = !isLoading ? expenses.find(e => e.id === expenseId) : undefined;
   const isAnySplitSettled = expense?.splitWith?.some(s => s.settled) ?? false;
 
-  const categoryMap = new Map(categories.map(c => [c.id, c]));
+  const categoryMap = new Map(categories.map(c => [c.id, c.name]));
   const peopleMap = new Map(people.map(p => [p.id, p.name]));
   
   const othersAmount = expense?.splitWith?.reduce((sum, s) => sum + s.amount, 0) ?? 0;
@@ -241,8 +241,8 @@ export default function TransactionDetailsPage() {
             {expense.receipt && (
               <div>
                 <h3 className="text-base font-semibold mb-2">Receipt</h3>
-                <div className='flex justify-center'>
-                  <Image src={expense.receipt} alt="Receipt" width={300} height={400} className="rounded-lg border object-contain" />
+                <div className="relative mx-auto w-full max-w-sm aspect-[4/5] rounded-lg overflow-hidden border">
+                  <Image src={expense.receipt} alt="Receipt" layout="fill" objectFit="contain" className="bg-muted" />
                 </div>
               </div>
             )}
