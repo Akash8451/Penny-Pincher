@@ -34,7 +34,10 @@ interface QuickExpenseFormProps {
 }
 
 const expenseSchema = z.object({
-  amount: z.coerce.number().positive({ message: "Amount must be positive." }),
+  amount: z.preprocess(
+    (val) => (val === "" ? NaN : val), // Treat empty string as invalid for the 'positive' check
+    z.coerce.number().positive({ message: "Amount must be positive." })
+  ),
   categoryId: z.string().min(1, { message: "Please select a category." }),
   note: z.string().max(100, "Note is too long.").optional(),
   receipt: z.any().optional(),
@@ -46,7 +49,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   const formatCurrency = useCurrencyFormatter();
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
-    defaultValues: { amount: undefined, categoryId: '', note: '' },
+    defaultValues: { amount: '' as any, categoryId: '', note: '' },
   });
   const totalAmount = Number(form.watch('amount')) || 0;
   const [isAILoading, setAILoading] = useState(false);
@@ -218,12 +221,6 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                         type="number"
                         placeholder="0.00"
                         {...field}
-                        value={field.value ?? ''}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value === '' ? undefined : e.target.value
-                          )
-                        }
                       />
                     </FormControl>
                     <FormMessage />
