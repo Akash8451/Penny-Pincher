@@ -124,7 +124,7 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
               )}>
                 {message.role === 'ai' && <Sparkles className="h-5 w-5 text-primary flex-shrink-0 mt-1" />}
                 <div className={cn(
-                  "p-3 rounded-lg max-w-sm prose prose-sm dark:prose-invert",
+                  "p-3 rounded-lg max-w-sm prose prose-xs dark:prose-invert",
                   message.role === 'user' 
                     ? 'bg-primary/20' 
                     : 'bg-background/50'
