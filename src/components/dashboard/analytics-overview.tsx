@@ -64,7 +64,7 @@ export default function AnalyticsOverview({ expenses, categories, onDeleteExpens
       <CardContent className="space-y-6">
         <div>
             <span className="text-sm text-muted-foreground">{dateRangeText}</span>
-            <p className="text-4xl font-bold">{formatCurrency(total)}</p>
+            <p className="text-4xl font-bold text-destructive">{formatCurrency(total)}</p>
         </div>
 
         <Tabs defaultValue={period} onValueChange={(value) => setPeriod(value as Period)} className="w-full">

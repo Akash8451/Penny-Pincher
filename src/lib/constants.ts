@@ -16,4 +16,4 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-12', name: 'Payment Request', group: 'Income', icon: 'Receipt' },
 ];
 
-export const DEFAULT_CURRENCY = 'USD';
+export const DEFAULT_CURRENCY = 'INR';

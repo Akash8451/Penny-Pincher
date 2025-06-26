@@ -12,7 +12,7 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrency] = useLocalStorage('currency', 'USD');
+  const [currency, setCurrency] = useLocalStorage('currency', 'INR');
 
   return (
     <SettingsContext.Provider value={{ currency, setCurrency }}>

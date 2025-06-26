@@ -84,7 +84,7 @@ export default function RecentExpenses({ expenses, categories, isDashboardList =
                       </div>
                        <p className={cn(
                          "ml-4 font-semibold",
-                         expense.type === 'expense' ? 'text-card-foreground' : 'text-green-500'
+                         expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
                        )}>
                           {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
                       </p>
