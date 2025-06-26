@@ -159,54 +159,54 @@ export default function DataManagement() {
         <CardDescription>Securely back up or restore your data. All backups are encrypted.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Dialog open={isExportOpen} onOpenChange={setExportOpen}>
-            <DialogTrigger asChild>
-                <div className="flex items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-accent">
-                    <div className="flex-1 min-w-0 pr-4">
-                        <h3 className="font-medium truncate">Export Encrypted Backup</h3>
-                        <p className="text-sm text-muted-foreground">Download all your data as an encrypted file.</p>
-                    </div>
-                    <Button>
+        <div className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1 min-w-0 pr-4">
+                <h3 className="font-medium">Export Encrypted Backup</h3>
+                <p className="text-sm text-muted-foreground">Download all your data as an encrypted file.</p>
+            </div>
+            <Dialog open={isExportOpen} onOpenChange={setExportOpen}>
+                <DialogTrigger asChild>
+                    <Button className="w-full sm:w-auto">
                         <Download className="mr-2 h-4 w-4" /> Export
                     </Button>
-                </div>
-            </DialogTrigger>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>Set Backup Password</DialogTitle>
-                    <DialogDescription>
-                        This password will be required to restore your data. Keep it safe, as it cannot be recovered.
-                    </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="password-export" className="text-right">
-                        Password
-                    </Label>
-                    <Input id="password-export" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="col-span-3" />
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Set Backup Password</DialogTitle>
+                        <DialogDescription>
+                            This password will be required to restore your data. Keep it safe, as it cannot be recovered.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                        <Label htmlFor="password-export" className="text-right">
+                            Password
+                        </Label>
+                        <Input id="password-export" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="col-span-3" />
+                        </div>
                     </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
-                    <Button onClick={handleExport} disabled={!password || isExporting}>
-                        {isExporting ? (
-                            <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Encrypting...</>
-                        ) : (
-                            <><Lock className="mr-2 h-4 w-4" /> Encrypt & Export</>
-                        )}
-                    </Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                    <DialogFooter>
+                        <DialogClose asChild><Button variant="ghost">Cancel</Button></DialogClose>
+                        <Button onClick={handleExport} disabled={!password || isExporting}>
+                            {isExporting ? (
+                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Encrypting...</>
+                            ) : (
+                                <><Lock className="mr-2 h-4 w-4" /> Encrypt & Export</>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        </div>
         
-        <div className="flex items-center justify-between rounded-lg border p-4">
+        <div className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1 min-w-0 pr-4">
-            <h3 className="font-medium truncate">Import from Backup</h3>
+            <h3 className="font-medium">Import from Backup</h3>
             <p className="text-sm text-muted-foreground">
               Restore data from an encrypted backup file.
             </p>
           </div>
-            <Button asChild>
+            <Button asChild className="w-full sm:w-auto">
                 <Label className='cursor-pointer'>
                     <Upload className="mr-2 h-4 w-4" /> Select File
                     <Input type="file" className="sr-only" accept=".txt,.json" onChange={onFileSelect} />

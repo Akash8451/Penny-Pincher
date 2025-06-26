@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 function VaultSkeleton() {
@@ -41,7 +41,12 @@ export default function VaultPage() {
   if (!isClient) {
       return (
           <>
-            <AppHeader title="Vault" />
+            <AppHeader title="Vault">
+              <Button onClick={() => router.back()} variant="outline" size="icon" className="rounded-full">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back</span>
+              </Button>
+            </AppHeader>
             <div className="flex-1 space-y-4 p-4 sm:p-6">
                 <VaultSkeleton />
             </div>
@@ -52,7 +57,12 @@ export default function VaultPage() {
   if (!isProUnlocked) {
     return (
         <>
-            <AppHeader title="Access Denied" />
+            <AppHeader title="Access Denied">
+              <Button onClick={() => router.back()} variant="outline" size="icon" className="rounded-full">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back</span>
+              </Button>
+            </AppHeader>
             <div className="flex-1 p-4 sm:p-6">
                 <Card className="text-center">
                     <CardHeader>
@@ -74,7 +84,12 @@ export default function VaultPage() {
 
   return (
     <>
-      <AppHeader title="Secure Vault" />
+      <AppHeader title="Secure Vault">
+        <Button onClick={() => router.back()} variant="outline" size="icon" className="rounded-full">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+        </Button>
+      </AppHeader>
       <div className="flex-1 space-y-4 p-4 sm:p-6">
         <VaultManager />
       </div>

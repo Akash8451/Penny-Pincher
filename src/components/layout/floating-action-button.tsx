@@ -46,7 +46,7 @@ export default function FloatingActionButton() {
             "fixed bottom-20 sm:bottom-6 right-6 z-30 flex flex-col items-center gap-3",
             isHidden && "hidden"
         )}>
-             <Button asChild variant="secondary" className="h-12 w-12 rounded-full shadow-md">
+             <Button asChild variant="secondary" className="h-12 w-12 rounded-full shadow-md animate-pulse-glow">
                 <Link href="/assistant">
                     <Wand2 className="h-6 w-6 text-primary" />
                     <span className="sr-only">AI Assistant</span>

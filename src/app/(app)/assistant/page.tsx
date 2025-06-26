@@ -10,6 +10,9 @@ import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 function AssistantSkeleton() {
   return (
@@ -26,6 +29,7 @@ export default function AssistantPage() {
   const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
   const formatCurrency = useCurrencyFormatter();
+  const router = useRouter();
 
   useEffect(() => {
     setIsClient(true);
@@ -49,7 +53,12 @@ export default function AssistantPage() {
   
   return (
     <>
-      <AppHeader title="AI Assistant" />
+      <AppHeader title="AI Assistant">
+        <Button onClick={() => router.back()} variant="outline" size="icon" className="rounded-full">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="sr-only">Back</span>
+        </Button>
+      </AppHeader>
       <div className="flex-1 flex flex-col p-4 sm:p-6">
         {isClient ? (
           <AIAssistant 
