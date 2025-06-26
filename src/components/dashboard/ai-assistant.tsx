@@ -167,7 +167,7 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         disabled={isLoading}
-                        className="pl-12 pr-12"
+                        className="pl-10 pr-10 h-11"
                     />
                      <Button
                         type="button"
@@ -175,9 +175,9 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
                         size="icon"
                         onClick={toggleListening}
                         disabled={isLoading}
-                        className="absolute left-1 top-1/2 -translate-y-1/2 text-muted-foreground"
+                        className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground h-8 w-8"
                     >
-                        <Mic />
+                        <Mic className="h-4 w-4" />
                         <span className="sr-only">Use Microphone</span>
                     </Button>
                     <Button
@@ -186,11 +186,11 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
                         size="icon"
                         disabled={isLoading || !query.trim()}
                         className={cn(
-                            "absolute right-1 top-1/2 -translate-y-1/2",
+                            "absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8",
                              query.trim() ? "text-primary" : "text-muted-foreground"
                         )}
                     >
-                        <Send />
+                        <Send className="h-4 w-4" />
                         <span className="sr-only">Submit</span>
                     </Button>
                 </div>
