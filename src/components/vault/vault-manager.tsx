@@ -24,6 +24,10 @@ export default function VaultManager() {
   const [isFormOpen, setFormOpen] = useState(false);
   const { toast } = useToast();
 
+  const [isConfirmingPassword, setIsConfirmingPassword] = useState(false);
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [onConfirmPasswordSuccess, setOnConfirmPasswordSuccess] = useState<(() => void) | null>(null);
+
   const handleUnlock = () => {
     if (!password) {
       toast({ variant: 'destructive', title: 'Password required' });
@@ -70,17 +74,35 @@ export default function VaultManager() {
         return newDecrypted;
       });
     } else {
-      try {
-        const decryptedBytes = CryptoJS.AES.decrypt(note.encryptedContent, password);
-        const decryptedContent = decryptedBytes.toString(CryptoJS.enc.Utf8);
-        if (!decryptedContent) throw new Error("Decryption failed");
-        
-        setDecryptedNotes(prev => ({ ...prev, [note.id]: decryptedContent }));
-      } catch (error) {
-        toast({ variant: 'destructive', title: 'Decryption Failed', description: 'Check your password and try again.' });
-      }
+        setOnConfirmPasswordSuccess(() => () => {
+            try {
+                const decryptedBytes = CryptoJS.AES.decrypt(note.encryptedContent, password);
+                const decryptedContent = decryptedBytes.toString(CryptoJS.enc.Utf8);
+                if (!decryptedContent) throw new Error("Decryption failed");
+                
+                setDecryptedNotes(prev => ({ ...prev, [note.id]: decryptedContent }));
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Decryption Failed', description: 'Check your password and try again.' });
+            }
+        });
+        setIsConfirmingPassword(true);
     }
   };
+
+  const handlePasswordConfirmation = () => {
+    if (passwordConfirmation === password) {
+      onConfirmPasswordSuccess?.();
+      setIsConfirmingPassword(false);
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Incorrect Password',
+        description: 'Please try again.',
+      });
+    }
+    setPasswordConfirmation('');
+  };
+
 
   if (!isUnlocked) {
     return (
@@ -109,6 +131,7 @@ export default function VaultManager() {
   }
 
   return (
+    <>
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
@@ -143,13 +166,19 @@ export default function VaultManager() {
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Delete this note?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This action is permanent. The note "{note.hint}" will be deleted forever.
+                                                This action is permanent. To delete the note "{note.hint}," you will need to confirm your password.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                            <AlertDialogAction onClick={() => handleDeleteNote(note.id)} className="bg-destructive hover:bg-destructive/90">
-                                                Delete
+                                            <AlertDialogAction 
+                                                onClick={() => {
+                                                    setOnConfirmPasswordSuccess(() => () => handleDeleteNote(note.id));
+                                                    setIsConfirmingPassword(true);
+                                                }}
+                                                className="bg-destructive hover:bg-destructive/90"
+                                            >
+                                                Continue
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
@@ -188,6 +217,40 @@ export default function VaultManager() {
         </Dialog>
       </CardFooter>
     </Card>
+
+    <Dialog open={isConfirmingPassword} onOpenChange={(isOpen) => {
+        if (!isOpen) {
+            setPasswordConfirmation('');
+            setOnConfirmPasswordSuccess(null);
+        }
+        setIsConfirmingPassword(isOpen);
+    }}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Confirm Password</DialogTitle>
+                <DialogDescription>
+                    For your security, please re-enter your vault password to continue.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+                <Label htmlFor="password-confirm" className="sr-only">Password</Label>
+                <Input
+                    id="password-confirm"
+                    type="password"
+                    value={passwordConfirmation}
+                    onChange={(e) => setPasswordConfirmation(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handlePasswordConfirmation()}
+                    placeholder="Enter vault password"
+                    autoFocus
+                />
+            </div>
+            <DialogFooter>
+                <Button variant="ghost" onClick={() => setIsConfirmingPassword(false)}>Cancel</Button>
+                <Button onClick={handlePasswordConfirmation}>Confirm</Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+    </>
   );
 }
 

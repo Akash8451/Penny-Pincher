@@ -4,7 +4,7 @@
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Moon, Sun, Monitor, Contrast } from 'lucide-react';
+import { Moon, Sun, Monitor } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -43,7 +43,6 @@ export default function ThemeSettings() {
   const themeButtons = [
     { name: 'light', label: 'Light', icon: Sun },
     { name: 'dark', label: 'Dark', icon: Moon },
-    { name: 'dark-contrast', label: 'Contrast', icon: Contrast },
     { name: 'system', label: 'System', icon: Monitor },
   ] as const;
 

@@ -60,34 +60,6 @@
     --chart-4: 208 65% 60%;
     --chart-5: 204 75% 55%;
   }
-
-  .dark-contrast {
-    /* High Contrast Dark Mode */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 5%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 51 100% 50%; /* Vibrant Yellow */
-    --primary-foreground: 0 0% 5%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 60%;
-    --accent: 51 100% 15%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 100% 50%; /* Bright Red */
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 30%;
-    --input: 0 0% 10%;
-    --ring: 51 100% 50%;
-    --chart-1: 51 100% 50%;
-    --chart-2: 180 100% 50%;
-    --chart-3: 300 100% 50%;
-    --chart-4: 240 100% 60%;
-    --chart-5: 120 100% 50%;
-  }
 }
 
 @layer base {

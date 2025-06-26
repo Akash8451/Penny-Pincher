@@ -5,18 +5,7 @@ import { useSettings } from '@/contexts/settings-context';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Languages } from 'lucide-react';
-
-const languages = [
-  { value: 'en-US', label: 'English (United States)' },
-  { value: 'en-GB', label: 'English (United Kingdom)' },
-  { value: 'es-ES', label: 'Español (España)' },
-  { value: 'fr-FR', label: 'Français (France)' },
-  { value: 'de-DE', label: 'Deutsch (Deutschland)' },
-  { value: 'ja-JP', label: '日本語 (日本)' },
-  { value: 'pt-BR', label: 'Português (Brasil)' },
-  { value: 'hi-IN', label: 'हिन्दी (भारत)' },
-];
+import { Gem } from 'lucide-react';
 
 const currencies = [
   { value: 'AED', label: 'AED - UAE Dirham' },
@@ -179,35 +168,20 @@ const currencies = [
 ];
 
 export default function RegionalSettings() {
-  const { language, setLanguage, currency, setCurrency } = useSettings();
+  const { currency, setCurrency } = useSettings();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Languages className="text-primary" />
-          Language & Currency
+          <Gem className="text-primary" />
+          Currency
         </CardTitle>
         <CardDescription>
-          Choose your preferred language and currency for the app.
+          Choose your preferred currency for the app.
         </CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="language-select">Language</Label>
-          <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger id="language-select">
-              <SelectValue placeholder="Select language" />
-            </SelectTrigger>
-            <SelectContent>
-              {languages.map(lang => (
-                <SelectItem key={lang.value} value={lang.value}>
-                  {lang.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      <CardContent className="grid gap-6">
         <div className="space-y-2">
           <Label htmlFor="currency-select">Currency</Label>
           <Select value={currency} onValueChange={setCurrency}>

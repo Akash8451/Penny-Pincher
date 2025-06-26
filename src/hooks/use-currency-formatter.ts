@@ -5,12 +5,12 @@ import { useCallback } from 'react';
 import { useSettings } from '@/contexts/settings-context';
 
 export function useCurrencyFormatter() {
-  const { language, currency } = useSettings();
+  const { currency } = useSettings();
 
   const formatter = useCallback(
     (amount: number) => {
       try {
-        return new Intl.NumberFormat(language, {
+        return new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: currency,
         }).format(amount);
@@ -23,7 +23,7 @@ export function useCurrencyFormatter() {
         }).format(amount);
       }
     },
-    [language, currency]
+    [currency]
   );
 
   return formatter;

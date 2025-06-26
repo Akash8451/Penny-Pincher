@@ -5,8 +5,6 @@ import React, { createContext, useContext, ReactNode } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface SettingsContextType {
-  language: string;
-  setLanguage: (language: string) => void;
   currency: string;
   setCurrency: (currency: string) => void;
 }
@@ -14,11 +12,10 @@ interface SettingsContextType {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useLocalStorage('language', 'en-US');
   const [currency, setCurrency] = useLocalStorage('currency', 'USD');
 
   return (
-    <SettingsContext.Provider value={{ language, setLanguage, currency, setCurrency }}>
+    <SettingsContext.Provider value={{ currency, setCurrency }}>
       {children}
     </SettingsContext.Provider>
   );
