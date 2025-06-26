@@ -11,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Paperclip, PlusCircle, Users, Mic, MicOff, Loader2 } from 'lucide-react';
+import { Paperclip, PlusCircle, Users, Mic, Loader2, X, ZoomIn } from 'lucide-react';
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -19,11 +19,10 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
-import { cn } from '@/lib/utils';
 import { SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
-
+import Image from 'next/image';
 
 interface QuickExpenseFormProps {
   categories: Category[];
@@ -48,12 +47,13 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   const formatCurrency = useCurrencyFormatter();
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
-    defaultValues: { amount: '' as any, categoryId: '', note: '' },
+    defaultValues: { amount: '', categoryId: '', note: '' },
   });
   const totalAmount = Number(form.watch('amount')) || 0;
   const [isAILoading, setAILoading] = useState(false);
 
   const [fileName, setFileName] = React.useState('');
+  const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
   const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
@@ -98,6 +98,12 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     }, {} as Record<string, Category[]>);
   }, [categories]);
 
+  const handleClearReceipt = () => {
+    form.setValue('receipt', null);
+    setFileName('');
+    setReceiptPreview(null);
+  };
+  
   const onSubmit = (values: z.infer<typeof expenseSchema>) => {
     let splitWithData: Split[] | undefined = undefined;
 
@@ -143,6 +149,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
       onAddExpense(finalExpenseData);
       form.reset();
       setFileName('');
+      setReceiptPreview(null);
       setSelectedPeople([]);
       setCustomSplits({});
       setSplitGroupName('');
@@ -272,32 +279,59 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
               <FormField
                   control={form.control}
                   name="receipt"
-                  render={({ field: { value, onChange, ...fieldProps } }) => (
+                  render={({ field: { onChange, ...fieldProps } }) => (
                     <FormItem>
                       <FormLabel>Receipt (Optional)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                            <Button asChild variant="outline" className="w-full justify-start text-muted-foreground font-normal">
-                                <Label>
-                                  <Paperclip className="mr-2 h-4 w-4" />
-                                  {fileName || "Attach a file"}
-                                </Label>
-                            </Button>
-                            <Input 
-                                {...fieldProps}
-                                type="file" 
-                                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" 
-                                accept="image/*"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        setFileName(file.name);
-                                        onChange(e.target.files);
-                                    }
-                                }}
-                            />
-                        </div>
-                      </FormControl>
+                        <FormControl>
+                        {!receiptPreview ? (
+                            <div className="relative">
+                                <Button asChild variant="outline" className="w-full justify-start text-muted-foreground font-normal">
+                                    <Label>
+                                    <Paperclip className="mr-2 h-4 w-4" />
+                                    {fileName || "Attach a file"}
+                                    </Label>
+                                </Button>
+                                <Input 
+                                    {...fieldProps}
+                                    type="file" 
+                                    className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" 
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files?.[0];
+                                        if (file) {
+                                            setFileName(file.name);
+                                            onChange(e.target.files);
+
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setReceiptPreview(reader.result as string);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
+                            </div>
+                        ) : (
+                            <div className="mt-2 space-y-2">
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <button type="button" className="relative w-full h-32 rounded-md overflow-hidden border cursor-pointer group">
+                                            <Image src={receiptPreview} alt="Receipt preview" layout="fill" objectFit="cover" className="group-hover:opacity-75 transition-opacity"/>
+                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <ZoomIn className="h-8 w-8 text-white" />
+                                            </div>
+                                        </button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl h-[90vh] p-2 bg-transparent border-none">
+                                        <Image src={receiptPreview} alt="Receipt full view" layout="fill" objectFit="contain" />
+                                    </DialogContent>
+                                </Dialog>
+                                <Button size="sm" variant="outline" className="w-full" onClick={handleClearReceipt}>
+                                    <X className="mr-2 h-4 w-4" /> Clear Receipt
+                                </Button>
+                            </div>
+                        )}
+                        </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
