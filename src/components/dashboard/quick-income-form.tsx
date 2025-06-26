@@ -3,8 +3,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { Category, Expense } from '@/lib/types';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -87,7 +86,7 @@ export default function QuickIncomeForm({ categories, onAddIncome, onSuccess }: 
                       <SelectContent>
                         {Object.entries(categoryGroups).map(([group, cats]) => (
                           <SelectGroup key={group}>
-                            <Label className='px-2 text-xs text-muted-foreground'>{group}</Label>
+                            <SelectLabel>{group}</SelectLabel>
                             {cats.map((cat) => (
                               <SelectItem key={cat.id} value={cat.id}>
                                 {cat.name}

@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Camera, Upload, ScanLine, Loader2, Sparkles, X, ListPlus, AlertTriangle, FileUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -278,7 +278,7 @@ function ReceiptScannerInternal() {
                         <SelectContent>
                           {Object.entries(categoryGroups).map(([group, cats]) => (
                             <SelectGroup key={group}>
-                              <Label className='px-2 text-xs text-muted-foreground'>{group}</Label>
+                              <SelectLabel>{group}</SelectLabel>
                               {cats.map((cat) => (
                                 <SelectItem key={cat.id} value={cat.id}>
                                   {cat.name}
@@ -594,7 +594,7 @@ function StatementImporterInternal() {
                         <SelectContent>
                           {Object.entries(categoryGroups).map(([group, cats]) => (
                             <SelectGroup key={group}>
-                              <Label className='px-2 text-xs text-muted-foreground'>{group}</Label>
+                              <SelectLabel>{group}</SelectLabel>
                               {cats.map((cat) => (
                                 <SelectItem key={cat.id} value={cat.id}>
                                   {cat.name}
