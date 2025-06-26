@@ -279,7 +279,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
               <FormField
                   control={form.control}
                   name="receipt"
-                  render={({ field: { onChange, ...fieldProps } }) => (
+                  render={({ field: { value, onChange, ...fieldProps } }) => (
                     <FormItem>
                       <FormLabel>Receipt (Optional)</FormLabel>
                         <FormControl>
@@ -291,7 +291,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                                     {fileName || "Attach a file"}
                                     </Label>
                                 </Button>
-                                <Input 
+                                <Input
                                     {...fieldProps}
                                     type="file" 
                                     className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" 
