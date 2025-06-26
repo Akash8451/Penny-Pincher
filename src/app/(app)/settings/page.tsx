@@ -36,12 +36,12 @@ export default function SettingsPage() {
                 <CardTitle>App Features</CardTitle>
                 <CardDescription>Navigate to other app features and tools.</CardDescription>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="grid grid-cols-1 gap-1">
                 {otherFeatures.map((feature) => {
                     if (feature.pro && !isProUnlocked) return null;
                     return (
-                         <Button key={feature.href} asChild variant="outline" className="h-auto w-full p-4">
-                            <Link href={feature.href} className="flex w-full flex-col items-start justify-between text-left lg:flex-row lg:items-center">
+                         <Button key={feature.href} asChild variant="ghost" className="h-auto w-full p-4 justify-start">
+                            <Link href={feature.href} className="flex w-full flex-row items-center justify-between text-left">
                                 <div className="flex items-center gap-4">
                                     <feature.icon className="h-6 w-6 text-primary flex-shrink-0" />
                                     <div>
@@ -49,7 +49,7 @@ export default function SettingsPage() {
                                         <p className="text-sm text-muted-foreground">{feature.description}</p>
                                     </div>
                                 </div>
-                                <ChevronRight className="h-5 w-5 text-muted-foreground mt-2 lg:mt-0" />
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
                             </Link>
                         </Button>
                     );

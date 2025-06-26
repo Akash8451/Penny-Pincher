@@ -3,11 +3,13 @@ import AppSidebar from '@/components/layout/app-sidebar';
 import FloatingActionButton from '@/components/layout/floating-action-button';
 import { cn } from '@/lib/utils';
 import { SidebarProvider } from '@/contexts/sidebar-context';
+import { useSidebar } from '@/contexts/sidebar-context';
 
 function MainContent({ children }: { children: React.ReactNode }) {
   return (
     <main className={cn(
-      "flex-1 flex flex-col pb-20 sm:pb-0"
+      "flex-1 flex flex-col pb-20 sm:pb-0",
+      "sm:ml-[68px]" // Static margin for collapsed sidebar on desktop
     )}>
       {children}
     </main>
