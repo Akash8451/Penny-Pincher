@@ -9,7 +9,7 @@ function MainContent({ children }: { children: React.ReactNode }) {
   const { isExpanded } = useSidebar();
   return (
     <main className={cn(
-      "flex-1 flex flex-col pb-20 sm:pb-0 min-w-0 overflow-x-hidden transition-all duration-200 ease-in-out",
+      "flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out h-screen overflow-y-auto pb-20 sm:pb-0",
       isExpanded ? "sm:ml-[220px]" : "sm:ml-[68px]"
     )}>
       {children}
