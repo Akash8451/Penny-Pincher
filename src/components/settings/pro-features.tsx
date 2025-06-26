@@ -64,7 +64,7 @@ export default function ProFeatures() {
           </div>
         ) : (
           <div className="flex flex-col sm:flex-row items-end gap-2">
-            <div className="w-full">
+            <div className="flex-1">
               <Label htmlFor="pin-input">Enter PIN</Label>
               <Input
                 id="pin-input"
