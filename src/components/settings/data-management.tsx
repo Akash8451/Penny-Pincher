@@ -162,7 +162,7 @@ export default function DataManagement() {
         <Dialog open={isExportOpen} onOpenChange={setExportOpen}>
             <DialogTrigger asChild>
                 <div className="flex items-center justify-between rounded-lg border p-4 cursor-pointer hover:bg-accent">
-                    <div>
+                    <div className="flex-1 min-w-0 pr-4">
                         <h3 className="font-medium">Export Encrypted Backup</h3>
                         <p className="text-sm text-muted-foreground">Download all your data as an encrypted file.</p>
                     </div>
@@ -200,14 +200,14 @@ export default function DataManagement() {
         </Dialog>
         
         <div className="flex items-center justify-between rounded-lg border p-4">
-          <div>
+          <div className="flex-1 min-w-0 pr-4">
             <h3 className="font-medium">Import from Backup</h3>
             <p className="text-sm text-muted-foreground">
               Restore data from an encrypted backup file.
             </p>
           </div>
             <Button asChild>
-                <Label>
+                <Label className='cursor-pointer'>
                     <Upload className="mr-2 h-4 w-4" /> Select File
                     <Input type="file" className="sr-only" accept=".txt,.json" onChange={onFileSelect} />
                 </Label>
