@@ -178,7 +178,7 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
                         onChange={(e) => setQuery(e.target.value)}
                         disabled={isLoading}
                     />
-                    <Button type="submit" disabled={isLoading || !query.trim()}>
+                    <Button type="submit" size="icon" disabled={isLoading || !query.trim()}>
                         <Send />
                         <span className="sr-only">Submit</span>
                     </Button>
