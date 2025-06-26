@@ -156,6 +156,7 @@ export default function TransactionDetailsPage() {
       note: `Settlement from ${personName} for "${expense.note || category?.name}"`,
       date: new Date().toISOString(),
       relatedExpenseId: expense.id,
+      relatedPersonId: personId,
     };
 
     // 2. Update original expense to mark as settled

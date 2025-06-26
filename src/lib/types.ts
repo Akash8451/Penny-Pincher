@@ -15,6 +15,7 @@ export interface Expense {
   receipt?: string; // data URL for the image
   splitWith?: Split[];
   relatedExpenseId?: string; // To link income to original expense
+  relatedPersonId?: string; // To link income to specific person in a split
 }
 
 export interface Category {

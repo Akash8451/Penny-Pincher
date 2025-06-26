@@ -135,25 +135,28 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
       amount: values.amount,
       note: splitGroupName || values.note || '',
       splitWith: splitWithData,
-    }
+    };
+    
+    const finishSubmit = (finalExpenseData: Omit<Expense, 'id' | 'date'>) => {
+      onAddExpense(finalExpenseData);
+      form.reset();
+      setFileName('');
+      setSelectedPeople([]);
+      setCustomSplits({});
+      setSplitGroupName('');
+      onSuccess();
+    };
 
     if (values.receipt && values.receipt.length > 0) {
       const file = values.receipt[0];
       const reader = new FileReader();
       reader.onload = (e) => {
-        onAddExpense({ ...expenseData, receipt: e.target?.result as string });
+        finishSubmit({ ...expenseData, receipt: e.target?.result as string });
       };
       reader.readAsDataURL(file);
     } else {
-      onAddExpense(expenseData);
+      finishSubmit(expenseData);
     }
-    
-    form.reset();
-    setFileName('');
-    setSelectedPeople([]);
-    setCustomSplits({});
-    setSplitGroupName('');
-    onSuccess();
   };
   
   const togglePersonSelection = (personId: string) => {

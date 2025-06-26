@@ -81,7 +81,32 @@ export default function DashboardPage() {
   }, [expenses]);
 
   const handleDeleteExpense = (expenseId: string) => {
-    setExpenses(prev => prev.filter(exp => exp.id !== expenseId));
+    setExpenses(prev => {
+      const expenseToDelete = prev.find(e => e.id === expenseId);
+
+      // Case 1: Deleting a settlement income. Un-settle the original expense.
+      if (expenseToDelete?.type === 'income' && expenseToDelete.relatedExpenseId && expenseToDelete.relatedPersonId) {
+        const updatedExpenses = prev.map(e => {
+          if (e.id === expenseToDelete.relatedExpenseId) {
+            return {
+              ...e,
+              splitWith: e.splitWith?.map(s => 
+                s.personId === expenseToDelete.relatedPersonId ? { ...s, settled: false } : s
+              ),
+            };
+          }
+          return e;
+        });
+        return updatedExpenses.filter(e => e.id !== expenseId);
+      }
+
+      // Case 2: Deleting an original expense. Also delete related income settlements.
+      const relatedIncomeIds = prev
+        .filter(e => e.type === 'income' && e.relatedExpenseId === expenseId)
+        .map(e => e.id);
+      
+      return prev.filter(e => e.id !== expenseId && !relatedIncomeIds.includes(e.id));
+    });
   };
   
   const handleLogExpense = (details: { amount: number, categoryId: string, note: string }) => {
