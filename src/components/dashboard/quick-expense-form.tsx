@@ -426,7 +426,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                         </Button>
                     ) : (
                       <div className="flex items-center gap-2">
-                          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                          <Button type="submit" className="flex-1" disabled={form.formState.isSubmitting}>
                               <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
                           </Button>
                           <Button 

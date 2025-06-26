@@ -58,7 +58,7 @@ export default function ThemeSettings() {
                 <h3 className="font-medium">Theme</h3>
                 <p className="text-sm text-muted-foreground">Select a theme or sync with your system.</p>
             </div>
-            <div className="flex shrink-0 items-center gap-2 rounded-md bg-muted p-1">
+            <div className="flex flex-wrap shrink-0 items-center gap-2 rounded-md bg-muted p-1">
                 {themeButtons.map((btn) => {
                     const Icon = btn.icon;
                     return (
