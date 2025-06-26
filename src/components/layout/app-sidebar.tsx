@@ -3,9 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect } from 'react';
 import { LayoutDashboard, Settings, Wallet, List, ChevronLeft, ChevronRight, ScanLine } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/contexts/sidebar-context';
@@ -13,7 +11,6 @@ import { useSidebar } from '@/contexts/sidebar-context';
 export default function AppSidebar() {
   const pathname = usePathname();
   const { isExpanded, setIsPinned } = useSidebar();
-  const [isPinned, setPinnedState] = useLocalStorage('sidebar-pinned', false);
 
   const navItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -30,22 +27,15 @@ export default function AppSidebar() {
 
 
   const handleTogglePin = () => {
-    const newPinnedState = !isPinned;
-    setPinnedState(newPinnedState);
-    setIsPinned(newPinnedState);
+    setIsPinned(!isExpanded);
   }
-
-  // Sync provider state with local storage state on mount
-  useEffect(() => {
-    setIsPinned(isPinned);
-  }, [isPinned, setIsPinned]);
 
   return (
     <>
       {/* Desktop Sidebar */}
         <aside 
           className={cn(
-            "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-30 transition-all duration-200 ease-in-out",
+            "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-40 transition-all duration-200 ease-in-out",
             isExpanded ? "w-[220px]" : "w-[68px]"
           )}
         >
