@@ -147,18 +147,14 @@ export default function DashboardPage() {
         </Card>
 
         {/* Savings and AI Section */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="md:col-span-1 lg:col-span-3">
-                <SavingsGoal expenses={expenses} />
-            </div>
-             <div className="md:col-span-1 lg:col-span-4">
-                <AIAssistant 
-                    expenses={expenses} 
-                    categories={categories} 
-                    people={people}
-                    onLogExpense={handleLogExpense}
-                />
-            </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <SavingsGoal expenses={expenses} />
+            <AIAssistant 
+                expenses={expenses} 
+                categories={categories} 
+                people={people}
+                onLogExpense={handleLogExpense}
+            />
         </div>
 
         {/* Analytics Section */}

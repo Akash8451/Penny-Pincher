@@ -130,7 +130,7 @@ export default function AppSidebar() {
                 )}
                 >
                 <item.icon className="h-5 w-5" />
-                <span className="text-xs font-medium text-center">{item.label}</span>
+                <span className="text-xs font-medium text-center truncate">{item.label}</span>
             </Link>
         ))}
       </nav>

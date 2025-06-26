@@ -131,29 +131,33 @@ export default function TransactionList() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <CardTitle>History</CardTitle>
-            <div className="flex flex-wrap items-center gap-2">
-                <div className="relative flex-grow">
+        <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+                <CardTitle>History</CardTitle>
+                <div className="flex items-center gap-2">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm"><FileDown className="mr-2 h-4 w-4" /> Export</Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent>
+                        <DropdownMenuItem onClick={handleExportPDF}>Export as PDF</DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleExportCSV}>Export as CSV</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button variant="ghost" size="sm" onClick={() => { setDateRange(undefined); setSearchTerm(''); }}>Reset</Button>
+                </div>
+            </div>
+            <div className="flex flex-col md:flex-row items-center gap-2">
+                <div className="relative w-full flex-grow">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by note or category..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full min-w-[200px] pl-10"
+                    className="w-full pl-10"
                   />
                 </div>
                 <DateRangePicker date={dateRange} onDateChange={setDateRange} />
-                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline"><FileDown className="mr-2 h-4 w-4" /> Export</Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={handleExportPDF}>Export as PDF</DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportCSV}>Export as CSV</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button variant="ghost" onClick={() => { setDateRange(undefined); setSearchTerm(''); }}>Reset</Button>
             </div>
         </div>
       </CardHeader>
