@@ -2,11 +2,11 @@
 'use client';
 
 import { useTheme } from 'next-themes';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Moon, Sun, Monitor } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function ThemeSettings() {
   const { setTheme, theme } = useTheme();
@@ -29,11 +29,7 @@ export default function ThemeSettings() {
                         <h3 className="font-medium">Theme</h3>
                         <p className="text-sm text-muted-foreground">Select a light or dark theme.</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Skeleton className="h-10 w-24" />
-                        <Skeleton className="h-10 w-24" />
-                        <Skeleton className="h-10 w-24" />
-                    </div>
+                    <Skeleton className="h-10 w-32" />
                 </div>
             </CardContent>
         </Card>
@@ -58,22 +54,21 @@ export default function ThemeSettings() {
                 <h3 className="font-medium">Theme</h3>
                 <p className="text-sm text-muted-foreground">Select a theme or sync with your system.</p>
             </div>
-            <div className="flex flex-wrap shrink-0 items-center gap-2 rounded-md bg-muted p-1">
-                {themeButtons.map((btn) => {
-                    const Icon = btn.icon;
-                    return (
-                        <Button
-                            key={btn.name}
-                            variant={theme === btn.name ? 'default' : 'ghost'}
-                            size="sm"
-                            onClick={() => setTheme(btn.name)}
-                        >
-                            <Icon className="h-4 w-4" />
-                            <span className='ml-2'>{btn.label}</span>
-                        </Button>
-                    );
-                })}
-            </div>
+            <Select value={theme} onValueChange={setTheme}>
+              <SelectTrigger className="w-full md:w-[180px]">
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                {themeButtons.map((btn) => (
+                  <SelectItem key={btn.name} value={btn.name}>
+                    <div className="flex items-center gap-2">
+                      <btn.icon className="h-4 w-4" />
+                      <span>{btn.label}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
         </div>
       </CardContent>
     </Card>
