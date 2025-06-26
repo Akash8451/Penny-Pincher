@@ -1,14 +1,14 @@
-
 'use client'
 
 import * as React from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import type { Category, Expense } from '@/lib/types'
 import SpendingTrendLineChart from './spending-trend-line-chart'
 import RecentExpenses from './recent-expenses'
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter'
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, isWithinInterval } from 'date-fns'
+import ExpensesByCategoryChart from './expenses-by-category-chart'
 
 interface AnalyticsOverviewProps {
   expenses: Expense[];
@@ -22,7 +22,7 @@ export default function AnalyticsOverview({ expenses, categories, onDeleteExpens
   const [period, setPeriod] = React.useState<Period>('month');
   const formatCurrency = useCurrencyFormatter();
 
-  const { total, dateRangeText, topExpenses } = React.useMemo(() => {
+  const { total, dateRangeText, periodExpenses } = React.useMemo(() => {
     const expenseOnly = expenses.filter(e => e.type === 'expense');
     const today = new Date();
     let start, end;
@@ -44,15 +44,17 @@ export default function AnalyticsOverview({ expenses, categories, onDeleteExpens
 
     const filtered = expenseOnly.filter(e => isWithinInterval(new Date(e.date), { start, end }));
     const currentTotal = filtered.reduce((sum, e) => sum + e.amount, 0);
-
-    const sortedExpenses = [...filtered].sort((a,b) => b.amount - a.amount);
     
     return { 
       total: currentTotal,
       dateRangeText: dateText,
-      topExpenses: sortedExpenses.slice(0, 3),
+      periodExpenses: filtered,
     };
   }, [expenses, period]);
+
+  const topExpenses = React.useMemo(() => {
+    return [...periodExpenses].sort((a,b) => b.amount - a.amount).slice(0, 3);
+  }, [periodExpenses]);
 
   return (
     <Card className="col-span-full">
@@ -73,16 +75,26 @@ export default function AnalyticsOverview({ expenses, categories, onDeleteExpens
             </TabsList>
         </Tabs>
         
-        <SpendingTrendLineChart expenses={expenses} period={period} />
-        
-        <div>
-            <h3 className="text-lg font-semibold mb-2">Top Spending this {period}</h3>
-            <RecentExpenses 
-                expenses={topExpenses} 
-                categories={categories}
-                onDeleteExpense={onDeleteExpense}
-            />
-        </div>
+        <Tabs defaultValue="trend" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="trend">Spending Trend</TabsTrigger>
+            <TabsTrigger value="category">By Category</TabsTrigger>
+          </TabsList>
+          <TabsContent value="trend" className="space-y-4 pt-4">
+            <SpendingTrendLineChart expenses={periodExpenses} period={period} />
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Top Spending</h3>
+              <RecentExpenses 
+                  expenses={topExpenses} 
+                  categories={categories}
+                  onDeleteExpense={onDeleteExpense}
+              />
+            </div>
+          </TabsContent>
+          <TabsContent value="category">
+            <ExpensesByCategoryChart expenses={periodExpenses} categories={categories} />
+          </TabsContent>
+        </Tabs>
 
       </CardContent>
     </Card>
