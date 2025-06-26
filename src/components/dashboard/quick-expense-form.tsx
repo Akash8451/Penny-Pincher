@@ -143,26 +143,23 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
 
   const handleSplitEqually = () => {
     if (totalAmount <= 0 || selectedPeople.length === 0) return;
-    const numberOfParticipants = selectedPeople.length + 1;
-    const amountPerPerson = totalAmount / numberOfParticipants;
+    
+    const numberOfParticipants = selectedPeople.length + 1; // Including the user
+    const totalInCents = Math.round(totalAmount * 100);
+    const shareInCents = Math.floor(totalInCents / numberOfParticipants);
+    let remainder = totalInCents % numberOfParticipants;
 
     const newSplits: Record<string, string> = {};
-    let totalAssignedToOthers = 0;
-
-    for (let i = 0; i < selectedPeople.length - 1; i++) {
-        const personId = selectedPeople[i];
-        const roundedAmount = parseFloat(amountPerPerson.toFixed(2));
-        newSplits[personId] = roundedAmount.toString();
-        totalAssignedToOthers += roundedAmount;
-    }
-
-    if (selectedPeople.length > 0) {
-        const lastPersonId = selectedPeople[selectedPeople.length - 1];
-        const myShare = parseFloat(amountPerPerson.toFixed(2));
-        const lastPersonAmount = totalAmount - myShare - totalAssignedToOthers;
-        newSplits[lastPersonId] = lastPersonAmount.toFixed(2);
-    }
     
+    selectedPeople.forEach(personId => {
+        let personShare = shareInCents;
+        if (remainder > 0) {
+            personShare++;
+            remainder--;
+        }
+        newSplits[personId] = (personShare / 100).toFixed(2);
+    });
+
     setCustomSplits(newSplits);
   }
   

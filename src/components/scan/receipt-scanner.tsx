@@ -50,6 +50,8 @@ function ReceiptScannerInternal() {
   const [selectedItems, setSelectedItems] = useState<Record<number, boolean>>({});
   const [itemCategories, setItemCategories] = useState<Record<number, string>>({});
 
+  const otherCategory = useMemo(() => categories.find(c => c.name.toLowerCase() === 'other'), [categories]);
+
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
       (acc[category.group] = acc[category.group] || []).push(category);
@@ -160,7 +162,7 @@ function ReceiptScannerInternal() {
         id: `exp-${new Date().getTime()}-${index}`,
         type: 'expense',
         amount: item.price,
-        categoryId: categoryId || 'cat-11', // Default to 'Other'
+        categoryId: categoryId || otherCategory?.id || 'cat-11', // Default to 'Other'
         note: item.description,
         date: new Date().toISOString(),
         receipt: imageSrc || undefined,
@@ -379,6 +381,8 @@ function StatementImporterInternal() {
   const [, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
   const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
 
+  const otherCategory = useMemo(() => categories.find(c => c.name.toLowerCase() === 'other'), [categories]);
+
   const categoryGroups = useMemo(() => {
     return categories.reduce((acc, category) => {
       (acc[category.group] = acc[category.group] || []).push(category);
@@ -484,7 +488,7 @@ function StatementImporterInternal() {
         id: `exp-${new Date().getTime()}-${index}`,
         type: item.type,
         amount: item.amount,
-        categoryId: categoryId || 'cat-11',
+        categoryId: categoryId || otherCategory?.id || 'cat-11',
         note: item.description,
         date: transactionDate,
       });

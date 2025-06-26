@@ -72,7 +72,8 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
         const result = await askAssistant({ query: queryToSubmit, expenses, categories, people });
         
         if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(result.answer);
+            const spokenText = result.answer.replace(/[*_`~#]/g, ''); // Remove markdown for cleaner speech
+            const utterance = new SpeechSynthesisUtterance(spokenText);
             speechSynthesis.speak(utterance);
         }
         
