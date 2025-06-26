@@ -221,6 +221,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                         type="number"
                         placeholder="0.00"
                         {...field}
+                        value={field.value ?? ''}
                       />
                     </FormControl>
                     <FormMessage />
