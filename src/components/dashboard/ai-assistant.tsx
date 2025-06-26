@@ -71,7 +71,7 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
     try {
         const result = await askAssistant({ query: queryToSubmit, expenses, categories, people });
         
-        if ('speechSynthesis' in window) {
+        if ('speechSynthesis' in window && window.speechSynthesis.speaking === false) {
             const spokenText = result.answer.replace(/[*_`~#]/g, ''); // Remove markdown for cleaner speech
             const utterance = new SpeechSynthesisUtterance(spokenText);
             speechSynthesis.speak(utterance);
@@ -147,9 +147,9 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
         </ScrollArea>
       </CardContent>
       <CardFooter>
-        <form 
-            onSubmit={(e) => { e.preventDefault(); handleAsk(); }} 
-            className="flex w-full items-center gap-2"
+        <form
+            onSubmit={(e) => { e.preventDefault(); handleAsk(); }}
+            className="w-full"
         >
             {isListening ? (
                 <Button
@@ -161,28 +161,39 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
                     <Mic className="mr-2 h-4 w-4" /> Listening... Tap to stop
                 </Button>
             ) : (
-                <>
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={toggleListening}
-                        disabled={isLoading}
-                    >
-                        <Mic />
-                        <span className="sr-only">Use Microphone</span>
-                    </Button>
-                    <Input 
+                <div className="relative flex w-full items-center">
+                    <Input
                         placeholder='Ask a question or log an expense...'
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         disabled={isLoading}
+                        className="pl-12 pr-12"
                     />
-                    <Button type="submit" size="icon" disabled={isLoading || !query.trim()}>
+                     <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={toggleListening}
+                        disabled={isLoading}
+                        className="absolute left-1 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    >
+                        <Mic />
+                        <span className="sr-only">Use Microphone</span>
+                    </Button>
+                    <Button
+                        type="submit"
+                        variant="ghost"
+                        size="icon"
+                        disabled={isLoading || !query.trim()}
+                        className={cn(
+                            "absolute right-1 top-1/2 -translate-y-1/2",
+                             query.trim() ? "text-primary" : "text-muted-foreground"
+                        )}
+                    >
                         <Send />
                         <span className="sr-only">Submit</span>
                     </Button>
-                </>
+                </div>
             )}
         </form>
       </CardFooter>
