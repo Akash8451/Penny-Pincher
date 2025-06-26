@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -273,7 +272,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
               <FormField
                   control={form.control}
                   name="receipt"
-                  render={({ field: { onChange, ...fieldProps } }) => (
+                  render={({ field: { value, onChange, ...fieldProps } }) => (
                     <FormItem>
                       <FormLabel>Receipt (Optional)</FormLabel>
                       <FormControl>
