@@ -10,8 +10,10 @@ export default function SettingsPage() {
     <>
       <AppHeader title="Settings" />
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <ThemeSettings />
-        <RegionalSettings />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <ThemeSettings />
+          <RegionalSettings />
+        </div>
         <DataManagement />
         <ProFeatures />
       </div>

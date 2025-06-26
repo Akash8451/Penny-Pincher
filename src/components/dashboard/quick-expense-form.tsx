@@ -405,20 +405,40 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                   </div>
                 )}
                 
-                <div className="flex items-center gap-2 pt-4">
-                    <Button type="submit" className="w-full" disabled={form.formState.isSubmitting || isAILoading || isListening}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
-                    </Button>
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="icon" 
-                        onClick={toggleListening}
-                        disabled={isAILoading}
-                        className={cn(isListening && "bg-destructive text-destructive-foreground")}
-                    >
-                        {isAILoading ? <Loader2 className="animate-spin" /> : isListening ? <MicOff /> : <Mic />}
-                    </Button>
+                <div className="pt-4">
+                    {isListening || isAILoading ? (
+                         <Button
+                            type="button"
+                            variant="destructive"
+                            onClick={toggleListening}
+                            className="w-full animate-pulse"
+                            disabled={isAILoading}
+                        >
+                            {isAILoading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Processing...
+                                </>
+                            ) : (
+                                <>
+                                    <Mic className="mr-2 h-4 w-4" /> Listening... Tap to stop
+                                </>
+                            )}
+                        </Button>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                          <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
+                              <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+                          </Button>
+                          <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="icon" 
+                              onClick={toggleListening}
+                          >
+                              <Mic />
+                          </Button>
+                      </div>
+                    )}
                 </div>
             </form>
           </Form>
