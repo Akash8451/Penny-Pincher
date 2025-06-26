@@ -20,6 +20,12 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 
 function TransactionDetailsSkeleton() {
@@ -89,6 +95,8 @@ export default function TransactionDetailsPage() {
   
   const othersSplitTotal = Object.values(editableSplits).reduce((sum, amount) => sum + Number(amount || 0), 0);
   const myEditedShare = expense ? expense.amount - othersSplitTotal : 0;
+  const isSplitInvalid = myEditedShare < 0;
+
 
   const handleEditClick = () => {
     if (!expense?.splitWith) return;
@@ -106,7 +114,7 @@ export default function TransactionDetailsPage() {
   };
 
   const handleSaveEdit = () => {
-    if (!expense) return;
+    if (!expense || isSplitInvalid) return;
 
     const newTotalForOthers = Object.values(editableSplits).reduce((sum, amount) => sum + Number(amount || 0), 0);
 
@@ -293,7 +301,22 @@ export default function TransactionDetailsPage() {
                         </div>
                         <div className="flex justify-end gap-2">
                             <Button variant="ghost" onClick={handleCancelEdit}>Cancel</Button>
-                            <Button onClick={handleSaveEdit}>Save Changes</Button>
+                             <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span tabIndex={isSplitInvalid ? 0 : -1}>
+                                    <Button onClick={handleSaveEdit} disabled={isSplitInvalid}>
+                                      Save Changes
+                                    </Button>
+                                  </span>
+                                </TooltipTrigger>
+                                {isSplitInvalid && (
+                                  <TooltipContent>
+                                    <p>Total split cannot exceed expense amount.</p>
+                                  </TooltipContent>
+                                )}
+                              </Tooltip>
+                            </TooltipProvider>
                         </div>
                     </div>
                 ) : (

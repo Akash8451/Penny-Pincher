@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import type { Person } from '@/lib/types';
+import type { Person, Expense } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
@@ -13,6 +13,12 @@ import { Label } from '@/components/ui/label';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 function PersonForm({
   person,
@@ -54,6 +60,7 @@ function PersonForm({
 
 export default function PeopleManager() {
   const [people, setPeople] = useLocalStorage<Person[]>('people', []);
+  const [expenses] = useLocalStorage<Expense[]>('expenses', []);
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingPerson, setEditingPerson] = useState<Person | null>(null);
   const { toast } = useToast();
@@ -71,7 +78,20 @@ export default function PeopleManager() {
   };
 
   const handleDelete = (id: string) => {
+    const isPartOfUnsettledSplit = expenses.some(expense => 
+        expense.splitWith?.some(split => split.personId === id && !split.settled)
+    );
+
+    if (isPartOfUnsettledSplit) {
+        toast({
+            variant: 'destructive',
+            title: 'Cannot Delete Person',
+            description: 'This person is part of an unsettled bill split. Please settle up first.',
+        });
+        return;
+    }
     setPeople(people.filter((p) => p.id !== id));
+    toast({ title: "Person deleted." });
   };
 
   return (
@@ -83,49 +103,67 @@ export default function PeopleManager() {
       <CardContent className="space-y-4">
         {people.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {people.map((person) => (
-                <div key={person.id} className="flex flex-col p-4 rounded-lg bg-accent/50 gap-2">
-                    <div className="flex items-center">
-                        <span className="flex-1 font-medium">{person.name}</span>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                            setEditingPerson(person);
-                            setDialogOpen(true);
-                            }}
-                        >
-                            <Edit className="h-4 w-4" />
-                        </Button>
-                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                This will permanently delete this person from your contacts.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(person.id)} className="bg-destructive hover:bg-destructive/90">
-                                Delete
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                    {person.tags && person.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                            {person.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+            {people.map((person) => {
+                const isPartOfUnsettledSplit = expenses.some(expense => 
+                    expense.splitWith?.some(split => split.personId === person.id && !split.settled)
+                );
+                return (
+                    <div key={person.id} className="flex flex-col p-4 rounded-lg bg-accent/50 gap-2">
+                        <div className="flex items-center">
+                            <span className="flex-1 font-medium">{person.name}</span>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                setEditingPerson(person);
+                                setDialogOpen(true);
+                                }}
+                            >
+                                <Edit className="h-4 w-4" />
+                            </Button>
+                             <AlertDialog>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span tabIndex={0}> {/* Span needed for tooltip on disabled button */}
+                                        <AlertDialogTrigger asChild>
+                                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" disabled={isPartOfUnsettledSplit}>
+                                            <Trash2 className="h-4 w-4" />
+                                          </Button>
+                                        </AlertDialogTrigger>
+                                      </span>
+                                    </TooltipTrigger>
+                                    {isPartOfUnsettledSplit && (
+                                      <TooltipContent>
+                                        <p>Cannot delete person with unsettled splits.</p>
+                                      </TooltipContent>
+                                    )}
+                                  </Tooltip>
+                                </TooltipProvider>
+                                <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                    This will permanently delete this person from your contacts.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleDelete(person.id)} className="bg-destructive hover:bg-destructive/90">
+                                    Delete
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         </div>
-                    )}
-                </div>
-            ))}
+                        {person.tags && person.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1">
+                                {person.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                            </div>
+                        )}
+                    </div>
+                )
+            })}
             </div>
         ) : (
              <div className="text-center text-muted-foreground py-10">
