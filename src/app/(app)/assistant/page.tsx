@@ -53,13 +53,14 @@ export default function AssistantPage() {
   
   return (
     <>
-      <AppHeader title="AI Assistant">
-        <Button onClick={() => router.back()} variant="outline" size="icon" className="rounded-full">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-        </Button>
-      </AppHeader>
-      <div className="flex-1 flex flex-col p-4">
+      <AppHeader title="AI Assistant" />
+      <div className="flex-1 flex flex-col p-4 md:p-6">
+        <div className="mb-4">
+            <Button onClick={() => router.back()} variant="outline" size="sm" className="rounded-full">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+            </Button>
+        </div>
         {isClient ? (
           <AIAssistant 
             expenses={expenses} 

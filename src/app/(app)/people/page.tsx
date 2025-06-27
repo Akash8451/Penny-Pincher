@@ -20,13 +20,14 @@ export default function PeoplePage() {
 
   return (
     <>
-      <AppHeader title="Manage People">
-        <Button onClick={() => router.back()} variant="outline" size="icon" className="rounded-full">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="sr-only">Back</span>
-        </Button>
-      </AppHeader>
-      <div className="flex-1 space-y-4 p-4">
+      <AppHeader title="Manage People" />
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+        <div className="mb-4">
+            <Button onClick={() => router.back()} variant="outline" size="sm" className="rounded-full">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+            </Button>
+        </div>
         {isClient ? (
           <PeopleManager />
         ) : (

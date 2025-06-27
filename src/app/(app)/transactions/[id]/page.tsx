@@ -26,13 +26,25 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 
 function TransactionDetailsSkeleton() {
     return (
         <>
             <AppHeader title="Loading Transaction..." />
-            <div className="flex-1 space-y-4 p-2 sm:p-4">
+            <div className="flex-1 space-y-4 p-4 md:p-6">
+                <Skeleton className="h-9 w-24 mb-4 rounded-full" />
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex justify-between items-start">
@@ -210,33 +222,34 @@ export default function TransactionDetailsPage() {
     );
   }
 
-  const category = categoryMap.get(expense.categoryId);
+  const category = categories.find(c => c.id === expense.categoryId);
   const Icon = category && isValidIcon(category.icon) ? Lucide[category.icon] as React.ElementType : Lucide.Package;
 
 
   return (
     <>
-      <AppHeader title="Transaction Details">
-         <Button onClick={() => router.back()} variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-      </AppHeader>
-      <div className="flex-1 space-y-4 p-2 sm:p-4">
+      <AppHeader title="Transaction Details" />
+      <div className="flex-1 space-y-4 p-4 md:p-6">
+         <div className="mb-4">
+            <Button onClick={() => router.back()} variant="outline" size="sm">
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            </Button>
+         </div>
         <Card>
           <CardHeader>
-            <CardTitle className="flex justify-between items-start">
-              <div className="flex items-center gap-4">
+            <CardTitle className="flex justify-between items-start gap-4">
+              <div className="flex items-center gap-4 flex-1 min-w-0">
                 <div className="h-12 w-12 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
                   <Icon className="h-6 w-6 text-accent-foreground" />
                 </div>
-                <div className='space-y-1.5'>
-                  <span>{expense.note || category?.name || 'Uncategorized'}</span>
+                <div className='space-y-1.5 flex-1 min-w-0'>
+                  <span className="truncate block font-semibold text-xl">{expense.note || category?.name || 'Uncategorized'}</span>
                    <CardDescription>
                     {format(new Date(expense.date), 'EEEE, MMMM d, yyyy')} &bull; {category?.name}
                   </CardDescription>
                 </div>
               </div>
-              <span className={`text-2xl font-bold ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
+              <span className={`text-2xl font-bold whitespace-nowrap ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
                 {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
               </span>
             </CardTitle>
@@ -343,7 +356,25 @@ export default function TransactionDetailsPage() {
                             {split.settled ? (
                             <Badge variant="secondary" className='border-green-500/50 text-green-600'>Settled</Badge>
                             ) : (
-                            <Button size="sm" onClick={() => handleSettleUp(split.personId, split.amount)} disabled={isEditing}>Settle Up</Button>
+                               <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                   <Button size="sm" disabled={isEditing}>Settle Up</Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Confirm Settlement</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This will record a new income transaction of {formatCurrency(split.amount)} from {peopleMap.get(split.personId) || 'this person'}. Are you sure?
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleSettleUp(split.personId, split.amount)}>
+                                      Yes, Settle Up
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
                             )}
                         </div>
                         </div>
