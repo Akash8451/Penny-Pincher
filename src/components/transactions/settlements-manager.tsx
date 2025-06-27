@@ -67,6 +67,11 @@ export default function SettlementsManager() {
       .sort((a, b) => b.balance - a.balance);
   }, [expenses, people, categories]);
 
+  const totalOwedToUser = useMemo(() => {
+    return settlements.reduce((sum, p) => sum + p.balance, 0);
+  }, [settlements]);
+
+
   const handleSettleTransaction = (expenseId: string, personId: string, amount: number) => {
     const originalExpense = expenses.find(e => e.id === expenseId);
     if (!originalExpense) return;
@@ -136,101 +141,116 @@ export default function SettlementsManager() {
     });
   };
 
-  if (settlements.length === 0) {
-    return (
+  return (
+    <div className="space-y-4">
       <Card>
-        <CardContent className="flex flex-col items-center justify-center text-center p-10 gap-4">
-          <Users className="h-16 w-16 text-muted-foreground/50" />
-          <h3 className="text-xl font-semibold">All Settled Up!</h3>
-          <p className="text-muted-foreground">There are no outstanding debts from anyone.</p>
+        <CardHeader>
+          <CardTitle>Net Balance</CardTitle>
+          <CardDescription>Your net settlement position across all contacts.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <div className="text-sm text-muted-foreground">Total Owed to You</div>
+            <div className="text-2xl font-bold text-green-500">{formatCurrency(totalOwedToUser)}</div>
+          </div>
+          <div className="p-4 bg-muted/50 rounded-lg">
+            <div className="text-sm text-muted-foreground">Total You Owe</div>
+            <div className="text-2xl font-bold text-destructive">{formatCurrency(0)}</div>
+          </div>
         </CardContent>
       </Card>
-    );
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Debt Settlements</CardTitle>
-        <CardDescription>A summary of who owes you money from split bills.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Accordion type="single" collapsible className="w-full space-y-2">
-          {settlements.map(({ personId, personName, balance, unsettledSplits }) => (
-            <AccordionItem value={personId} key={personId} className="border-none">
-              <AccordionTrigger className="p-4 rounded-lg bg-muted/50 hover:bg-accent/80 hover:no-underline data-[state=open]:rounded-b-none transition-all">
-                <div className="flex items-center gap-4 text-left">
-                  <div className="p-2 bg-background rounded-full">
-                    <User className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-base">{personName}</div>
-                    <div className="text-sm text-green-500 font-medium">Owes you {formatCurrency(balance)}</div>
-                  </div>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="p-4 rounded-lg rounded-t-none bg-muted/30 animate-fade-in-up">
-                <div className="space-y-3">
-                  {unsettledSplits.map((split, index) => (
-                    <div key={`${split.expenseId}-${index}`} className="flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">{split.expenseNote}</p>
-                        <p className="text-sm text-muted-foreground">{format(new Date(split.date), 'PP')}</p>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>People Who Owe You</CardTitle>
+          <CardDescription>A summary of outstanding debts from split bills.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {settlements.length === 0 ? (
+            <div className="flex flex-col items-center justify-center text-center p-10 gap-4">
+              <Users className="h-16 w-16 text-muted-foreground/50" />
+              <h3 className="text-xl font-semibold">All Settled Up!</h3>
+              <p className="text-muted-foreground">There are no outstanding debts from anyone.</p>
+            </div>
+          ) : (
+            <Accordion type="single" collapsible className="w-full space-y-2">
+              {settlements.map(({ personId, personName, balance, unsettledSplits }) => (
+                <AccordionItem value={personId} key={personId} className="border-none">
+                  <AccordionTrigger className="p-4 rounded-lg bg-muted/50 hover:bg-accent/80 hover:no-underline data-[state=open]:rounded-b-none transition-all">
+                    <div className="flex items-center gap-4 text-left">
+                      <div className="p-2 bg-background rounded-full">
+                        <User className="h-6 w-6 text-primary" />
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold">{formatCurrency(split.amount)}</span>
+                      <div>
+                        <div className="font-semibold text-base">{personName}</div>
+                        <div className="text-sm text-green-500 font-medium">Owes you {formatCurrency(balance)}</div>
+                      </div>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="p-4 rounded-lg rounded-t-none bg-muted/30 animate-fade-in-up">
+                    <div className="space-y-3">
+                      {unsettledSplits.map((split, index) => (
+                        <div key={`${split.expenseId}-${index}`} className="flex justify-between items-center">
+                          <div>
+                            <p className="font-medium">{split.expenseNote}</p>
+                            <p className="text-sm text-muted-foreground">{format(new Date(split.date), 'PP')}</p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="font-semibold">{formatCurrency(split.amount)}</span>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="outline">Settle</Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Confirm Settlement</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to mark this payment of {formatCurrency(split.amount)} for "{split.expenseNote}" as settled? This will create a new income entry.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleSettleTransaction(split.expenseId, personId, split.amount)}>
+                                    Confirm
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      ))}
+                      <Separator />
+                      <div className="flex justify-end pt-2">
                         <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button size="sm" variant="outline">Settle</Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Confirm Settlement</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to mark this payment of {formatCurrency(split.amount)} for "{split.expenseNote}" as settled? This will create a new income entry.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleSettleTransaction(split.expenseId, personId, split.amount)}>
-                                Confirm
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
+                            <AlertDialogTrigger asChild>
+                                <Button>
+                                    <HandCoins className="mr-2 h-4 w-4" /> Settle All for {formatCurrency(balance)}
+                                </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Settle All Debts for {personName}?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        This will clear the entire outstanding balance of {formatCurrency(balance)}. A single income transaction will be created to record this settlement. This action cannot be undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleSettleAllForPerson(personId, personName, balance, unsettledSplits)}>
+                                        Settle All
+                                    </AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
                         </AlertDialog>
                       </div>
                     </div>
-                  ))}
-                  <Separator />
-                  <div className="flex justify-end pt-2">
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button>
-                                <HandCoins className="mr-2 h-4 w-4" /> Settle All for {formatCurrency(balance)}
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle>Settle All Debts for {personName}?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This will clear the entire outstanding balance of {formatCurrency(balance)}. A single income transaction will be created to record this settlement. This action cannot be undone.
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleSettleAllForPerson(personId, personName, balance, unsettledSplits)}>
-                                    Settle All
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </CardContent>
-    </Card>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

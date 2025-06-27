@@ -76,7 +76,6 @@ export default function TransactionList() {
     setExpenses(prev => {
       const expenseToDelete = prev.find(e => e.id === expenseId);
 
-      // Case 1: Deleting a settlement income. Un-settle the original expense.
       if (expenseToDelete?.type === 'income' && expenseToDelete.relatedExpenseId && expenseToDelete.relatedPersonId) {
         const updatedExpenses = prev.map(e => {
           if (e.id === expenseToDelete.relatedExpenseId) {
@@ -92,7 +91,6 @@ export default function TransactionList() {
         return updatedExpenses.filter(e => e.id !== expenseId);
       }
 
-      // Case 2: Deleting an original expense. Also delete related income settlements.
       const relatedIncomeIds = prev
         .filter(e => e.type === 'income' && e.relatedExpenseId === expenseId)
         .map(e => e.id);
@@ -111,7 +109,7 @@ export default function TransactionList() {
         exp.type,
         exp.amount.toFixed(2),
         categoryMap.get(exp.categoryId) || 'Uncategorized',
-        `"${exp.note || ''}"`, // handle commas in notes
+        `"${exp.note || ''}"`,
         `"${splitWithNames}"`,
       ].join(',');
     });
@@ -186,7 +184,7 @@ export default function TransactionList() {
             </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-2 sm:p-4 md:p-6 pt-0">
         <ScrollArea className="h-[60vh]">
           <div className="space-y-2 pr-2">
             {filteredExpenses.map((expense) => {
@@ -199,39 +197,41 @@ export default function TransactionList() {
                     <div
                         key={expense.id}
                         className={cn(
-                            "p-3 rounded-lg border transition-all duration-200 cursor-pointer",
-                            isSelected ? "border-primary bg-accent/80" : "border-transparent hover:bg-accent/50"
+                            "rounded-lg border transition-all duration-200 cursor-pointer",
+                            isSelected ? "border-primary bg-accent/80" : "border-transparent"
                         )}
                         onClick={() => handleItemClick(expense.id)}
                     >
-                        <div className="flex items-center flex-1 min-w-0 gap-4">
-                            <div className="h-10 w-10 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
-                                <Icon className="h-5 w-5 text-accent-foreground" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate text-card-foreground">
-                                    {expense.note || category?.name || 'Uncategorized'}
+                        <div className="p-3">
+                            <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 bg-background rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
+                                    <Icon className="h-5 w-5 text-muted-foreground" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-medium truncate text-card-foreground">
+                                        {expense.note || category?.name || 'Uncategorized'}
+                                    </p>
+                                    <p className="text-sm text-muted-foreground truncate">
+                                        {expense.type === 'expense' && splitWithNames 
+                                            ? `Split with: ${splitWithNames}`
+                                            : format(new Date(expense.date), "MMM d, yyyy")
+                                        }
+                                    </p>
+                                </div>
+                                <p className={cn(
+                                    "ml-auto font-semibold flex-shrink-0 pl-2",
+                                    expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
+                                )}>
+                                    {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
                                 </p>
-                                <p className="text-sm text-muted-foreground truncate">
-                                    {expense.type === 'expense' && splitWithNames 
-                                        ? `Split with: ${splitWithNames}`
-                                        : format(new Date(expense.date), "MMM d, yyyy")
-                                    }
-                                </p>
                             </div>
-                            <p className={cn(
-                                "ml-4 font-semibold",
-                                expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
-                            )}>
-                                {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
-                            </p>
                         </div>
 
                         {isSelected && (
-                            <div className="mt-3 flex justify-end items-center gap-2 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                            <div className="px-3 pb-3 flex justify-end items-center gap-2 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                      <Button variant="destructive" size="icon" className="h-8 w-8">
+                                      <Button variant="destructive" size="icon" className="h-9 w-9">
                                           <Trash2 className="h-4 w-4" />
                                           <span className="sr-only">Delete</span>
                                       </Button>
@@ -251,9 +251,10 @@ export default function TransactionList() {
                                       </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
-                                <Button asChild variant="outline" size="sm">
+                                <Button asChild variant="secondary" size="icon" className="h-9 w-9">
                                     <Link href={`/transactions/${expense.id}`}>
-                                        View Details <ArrowRight className="ml-2 h-4 w-4" />
+                                        <ArrowRight className="h-4 w-4" />
+                                        <span className="sr-only">View Details</span>
                                     </Link>
                                 </Button>
                             </div>
