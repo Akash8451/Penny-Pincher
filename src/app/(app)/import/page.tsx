@@ -1,4 +1,3 @@
-
 'use client';
 
 import { AppHeader } from '@/components/layout/app-header';
@@ -6,6 +5,8 @@ import StatementImporter from '@/components/import/statement-importer';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+
+export const maxDuration = 60;
 
 export default function ImportPage() {
   const [isClient, setIsClient] = useState(false);
