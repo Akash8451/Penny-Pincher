@@ -198,7 +198,7 @@ export default function TransactionList() {
                         key={expense.id}
                         className={cn(
                             "rounded-lg border transition-all duration-200 cursor-pointer",
-                            isSelected ? "border-primary bg-accent/80" : "border-transparent"
+                            isSelected ? "border-primary bg-accent/80" : "border-transparent bg-muted/50"
                         )}
                         onClick={() => handleItemClick(expense.id)}
                     >
@@ -218,12 +218,14 @@ export default function TransactionList() {
                                         }
                                     </p>
                                 </div>
-                                <p className={cn(
-                                    "ml-auto font-semibold flex-shrink-0 pl-2",
-                                    expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
-                                )}>
-                                    {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
-                                </p>
+                                <div className="flex-shrink-0 pl-2 text-right">
+                                    <p className={cn(
+                                        "font-semibold",
+                                        expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
+                                    )}>
+                                        {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
+                                    </p>
+                                </div>
                             </div>
                         </div>
 

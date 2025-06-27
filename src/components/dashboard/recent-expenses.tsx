@@ -41,14 +41,13 @@ export default function RecentExpenses({ expenses, categories, isDashboardList =
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
 
   const handleItemClick = (id: string) => {
-    // We only allow selection if a delete handler is provided
     if (onDeleteExpense) {
       setSelectedExpenseId(prevId => (prevId === id ? null : id));
     }
   };
 
   const handleDeleteClick = (e: React.MouseEvent, expenseId: string) => {
-    e.stopPropagation(); // prevent re-triggering the parent onClick
+    e.stopPropagation(); 
     onDeleteExpense?.(expenseId);
     setSelectedExpenseId(null);
   };
@@ -70,8 +69,8 @@ export default function RecentExpenses({ expenses, categories, isDashboardList =
                   )}
                   onClick={() => onDeleteExpense ? handleItemClick(expense.id) : null}
               >
-                  <div className="flex items-center flex-1 min-w-0">
-                      <div className="h-10 w-10 bg-background rounded-full flex items-center justify-center flex-shrink-0 mr-4 shadow-sm">
+                  <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 bg-background rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                           <Icon className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -82,12 +81,14 @@ export default function RecentExpenses({ expenses, categories, isDashboardList =
                               {format(new Date(expense.date), "d MMM, yyyy")}
                           </p>
                       </div>
-                       <p className={cn(
-                         "ml-4 font-semibold",
-                         expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
-                       )}>
-                          {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
-                      </p>
+                       <div className="flex-shrink-0 pl-2 text-right">
+                         <p className={cn(
+                           "font-semibold",
+                           expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
+                         )}>
+                            {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
+                         </p>
+                       </div>
                   </div>
 
                   {isSelected && (
