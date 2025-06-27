@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { Category } from '@/lib/types';
 import { DEFAULT_CATEGORIES } from '@/lib/constants';
@@ -45,19 +45,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import React from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
-const iconList = Object.keys(icons);
+
+// A curated list of common icons for finance apps to avoid loading all 700+ icons.
+const curatedIconList = [
+  'Activity', 'Award', 'Banknote', 'Bike', 'BookOpen', 'Briefcase', 'Bus', 'Car',
+  'Cat', 'Cigarette', 'CircleDollarSign', 'Clapperboard', 'Coffee', 'Coins', 'CreditCard',
+  'Dog', 'Dumbbell', 'Film', 'Fuel', 'Gamepad2', 'Gift', 'GraduationCap', 'HandCoins',
+  'HeartPulse', 'Home', 'Landmark', 'Laptop', 'Martini', 'Mic', 'Music', 'Package',
+  'PawPrint', 'PersonStanding', 'Phone', 'PiggyBank', 'Pill', 'Plane', 'Plug',
+  'Receipt', 'Scale', 'Shirt', 'ShoppingCart', 'ShoppingBag', 'Smartphone', 'Sprout',
+  'Ticket', 'Train', 'TreePalm', 'Truck', 'Tv', 'UtensilsCrossed', 'Wallet', 'Wrench', 'Zap'
+];
 
 function CategoryForm({
   category,
   onSave,
-  onClose,
+  iconList,
 }: {
   category?: Category | null;
   onSave: (category: Omit<Category, 'id'>) => void;
-  onClose: () => void;
+  iconList: string[];
 }) {
   const [name, setName] = useState(category?.name || '');
   const [group, setGroup] = useState(category?.group || '');
@@ -91,7 +101,7 @@ function CategoryForm({
             <SelectTrigger>
               <SelectValue placeholder="Select an icon" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[var(--radix-select-content-available-height)]">
                 <div className="p-2">
                     <Input
                         placeholder="Search icons..."
@@ -105,7 +115,7 @@ function CategoryForm({
                     return (
                         <SelectItem key={iconName} value={iconName}>
                             <div className="flex items-center gap-2">
-                               <Icon className="h-4 w-4" />
+                               {Icon ? <Icon className="h-4 w-4" /> : <Package className="h-4 w-4" />}
                                {iconName}
                             </div>
                         </SelectItem>
@@ -151,10 +161,19 @@ export default function CategoryManager() {
     setCategories(categories.filter((c) => c.id !== id));
   };
   
-  const categoryGroups = categories.reduce((acc, category) => {
-      (acc[category.group] = acc[category.group] || []).push(category);
-      return acc;
-  }, {} as Record<string, Category[]>);
+  const categoryGroups = useMemo(() => {
+    return categories.reduce((acc, category) => {
+        (acc[category.group] = acc[category.group] || []).push(category);
+        return acc;
+    }, {} as Record<string, Category[]>);
+  }, [categories]);
+
+  // Create a combined, unique, and sorted list of icons to show in the dropdown.
+  const availableIcons = useMemo(() => {
+    const usedIcons = categories.map(c => c.icon);
+    const combined = [...new Set([...curatedIconList, ...usedIcons])];
+    return combined.sort();
+  }, [categories]);
 
   return (
     <Card>
@@ -171,8 +190,8 @@ export default function CategoryManager() {
                     const Icon = icons[cat.icon as keyof typeof icons] || Package;
                     return (
                         <div key={cat.id} className="flex items-center p-3 rounded-lg bg-accent/50">
-                            <Icon className="h-5 w-5 mr-3 text-accent-foreground" />
-                            <span className="flex-1 font-medium truncate">{cat.name}</span>
+                            <Icon className="h-5 w-5 mr-3 text-accent-foreground flex-shrink-0" />
+                            <span className="flex-1 font-medium truncate min-w-0">{cat.name}</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -228,10 +247,7 @@ export default function CategoryManager() {
             <CategoryForm
               category={editingCategory}
               onSave={handleSave}
-              onClose={() => {
-                setEditingCategory(null);
-                setDialogOpen(false);
-              }}
+              iconList={availableIcons}
             />
           </DialogContent>
         </Dialog>
