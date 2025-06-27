@@ -99,30 +99,44 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
   const handleVoiceResult = async (transcript: string) => {
     if (!transcript) return;
     setIsVoiceLoading(true);
-    toast({ title: "Processing your voice command...", description: `"${transcript}"`});
+    toast({ title: "Processing your voice command...", description: `"${transcript}"` });
     try {
-        const result = await logExpenseFromVoice({ query: transcript, categories });
-        if (result.amount) {
-            form.setValue('amount', result.amount as any);
-        }
-        if (result.categoryId) {
-            form.setValue('categoryId', result.categoryId);
-        }
-        if (result.note) {
-            form.setValue('note', result.note);
-        }
-        toast({ title: "✔️ Fields populated by voice" });
-    } catch (error) {
-        console.error("Voice expense logging error:", error);
-        toast({ 
-            variant: 'destructive', 
-            title: "Voice Command Error", 
-            description: error instanceof Error ? error.message : "An unknown error occurred." 
+      const result = await logExpenseFromVoice({ query: transcript, categories });
+
+      // If AI gets all required info, log it automatically.
+      if (result.amount && result.categoryId) {
+        const newExpense: Omit<Expense, 'id' | 'date'> = {
+          type: 'expense',
+          amount: result.amount,
+          categoryId: result.categoryId,
+          note: result.note || '',
+        };
+        onAddExpense(newExpense);
+        onSuccess(); // Close the sheet. The parent component will show a toast.
+      } else {
+        // Otherwise, populate what we have and let the user finish.
+        if (result.amount) form.setValue('amount', result.amount as any);
+        if (result.categoryId) form.setValue('categoryId', result.categoryId);
+        if (result.note) form.setValue('note', result.note);
+        toast({
+          variant: 'destructive',
+          title: "More information needed",
+          description: "AI couldn't get all the details. Please complete the form manually."
         });
+      }
+    } catch (error) {
+      console.error("Voice expense logging error:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      toast({
+        variant: 'destructive',
+        title: "Voice Command Error",
+        description: errorMessage
+      });
     } finally {
-        setIsVoiceLoading(false);
+      setIsVoiceLoading(false);
     }
   };
+
 
   const handleVoiceError = (error: string) => {
       let description = 'An unknown error occurred.';
