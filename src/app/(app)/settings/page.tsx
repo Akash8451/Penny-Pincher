@@ -25,7 +25,7 @@ export default function SettingsPage() {
   return (
     <>
       <AppHeader title="Settings" />
-      <div className="flex-1 space-y-6 p-4 sm:p-6">
+      <div className="flex-1 space-y-6 p-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ThemeSettings />
           <RegionalSettings />

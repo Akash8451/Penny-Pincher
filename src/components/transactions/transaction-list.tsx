@@ -227,10 +227,10 @@ export default function TransactionList() {
                         </div>
 
                         {isSelected && (
-                            <div className="mt-3 flex justify-end items-center gap-4 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
+                            <div className="mt-3 flex justify-end items-center gap-2 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
                                 <AlertDialog>
                                   <AlertDialogTrigger asChild>
-                                      <Button variant="destructive" size="sm" className="w-9 h-9 px-0 rounded-full">
+                                      <Button variant="destructive" size="icon" className="h-8 w-8">
                                           <Trash2 className="h-4 w-4" />
                                           <span className="sr-only">Delete</span>
                                       </Button>
@@ -250,7 +250,7 @@ export default function TransactionList() {
                                       </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
-                                <Button asChild variant="outline" size="sm" className="h-9 rounded-full">
+                                <Button asChild variant="outline" size="sm">
                                     <Link href={`/transactions/${expense.id}`}>
                                         View Details <ArrowRight className="ml-2 h-4 w-4" />
                                     </Link>

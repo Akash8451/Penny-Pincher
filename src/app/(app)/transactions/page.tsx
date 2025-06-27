@@ -20,7 +20,7 @@ export default function TransactionsPage() {
   return (
     <>
       <AppHeader title="Transactions" />
-      <div className="flex-1 space-y-4 p-4 sm:p-6">
+      <div className="flex-1 space-y-4 p-4">
         {isClient ? (
            <Tabs defaultValue="history" className="w-full">
             <div className="flex justify-center mb-6">

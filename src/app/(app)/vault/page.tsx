@@ -47,7 +47,7 @@ export default function VaultPage() {
                   <span className="sr-only">Back</span>
               </Button>
             </AppHeader>
-            <div className="flex-1 space-y-4 p-4 sm:p-6">
+            <div className="flex-1 space-y-4 p-4">
                 <VaultSkeleton />
             </div>
           </>
@@ -63,7 +63,7 @@ export default function VaultPage() {
                   <span className="sr-only">Back</span>
               </Button>
             </AppHeader>
-            <div className="flex-1 p-4 sm:p-6">
+            <div className="flex-1 p-4">
                 <Card className="text-center">
                     <CardHeader>
                         <CardTitle className="flex items-center justify-center gap-2">
@@ -90,7 +90,7 @@ export default function VaultPage() {
             <span className="sr-only">Back</span>
         </Button>
       </AppHeader>
-      <div className="flex-1 space-y-4 p-4 sm:p-6">
+      <div className="flex-1 space-y-4 p-4">
         <VaultManager />
       </div>
     </>

@@ -86,8 +86,13 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
         tags: [],
     };
     
-    setPeople(prev => [...prev, newPerson]);
-    setSelectedPeople(prev => [...prev, newPerson.id]);
+    // Explicitly create new arrays before setting state to ensure re-render
+    const newPeopleList = [...people, newPerson];
+    const newSelectedPeopleList = [...selectedPeople, newPerson.id];
+
+    setPeople(newPeopleList);
+    setSelectedPeople(newSelectedPeopleList);
+
     setNewPersonName('');
     toast({
         title: `Added "${trimmedName}"`,

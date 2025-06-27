@@ -17,7 +17,7 @@ export default function ScanPage() {
   return (
     <>
       <AppHeader title="Scan & Import" />
-      <div className="flex-1 space-y-4 p-4 sm:p-6">
+      <div className="flex-1 space-y-4 p-4">
         {isClient ? (
           <ScanImportManager />
         ) : (
