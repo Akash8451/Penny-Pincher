@@ -434,87 +434,85 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
                         : "Split Bill"}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-md">
-                    <DialogHeader>
+                  <DialogContent className="max-w-md flex flex-col max-h-[85vh]">
+                    <DialogHeader className="flex-shrink-0">
                       <DialogTitle>Split Bill</DialogTitle>
                       <DialogDescription>
                         Select people and specify how to split the {formatCurrency(totalAmount)}.
                       </DialogDescription>
                     </DialogHeader>
-                     <div className="space-y-1.5">
-                        <Label htmlFor="split-group-name">Group/Event Name (Optional)</Label>
-                        <Input 
-                            id="split-group-name"
-                            placeholder="e.g. Weekend Trip, Team Lunch" 
-                            value={splitGroupName}
-                            onChange={(e) => setSplitGroupName(e.target.value)}
-                        />
-                        <p className="text-xs text-muted-foreground">This will be used as the transaction note.</p>
-                    </div>
-                    <Separator />
-                    <ScrollArea className="max-h-40">
-                    <div className="space-y-2 py-2 pr-4">
-                      {people.length > 0 ? people.map(person => (
-                        <div key={person.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-accent" >
-                          <Checkbox
-                            id={`person-${person.id}`}
-                            checked={selectedPeople.includes(person.id)}
-                            onCheckedChange={() => togglePersonSelection(person.id)}
-                          />
-                          <Label htmlFor={`person-${person.id}`} className="flex-1 cursor-pointer">{person.name}</Label>
+                    <div className="flex-grow overflow-y-auto -mr-6 pr-6 space-y-4">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="split-group-name">Group/Event Name (Optional)</Label>
+                            <Input 
+                                id="split-group-name"
+                                placeholder="e.g. Weekend Trip, Team Lunch" 
+                                value={splitGroupName}
+                                onChange={(e) => setSplitGroupName(e.target.value)}
+                            />
+                            <p className="text-xs text-muted-foreground">This will be used as the transaction note.</p>
                         </div>
-                      )) : <p className='text-sm text-muted-foreground text-center'>No people added yet.</p>}
-                    </div>
-                    </ScrollArea>
-                    {AddPersonForm}
-                    {selectedPeople.length > 0 && (
-                      <>
                         <Separator />
-                        <div className="space-y-4">
-                           <div className='flex justify-between items-center'>
-                             <h4 className="font-medium">Custom Amounts</h4>
-                             <Button variant="secondary" size="sm" onClick={handleSplitEqually}>Split Equally</Button>
-                           </div>
-                           <ScrollArea className="max-h-48">
-                            <div className="space-y-3 pr-4">
-                                {selectedPeople.map(personId => {
-                                    const person = people.find(p => p.id === personId);
-                                    return (
-                                        <div key={personId} className="flex items-center gap-3">
-                                            <Label htmlFor={`split-${personId}`} className="w-24 truncate">{person?.name}</Label>
-                                            <div className="relative flex-1">
-                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
-                                                <Input 
-                                                    id={`split-${personId}`} 
-                                                    type="number" 
-                                                    placeholder="0.00"
-                                                    className="pl-6"
-                                                    value={customSplits[personId] || ''}
-                                                    onChange={(e) => setCustomSplits(prev => ({...prev, [personId]: e.target.value }))}
-                                                />
-                                            </div>
-                                        </div>
-                                    )
-                                })}
+                        <div className="space-y-2 py-2">
+                          {people.length > 0 ? people.map(person => (
+                            <div key={person.id} className="flex items-center space-x-3 p-2 rounded-md hover:bg-accent" >
+                              <Checkbox
+                                id={`person-${person.id}`}
+                                checked={selectedPeople.includes(person.id)}
+                                onCheckedChange={() => togglePersonSelection(person.id)}
+                              />
+                              <Label htmlFor={`person-${person.id}`} className="flex-1 cursor-pointer">{person.name}</Label>
                             </div>
-                           </ScrollArea>
-                           <Separator />
-                           <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
-                                <span>You (Your Share):</span>
-                                <span className={myShare < 0 ? 'text-destructive' : 'text-foreground'}>
-                                    {formatCurrency(myShare)}
-                                </span>
-                           </div>
-                           <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
-                                <span>Total Assigned to Others:</span>
-                                <span className={currentSplitTotalForOthers > totalAmount ? 'text-destructive' : 'text-foreground'}>
-                                    {formatCurrency(currentSplitTotalForOthers)}
-                                </span>
-                           </div>
+                          )) : <p className='text-sm text-muted-foreground text-center'>No people added yet.</p>}
                         </div>
-                      </>
-                    )}
-                    <DialogFooter>
+                        {AddPersonForm}
+                        {selectedPeople.length > 0 && (
+                          <>
+                            <Separator />
+                            <div className="space-y-4">
+                               <div className='flex justify-between items-center'>
+                                 <h4 className="font-medium">Custom Amounts</h4>
+                                 <Button variant="secondary" size="sm" onClick={handleSplitEqually}>Split Equally</Button>
+                               </div>
+                                <div className="space-y-3">
+                                    {selectedPeople.map(personId => {
+                                        const person = people.find(p => p.id === personId);
+                                        return (
+                                            <div key={personId} className="flex items-center gap-3">
+                                                <Label htmlFor={`split-${personId}`} className="w-24 truncate">{person?.name}</Label>
+                                                <div className="relative flex-1">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                                                    <Input 
+                                                        id={`split-${personId}`} 
+                                                        type="number" 
+                                                        placeholder="0.00"
+                                                        className="pl-6"
+                                                        value={customSplits[personId] || ''}
+                                                        onChange={(e) => setCustomSplits(prev => ({...prev, [personId]: e.target.value }))}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                               <Separator />
+                               <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
+                                    <span>You (Your Share):</span>
+                                    <span className={myShare < 0 ? 'text-destructive' : 'text-foreground'}>
+                                        {formatCurrency(myShare)}
+                                    </span>
+                               </div>
+                               <div className='flex justify-between text-sm font-medium p-2 rounded-lg bg-muted/50'>
+                                    <span>Total Assigned to Others:</span>
+                                    <span className={currentSplitTotalForOthers > totalAmount ? 'text-destructive' : 'text-foreground'}>
+                                        {formatCurrency(currentSplitTotalForOthers)}
+                                    </span>
+                               </div>
+                            </div>
+                          </>
+                        )}
+                    </div>
+                    <DialogFooter className="flex-shrink-0 pt-4">
                       {isSplitInvalid && (
                         <p className="text-sm text-destructive text-left mr-auto">
                             {isIndividualSplitTooHigh 
