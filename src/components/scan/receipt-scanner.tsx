@@ -133,7 +133,11 @@ function ReceiptScannerInternal() {
       }
     } catch (err) {
       console.error("Scanning error:", err);
-      setError("An unexpected error occurred while scanning the receipt. Please try again.");
+      let errorMessage = "An unexpected error occurred while scanning the receipt. Please try again.";
+      if (err instanceof Error && (err.message.includes('503') || err.message.toLowerCase().includes('overloaded'))) {
+          errorMessage = "The AI service is currently overloaded and cannot scan the receipt. Please try again in a few moments.";
+      }
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -421,10 +425,11 @@ function StatementImporterInternal() {
     setError(null);
     setParsedTransactions([]);
 
-    try {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = async (e) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    
+    reader.onload = async (e) => {
+      try {
         const dataUri = e.target?.result as string;
         if (!dataUri) {
           throw new Error('Could not read file.');
@@ -433,7 +438,6 @@ function StatementImporterInternal() {
         const result = await parseStatement({ statementDataUri: dataUri, categories });
         if (!result.transactions || result.transactions.length === 0) {
           setError("The AI couldn't find any transactions in this file. Please check the file and try again.");
-          setIsLoading(false);
         } else {
           setParsedTransactions(result.transactions);
           const initialCategories: Record<number, string> = {};
@@ -444,17 +448,23 @@ function StatementImporterInternal() {
           });
           setEditedCategories(initialCategories);
           setSelectedRows(initialSelections);
-          setIsLoading(false);
         }
-      };
-      reader.onerror = () => {
-        throw new Error('Error reading file.');
+      } catch (err) {
+        console.error("Parsing error:", err);
+        let errorMessage = "An unexpected error occurred while parsing the statement. Please try again.";
+        if (err instanceof Error && (err.message.includes('503') || err.message.toLowerCase().includes('overloaded'))) {
+            errorMessage = "The AI service is currently overloaded and cannot parse the statement. Please try again in a few moments.";
+        }
+        setError(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error("Parsing error:", err);
-      setError("An unexpected error occurred while parsing the statement. Please try again.");
+    };
+
+    reader.onerror = () => {
+      setError('Error reading file.');
       setIsLoading(false);
-    }
+    };
   };
 
   const handleImportSelected = () => {

@@ -85,9 +85,16 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
 
     } catch (error) {
         console.error("AI Assistant Error:", error);
-        const errorMessage = "There was a problem getting a response. Please try again.";
+        let errorMessage = "I've encountered an issue and can't respond right now. Please try again later.";
+        let errorDescription = 'Could not get a response from the AI service.';
+
+        if (error instanceof Error && (error.message.includes('503') || error.message.toLowerCase().includes('overloaded'))) {
+            errorMessage = "The AI service is currently experiencing high demand. Please try your request again in a few moments.";
+            errorDescription = "Service is temporarily unavailable.";
+        }
+
         setMessages(prev => [...prev, { role: 'ai', text: errorMessage }]);
-        toast({ variant: 'destructive', title: 'AI Assistant Error', description: 'Could not get a response.'});
+        toast({ variant: 'destructive', title: 'AI Assistant Error', description: errorDescription });
     } finally {
         setIsLoading(false);
     }

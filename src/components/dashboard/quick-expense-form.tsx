@@ -118,7 +118,15 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
         toast({ title: "✔️ Fields populated by voice" });
     } catch (error) {
         console.error("Voice expense logging error:", error);
-        toast({ variant: 'destructive', title: 'Could not process voice command.' });
+        let title = "Could not process voice command.";
+        let description = "Please try speaking again.";
+        
+        if (error instanceof Error && (error.message.includes('503') || error.message.toLowerCase().includes('overloaded'))) {
+            title = 'AI Service Overloaded';
+            description = 'The voice service is busy. Please try again in a moment.';
+        }
+        
+        toast({ variant: 'destructive', title, description });
     } finally {
         setIsVoiceLoading(false);
     }
