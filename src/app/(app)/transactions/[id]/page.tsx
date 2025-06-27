@@ -4,7 +4,6 @@
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { Expense, Category, Person } from '@/lib/types';
 import { AppHeader } from '@/components/layout/app-header';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -37,6 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { useExpenses } from '@/hooks/use-expenses';
 
 
 function TransactionDetailsSkeleton() {
@@ -83,15 +83,13 @@ export default function TransactionDetailsPage() {
   const formatCurrency = useCurrencyFormatter();
   
   const [isLoading, setIsLoading] = useState(true);
-  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
-  const [categories] = useLocalStorage<Category[]>('categories', []);
-  const [people] = useLocalStorage<Person[]>('people', []);
+  const { expenses, categories, people, setExpenses } = useExpenses();
 
   const [isEditing, setIsEditing] = useState(false);
   const [editableSplits, setEditableSplits] = useState<Record<string, number>>({});
   
   useEffect(() => {
-    // Component has mounted, localStorage data is now available.
+    // Component has mounted, data is now available.
     setIsLoading(false);
   }, []);
 
@@ -99,8 +97,8 @@ export default function TransactionDetailsPage() {
   const expense = !isLoading ? expenses.find(e => e.id === expenseId) : undefined;
   const isAnySplitSettled = expense?.splitWith?.some(s => s.settled) ?? false;
 
-  const categoryMap = new Map(categories.map(c => [c.id, c.name]));
-  const peopleMap = new Map(people.map(p => [p.id, p.name]));
+  const categoryMap = useMemo(() => new Map(categories.map(c => [c.id, c.name])), [categories]);
+  const peopleMap = useMemo(() => new Map(people.map(p => [p.id, p.name])), [people]);
   
   const othersAmount = expense?.splitWith?.reduce((sum, s) => sum + s.amount, 0) ?? 0;
   const myShare = expense ? expense.amount - othersAmount : 0;
