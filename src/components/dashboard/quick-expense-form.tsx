@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,7 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mic, Paperclip, PlusCircle, Users, X, ZoomIn } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '../ui/scroll-area';
@@ -52,7 +53,6 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   
   const [fileName, setFileName] = React.useState('');
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
-  const [isSplitBillOpen, setSplitBillOpen] = React.useState(false);
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
   const [splitGroupName, setSplitGroupName] = React.useState('');
@@ -110,18 +110,33 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     setFileName('');
     setReceiptPreview(null);
   };
+
+    const currentSplitTotalForOthers = useMemo(() => {
+        return Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
+    }, [customSplits]);
+
+    const myShare = totalAmount - currentSplitTotalForOthers;
+
+    const isIndividualSplitTooHigh = useMemo(() => {
+        if (!totalAmount) return false;
+        return Object.values(customSplits).some(amount => parseFloat(amount || '0') > totalAmount);
+    }, [customSplits, totalAmount]);
+
+    const isTotalSplitTooHigh = myShare < 0;
+
+    const isSplitInvalid = isIndividualSplitTooHigh || isTotalSplitTooHigh;
   
   const onSubmit = (values: z.infer<typeof expenseSchema>) => {
     let splitWithData: Split[] | undefined = undefined;
 
     if (selectedPeople.length > 0) {
-      const customTotal = Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
-
-      if (customTotal > totalAmount) {
+      if (isSplitInvalid) {
            toast({
               variant: 'destructive',
-              title: "Split Error",
-              description: `The assigned splits for others (${formatCurrency(customTotal)}) cannot exceed the total expense (${formatCurrency(totalAmount)}).`,
+              title: "Invalid Split Data",
+              description: isIndividualSplitTooHigh 
+                ? 'A single person\'s split cannot exceed the total amount. Please correct it.' 
+                : 'The total amount split for others cannot exceed the total expense. Please correct it.',
           });
           return;
       }
@@ -205,12 +220,6 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     setCustomSplits(newSplits);
   }
   
-  const currentSplitTotalForOthers = React.useMemo(() => {
-    return Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
-  }, [customSplits]);
-
-  const myShare = totalAmount - currentSplitTotalForOthers;
-
   return (
     <div className='space-y-2'>
         <div className="text-center relative">
@@ -357,7 +366,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                   )}
                 />
 
-                <Dialog open={isSplitBillOpen} onOpenChange={setSplitBillOpen}>
+                <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="outline" className="w-full" disabled={!totalAmount || totalAmount <= 0}>
                       <Users className="mr-2 h-4 w-4" />
@@ -446,8 +455,15 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                       </>
                     )}
                     <DialogFooter>
+                      {isSplitInvalid && (
+                        <p className="text-sm text-destructive text-left mr-auto">
+                            {isIndividualSplitTooHigh 
+                            ? 'A single split cannot exceed the total amount.' 
+                            : 'Total split for others exceeds total amount.'}
+                        </p>
+                       )}
                       <DialogClose asChild>
-                        <Button>Done</Button>
+                        <Button disabled={isSplitInvalid}>Done</Button>
                       </DialogClose>
                     </DialogFooter>
                   </DialogContent>

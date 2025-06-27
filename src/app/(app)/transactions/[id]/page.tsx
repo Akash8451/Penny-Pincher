@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Edit } from 'lucide-react';
 import * as Lucide from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -95,7 +95,13 @@ export default function TransactionDetailsPage() {
   
   const othersSplitTotal = Object.values(editableSplits).reduce((sum, amount) => sum + Number(amount || 0), 0);
   const myEditedShare = expense ? expense.amount - othersSplitTotal : 0;
-  const isSplitInvalid = myEditedShare < 0;
+
+  const isIndividualSplitTooHigh = useMemo(() => 
+    expense ? Object.values(editableSplits).some(splitAmount => Number(splitAmount || '0') > expense.amount) : false,
+  [editableSplits, expense]);
+
+  const isTotalSplitTooHigh = myEditedShare < 0;
+  const isSplitInvalid = isTotalSplitTooHigh || isIndividualSplitTooHigh;
 
 
   const handleEditClick = () => {
@@ -114,15 +120,13 @@ export default function TransactionDetailsPage() {
   };
 
   const handleSaveEdit = () => {
-    if (!expense || isSplitInvalid) return;
-
-    const newTotalForOthers = Object.values(editableSplits).reduce((sum, amount) => sum + Number(amount || 0), 0);
-
-    if (newTotalForOthers > expense.amount) {
+    if (!expense || isSplitInvalid) {
         toast({
             variant: 'destructive',
             title: 'Split Error',
-            description: `The total split for others (${formatCurrency(newTotalForOthers)}) cannot exceed the total expense amount (${formatCurrency(expense.amount)}).`,
+            description: isIndividualSplitTooHigh 
+                ? 'An individual split cannot exceed the total expense amount.'
+                : 'The total split for others cannot exceed the total expense amount.',
         });
         return;
     }
@@ -294,7 +298,7 @@ export default function TransactionDetailsPage() {
                                         type="text"
                                         value={formatCurrency(myEditedShare)}
                                         disabled
-                                        className="pl-3 bg-transparent border-none text-right"
+                                        className={`pl-3 bg-transparent border-none text-right ${isTotalSplitTooHigh ? 'text-destructive' : ''}`}
                                     />
                                 </div>
                             </div>
@@ -312,7 +316,11 @@ export default function TransactionDetailsPage() {
                                 </TooltipTrigger>
                                 {isSplitInvalid && (
                                   <TooltipContent>
-                                    <p>Total split cannot exceed expense amount.</p>
+                                    <p>
+                                      {isIndividualSplitTooHigh
+                                        ? 'A single split cannot exceed the expense amount.'
+                                        : 'Total split cannot exceed expense amount.'}
+                                    </p>
                                   </TooltipContent>
                                 )}
                               </Tooltip>
