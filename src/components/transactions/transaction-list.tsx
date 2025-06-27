@@ -203,11 +203,11 @@ export default function TransactionList() {
                         onClick={() => handleItemClick(expense.id)}
                     >
                         <div className="p-3">
-                            <div className="flex items-center gap-3">
+                            <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
                                 <div className="h-10 w-10 bg-background rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
                                     <Icon className="h-5 w-5 text-muted-foreground" />
                                 </div>
-                                <div className="flex-1 min-w-0">
+                                <div className="min-w-0">
                                     <p className="font-medium truncate text-card-foreground">
                                         {expense.note || category?.name || 'Uncategorized'}
                                     </p>
@@ -218,7 +218,7 @@ export default function TransactionList() {
                                         }
                                     </p>
                                 </div>
-                                <div className="flex-shrink-0 pl-2 text-right">
+                                <div className="text-right">
                                     <p className={cn(
                                         "font-semibold",
                                         expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
