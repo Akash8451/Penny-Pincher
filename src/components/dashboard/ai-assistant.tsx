@@ -13,7 +13,7 @@ import { askAssistant } from '@/ai/flows/assistant-flow';
 import type { Category, Expense, Person } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
+import { useSpeech } from '@/contexts/speech-context';
 
 interface AIAssistantProps {
     expenses: Expense[];
@@ -36,30 +36,25 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
     { role: 'ai', text: "Hello! How can I help you today? You can ask me about your finances or tell me to log an expense." }
   ]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const { isListening, startListening, stopListening, speak, cancelSpeech } = useSpeech();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // When component unmounts, cancel any ongoing speech
+  useEffect(() => {
+    return () => {
+      cancelSpeech();
+    };
+  }, [cancelSpeech]);
 
   const handleVoiceResult = (transcript: string) => {
     setQuery(transcript);
     handleAsk(transcript);
   };
   
-  const handleVoiceError = (error: string) => {
-    let description = 'An unknown error occurred. Please try again.';
-    if (error === 'not-allowed' || error === 'service-not-allowed') {
-      description = 'Microphone access denied. Please enable it in your browser settings.';
-    } else if (error === 'no-speech') {
-      description = 'No speech was detected. Please make sure your microphone is working.';
-    } else if (error === 'network') {
-      description = 'A network error occurred. Please check your connection and try again.';
-    }
-    toast({ variant: 'destructive', title: 'Speech Recognition Error', description });
-  };
-  
-  const { isListening, toggleListening } = useSpeechRecognition({ onResult: handleVoiceResult, onError: handleVoiceError });
-
   const handleAsk = async (currentQuery?: string) => {
     const queryToSubmit = (typeof currentQuery === 'string' ? currentQuery : query).trim();
     if (!queryToSubmit) return;
@@ -71,13 +66,8 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
     try {
         const result = await askAssistant({ query: queryToSubmit, expenses, categories, people });
         
-        // Before speaking, cancel any ongoing speech to prevent overlap.
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const spokenText = result.answer.replace(/[*_`~#]/g, ''); // Remove markdown for cleaner speech
-            const utterance = new SpeechSynthesisUtterance(spokenText);
-            speechSynthesis.speak(utterance);
-        }
+        const spokenText = result.answer.replace(/[*_`~#]/g, '');
+        speak(spokenText);
         
         setMessages(prev => [...prev, { role: 'ai', text: result.answer }]);
 
@@ -88,12 +78,25 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
     } catch (error) {
         console.error("AI Assistant Error:", error);
         const errorMessage = "I've encountered an issue and can't respond right now. Please try again later.";
-        const errorDescription = error instanceof Error ? error.message : 'An unknown error occurred.';
-
+        
         setMessages(prev => [...prev, { role: 'ai', text: errorMessage }]);
-        toast({ variant: 'destructive', title: 'AI Assistant Error', description: errorDescription });
+
+        if (error instanceof Error && (error.message.includes('429') || error.message.toLowerCase().includes('rate limit'))) {
+             toast({ variant: 'destructive', title: 'Rate Limit Exceeded', description: "You've made too many requests. Please wait a moment." });
+        } else {
+            const errorDescription = error instanceof Error ? error.message : 'An unknown error occurred.';
+            toast({ variant: 'destructive', title: 'AI Assistant Error', description: errorDescription });
+        }
     } finally {
         setIsLoading(false);
+    }
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening(handleVoiceResult);
     }
   };
 

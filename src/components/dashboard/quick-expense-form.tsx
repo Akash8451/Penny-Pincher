@@ -13,17 +13,17 @@ import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Mic, Paperclip, PlusCircle, Users, X, ZoomIn, UserPlus } from 'lucide-react';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Image from 'next/image';
-import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { cn } from '@/lib/utils';
+import { useSpeech } from '@/contexts/speech-context';
 
 interface QuickExpenseFormProps {
   categories: Category[];
@@ -59,6 +59,8 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
   const [splitGroupName, setSplitGroupName] = React.useState('');
   const [isVoiceLoading, setIsVoiceLoading] = useState(false);
   const [newPersonName, setNewPersonName] = React.useState('');
+
+  const { isListening, startListening, stopListening } = useSpeech();
 
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
@@ -103,7 +105,6 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
     try {
       const result = await logExpenseFromVoice({ query: transcript, categories });
 
-      // If AI gets all required info, log it automatically.
       if (result.amount && result.categoryId) {
         const newExpense: Omit<Expense, 'id' | 'date'> = {
           type: 'expense',
@@ -112,47 +113,41 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
           note: result.note || '',
         };
         onAddExpense(newExpense);
-        onSuccess(); // Close the sheet. The parent component will show a toast.
+        onSuccess();
       } else {
-        // Otherwise, populate what we have and let the user finish.
         if (result.amount) form.setValue('amount', result.amount as any);
         if (result.categoryId) form.setValue('categoryId', result.categoryId);
         if (result.note) form.setValue('note', result.note);
         toast({
-          variant: 'destructive',
-          title: "More information needed",
+          variant: 'default',
+          title: "Almost there!",
           description: "AI couldn't get all the details. Please complete the form manually."
         });
       }
     } catch (error) {
       console.error("Voice expense logging error:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-      toast({
-        variant: 'destructive',
-        title: "Voice Command Error",
-        description: errorMessage
-      });
+      if (error instanceof Error && (error.message.includes('429') || error.message.toLowerCase().includes('rate limit'))) {
+           toast({ variant: 'destructive', title: 'Rate Limit Exceeded', description: "You've made too many requests. Please wait a moment." });
+      } else {
+          const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+          toast({
+            variant: 'destructive',
+            title: "Voice Command Error",
+            description: errorMessage
+          });
+      }
     } finally {
       setIsVoiceLoading(false);
     }
   };
 
-
-  const handleVoiceError = (error: string) => {
-      let description = 'An unknown error occurred.';
-      if (error === 'not-allowed' || error === 'service-not-allowed') {
-          description = 'Microphone access denied. Please enable it in your browser settings.';
-      } else if (error === 'no-speech') {
-          description = 'No speech was detected. Please try again.';
-      }
-      toast({ variant: 'destructive', title: 'Speech Recognition Error', description });
-      setIsVoiceLoading(false);
+  const toggleListening = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening(handleVoiceResult);
+    }
   };
-
-  const { isListening, toggleListening } = useSpeechRecognition({
-      onResult: handleVoiceResult,
-      onError: handleVoiceError,
-  });
 
   const handleClearReceipt = () => {
     form.setValue('receipt', null);
