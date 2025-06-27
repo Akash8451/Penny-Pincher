@@ -62,6 +62,7 @@ function CategoryForm({
   const [name, setName] = useState(category?.name || '');
   const [group, setGroup] = useState(category?.group || '');
   const [icon, setIcon] = useState(category?.icon || 'Package');
+  const [iconSearch, setIconSearch] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,6 +70,10 @@ function CategoryForm({
       onSave({ name, group, icon });
     }
   };
+
+  const filteredIcons = iconList.filter((i) =>
+    i.toLowerCase().includes(iconSearch.toLowerCase())
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -87,7 +92,15 @@ function CategoryForm({
               <SelectValue placeholder="Select an icon" />
             </SelectTrigger>
             <SelectContent>
-                {iconList.map((iconName) => {
+                <div className="p-2">
+                    <Input
+                        placeholder="Search icons..."
+                        value={iconSearch}
+                        onChange={(e) => setIconSearch(e.target.value)}
+                        className="w-full"
+                    />
+                </div>
+                {filteredIcons.map((iconName) => {
                     const Icon = icons[iconName as keyof typeof icons];
                     return (
                         <SelectItem key={iconName} value={iconName}>
@@ -98,6 +111,11 @@ function CategoryForm({
                         </SelectItem>
                     );
                 })}
+                {filteredIcons.length === 0 && (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                        No icons found.
+                    </div>
+                )}
             </SelectContent>
         </Select>
       </div>
@@ -154,7 +172,7 @@ export default function CategoryManager() {
                     return (
                         <div key={cat.id} className="flex items-center p-3 rounded-lg bg-accent/50">
                             <Icon className="h-5 w-5 mr-3 text-accent-foreground" />
-                            <span className="flex-1 font-medium">{cat.name}</span>
+                            <span className="flex-1 font-medium truncate">{cat.name}</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
