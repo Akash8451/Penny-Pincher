@@ -116,9 +116,15 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
         let title = "Could not process voice command.";
         let description = "Please try speaking again.";
         
-        if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && (error.message.includes('503') || error.message.toLowerCase().includes('overloaded'))) {
-            title = 'AI Service Overloaded';
-            description = 'The voice service is busy. Please try again in a moment.';
+        if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+            const lowerCaseMessage = (error.message as string).toLowerCase();
+            if (lowerCaseMessage.includes('503') || lowerCaseMessage.includes('overloaded')) {
+                title = 'AI Service Overloaded';
+                description = 'The voice service is busy. Please try again in a moment.';
+            } else if (lowerCaseMessage.includes('429') || lowerCaseMessage.includes('too many requests') || lowerCaseMessage.includes('quota')) {
+                title = 'Request Limit Exceeded';
+                description = 'You have made too many requests. Please wait and try again.';
+            }
         }
         
         toast({ variant: 'destructive', title, description });

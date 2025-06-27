@@ -88,9 +88,15 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
         let errorMessage = "I've encountered an issue and can't respond right now. Please try again later.";
         let errorDescription = 'Could not get a response from the AI service.';
 
-        if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && (error.message.includes('503') || error.message.toLowerCase().includes('overloaded'))) {
-            errorMessage = "The AI service is currently experiencing high demand. Please try your request again in a few moments.";
-            errorDescription = "Service is temporarily unavailable.";
+        if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+            const lowerCaseMessage = error.message.toLowerCase();
+            if (lowerCaseMessage.includes('503') || lowerCaseMessage.includes('overloaded')) {
+                errorMessage = "The AI service is currently experiencing high demand. Please try your request again in a few moments.";
+                errorDescription = "Service is temporarily unavailable.";
+            } else if (lowerCaseMessage.includes('429') || lowerCaseMessage.includes('too many requests') || lowerCaseMessage.includes('quota')) {
+                 errorMessage = "You've made too many requests in a short period. Please wait a moment before trying again.";
+                 errorDescription = "Request limit exceeded.";
+            }
         }
 
         setMessages(prev => [...prev, { role: 'ai', text: errorMessage }]);
