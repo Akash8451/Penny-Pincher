@@ -228,7 +228,7 @@ export default function TransactionList() {
 
                         {isSelected && (
                             <div className="mt-3 flex justify-end items-center gap-4 animate-fade-in-up" onClick={(e) => e.stopPropagation()}>
-                                <AlertDialog onOpenChange={(open) => !open && setSelectedExpenseId(null)}>
+                                <AlertDialog>
                                   <AlertDialogTrigger asChild>
                                       <Button variant="destructive" size="sm" className="w-9 h-9 px-0 rounded-full">
                                           <Trash2 className="h-4 w-4" />
@@ -243,7 +243,7 @@ export default function TransactionList() {
                                           </AlertDialogDescription>
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
-                                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                          <AlertDialogCancel onClick={() => setSelectedExpenseId(null)}>Cancel</AlertDialogCancel>
                                           <AlertDialogAction onClick={() => handleDeleteExpense(expense.id)} className="bg-destructive hover:bg-destructive/90">
                                           Delete
                                           </AlertDialogAction>

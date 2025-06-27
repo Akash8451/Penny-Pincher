@@ -7,7 +7,7 @@ import { useLocalStorage } from '@/hooks/use-local-storage';
 import type { Category, Expense, Person } from '@/lib/types';
 import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import QuickExpenseForm from '@/components/dashboard/quick-expense-form';
 import QuickIncomeForm from '@/components/dashboard/quick-income-form';
 import PaymentRequestForm from '@/components/dashboard/payment-request-form';
@@ -18,6 +18,7 @@ import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '../ui/scroll-area';
 
 
 export default function FloatingActionButton() {
@@ -118,18 +119,23 @@ export default function FloatingActionButton() {
                             <p>Add New Transaction</p>
                         </TooltipContent>
                     </Tooltip>
-                    <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-lg bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
-                    <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
-                    <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col">
-                            <div className="flex justify-center p-4">
-                                <TabsList>
-                                    <TabsTrigger value="expense">Expense</TabsTrigger>
-                                    <TabsTrigger value="income">Income</TabsTrigger>
-                                    <TabsTrigger value="request">Request</TabsTrigger>
-                                </TabsList>
-                            </div>
-                            <div className="flex-grow overflow-y-auto">
-                                <TabsContent value="expense" className="p-6 pt-0 mt-0">
+                    <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-2xl bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
+                    <SheetHeader className="p-4 pt-2 text-center">
+                        <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
+                        {/* Drag handle for mobile */}
+                        <div className="mx-auto h-1.5 w-12 flex-shrink-0 rounded-full bg-muted-foreground/30" />
+                    </SheetHeader>
+                    <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col overflow-hidden">
+                        <div className="flex justify-center px-4 pb-4 border-b">
+                            <TabsList>
+                                <TabsTrigger value="expense">Expense</TabsTrigger>
+                                <TabsTrigger value="income">Income</TabsTrigger>
+                                <TabsTrigger value="request">Request</TabsTrigger>
+                            </TabsList>
+                        </div>
+                        <ScrollArea className="flex-grow">
+                            <div className="p-6 pt-4">
+                                <TabsContent value="expense" className="mt-0">
                                     <QuickExpenseForm 
                                         categories={categories.filter(c => c.group !== 'Income')} 
                                         people={people} 
@@ -137,14 +143,14 @@ export default function FloatingActionButton() {
                                         onSuccess={() => setIsOpen(false)}
                                     />
                                 </TabsContent>
-                                <TabsContent value="income" className="p-6 pt-0 mt-0">
+                                <TabsContent value="income" className="mt-0">
                                     <QuickIncomeForm 
                                         categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
                                         onAddIncome={handleAddIncome}
                                         onSuccess={() => setIsOpen(false)}
                                     />
                                 </TabsContent>
-                                <TabsContent value="request" className="p-6 pt-0 mt-0">
+                                <TabsContent value="request" className="mt-0">
                                     <PaymentRequestForm
                                         people={people}
                                         onAddRequest={handleAddPaymentRequest}
@@ -152,7 +158,8 @@ export default function FloatingActionButton() {
                                         />
                                 </TabsContent>
                             </div>
-                        </Tabs>
+                        </ScrollArea>
+                    </Tabs>
                     </SheetContent>
                 </Sheet>
             </div>
