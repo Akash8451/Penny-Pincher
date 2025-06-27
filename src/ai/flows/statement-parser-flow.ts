@@ -76,7 +76,7 @@ Statement File:
 1.  Analyze the provided file, which is either a PDF or CSV bank/credit card statement.
 2.  Identify every individual transaction.
 3.  For each transaction, extract the following details:
-    *   **description**: The full transaction description.
+    *   **description**: The full transaction description from the statement.
     *   **amount**: The transaction amount as a positive number.
     *   **date**: The date of the transaction. Format it as YYYY-MM-DD. If the year is not present, infer it from the statement's date range or the current date.
     *   **type**: Determine if it's an 'expense' (debit, withdrawal, payment) or 'income' (credit, deposit).
@@ -91,7 +91,7 @@ const statementParserFlow = ai.defineFlow(
     outputSchema: ParseStatementOutputSchema,
   },
   async (input) => {
-    const response = await prompt(input);
+    const response = await prompt(input, { model: 'googleai/gemini-1.5-flash' });
     const output = response.output;
 
     if (!output) {
