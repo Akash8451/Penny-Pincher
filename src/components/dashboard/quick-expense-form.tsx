@@ -114,13 +114,11 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
         toast({ title: "✔️ Fields populated by voice" });
     } catch (error) {
         console.error("Voice expense logging error:", error);
-        let title = "Could not process voice command.";
-        let description = error instanceof Error ? error.message : "An unknown error occurred. Please try again.";
-        if (typeof description === 'string' && description.includes('rate limit')) {
-            title = "Request Limit Exceeded";
-            description = "You've made too many requests. Please wait a moment before trying again.";
-        }
-        toast({ variant: 'destructive', title, description });
+        toast({ 
+            variant: 'destructive', 
+            title: "Voice Command Error", 
+            description: error instanceof Error ? error.message : "An unknown error occurred." 
+        });
     } finally {
         setIsVoiceLoading(false);
     }

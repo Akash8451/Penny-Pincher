@@ -71,7 +71,9 @@ export default function AIAssistant({ expenses, categories, people, onLogExpense
     try {
         const result = await askAssistant({ query: queryToSubmit, expenses, categories, people });
         
-        if ('speechSynthesis' in window && window.speechSynthesis.speaking === false) {
+        // Before speaking, cancel any ongoing speech to prevent overlap.
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
             const spokenText = result.answer.replace(/[*_`~#]/g, ''); // Remove markdown for cleaner speech
             const utterance = new SpeechSynthesisUtterance(spokenText);
             speechSynthesis.speak(utterance);
