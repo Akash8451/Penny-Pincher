@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mic, Paperclip, PlusCircle, Users, X, ZoomIn } from 'lucide-react';
+import { Loader2, Mic, Paperclip, PlusCircle, Users, X, ZoomIn, UserPlus } from 'lucide-react';
 import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,10 +23,10 @@ import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Image from 'next/image';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 interface QuickExpenseFormProps {
   categories: Category[];
-  people: Person[];
   onAddExpense: (expense: Omit<Expense, 'id' | 'date'>) => void;
   onSuccess: () => void;
 }
@@ -42,9 +42,10 @@ const expenseSchema = z.object({
 });
 
 
-export default function QuickExpenseForm({ categories, people, onAddExpense, onSuccess }: QuickExpenseFormProps) {
+export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }: QuickExpenseFormProps) {
   const { toast } = useToast();
   const formatCurrency = useCurrencyFormatter();
+  const [people, setPeople] = useLocalStorage<Person[]>('people', []);
   const form = useForm<z.infer<typeof expenseSchema>>({
     resolver: zodResolver(expenseSchema),
     defaultValues: { amount: '', categoryId: '', note: '' },
@@ -57,6 +58,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
   const [splitGroupName, setSplitGroupName] = React.useState('');
   const [isVoiceLoading, setIsVoiceLoading] = useState(false);
+  const [newPersonName, setNewPersonName] = React.useState('');
 
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
@@ -64,6 +66,34 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
       return acc;
     }, {} as Record<string, Category[]>);
   }, [categories]);
+
+  const handleAddNewPerson = () => {
+    const trimmedName = newPersonName.trim();
+    if (!trimmedName) return;
+
+    if (people.some(p => p.name.toLowerCase() === trimmedName.toLowerCase())) {
+        toast({
+            variant: 'destructive',
+            title: 'Person already exists',
+            description: `"${trimmedName}" is already in your contacts.`,
+        });
+        return;
+    }
+
+    const newPerson: Person = {
+        id: `person-${new Date().getTime()}`,
+        name: trimmedName,
+        tags: [],
+    };
+    
+    setPeople(prev => [...prev, newPerson]);
+    setSelectedPeople(prev => [...prev, newPerson.id]);
+    setNewPersonName('');
+    toast({
+        title: `Added "${trimmedName}"`,
+        description: 'They have been selected for the split.',
+    });
+  };
 
   const handleVoiceResult = async (transcript: string) => {
     if (!transcript) return;
@@ -220,6 +250,35 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     setCustomSplits(newSplits);
   }
   
+  const AddPersonForm = (
+    <div className="mt-4 pt-4 border-t">
+        <Label htmlFor="new-person-name" className="text-xs text-muted-foreground">Add someone new to this split?</Label>
+        <div className="flex items-center gap-2 mt-1">
+            <Input
+                id="new-person-name"
+                placeholder="New person's name"
+                value={newPersonName}
+                onChange={(e) => setNewPersonName(e.target.value)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddNewPerson();
+                    }
+                }}
+            />
+            <Button
+                type="button"
+                variant="secondary"
+                size="icon"
+                onClick={handleAddNewPerson}
+                disabled={!newPersonName.trim()}
+            >
+                <UserPlus className="h-4 w-4" />
+            </Button>
+        </div>
+    </div>
+  );
+
   return (
     <div className='space-y-2'>
         <div className="text-center relative">
@@ -404,9 +463,10 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
                           />
                           <Label htmlFor={`person-${person.id}`} className="flex-1 cursor-pointer">{person.name}</Label>
                         </div>
-                      )) : <p className='text-sm text-muted-foreground text-center'>Add people in the 'People' tab first.</p>}
+                      )) : <p className='text-sm text-muted-foreground text-center'>No people added yet.</p>}
                     </div>
                     </ScrollArea>
+                    {AddPersonForm}
                     {selectedPeople.length > 0 && (
                       <>
                         <Separator />

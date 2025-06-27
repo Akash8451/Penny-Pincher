@@ -24,7 +24,6 @@ export default function FloatingActionButton() {
     const [isOpen, setIsOpen] = useState(false);
     const [, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
     const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
-    const [people] = useLocalStorage<Person[]>('people', []);
     const { toast } = useToast();
     const pathname = usePathname();
     const formatCurrency = useCurrencyFormatter();
@@ -64,6 +63,7 @@ export default function FloatingActionButton() {
       
     const handleAddPaymentRequest = (request: Omit<Expense, 'id'|'date'|'type'|'splitWith'|'categoryId'> & { personId: string }) => {
         const { personId, amount, note } = request;
+        const people = JSON.parse(window.localStorage.getItem('people') || '[]') as Person[];
         const personName = people.find(p => p.id === personId)?.name || 'Someone';
 
         const newRequest: Expense = {
@@ -124,20 +124,19 @@ export default function FloatingActionButton() {
                             {/* Drag handle for mobile */}
                             <div className="mx-auto h-1.5 w-12 flex-shrink-0 rounded-full bg-muted-foreground/30" />
                         </SheetHeader>
-                        <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col overflow-y-hidden">
-                            <div className="flex justify-center px-4 pb-4 border-b flex-shrink-0">
-                                <TabsList>
-                                    <TabsTrigger value="expense">Expense</TabsTrigger>
-                                    <TabsTrigger value="income">Income</TabsTrigger>
-                                    <TabsTrigger value="request">Request</TabsTrigger>
-                                </TabsList>
-                            </div>
-                            <div className="flex-grow overflow-y-auto">
+                        <div className="flex-grow overflow-y-auto">
+                            <Tabs defaultValue="expense" className="w-full">
+                                <div className="flex justify-center px-4 pb-4 border-b flex-shrink-0">
+                                    <TabsList>
+                                        <TabsTrigger value="expense">Expense</TabsTrigger>
+                                        <TabsTrigger value="income">Income</TabsTrigger>
+                                        <TabsTrigger value="request">Request</TabsTrigger>
+                                    </TabsList>
+                                </div>
                                 <div className="p-6 pt-4">
                                     <TabsContent value="expense" className="mt-0">
                                         <QuickExpenseForm 
                                             categories={categories.filter(c => c.group !== 'Income')} 
-                                            people={people} 
                                             onAddExpense={handleAddExpense}
                                             onSuccess={() => setIsOpen(false)}
                                         />
@@ -151,14 +150,13 @@ export default function FloatingActionButton() {
                                     </TabsContent>
                                     <TabsContent value="request" className="mt-0">
                                         <PaymentRequestForm
-                                            people={people}
                                             onAddRequest={handleAddPaymentRequest}
                                             onSuccess={() => setIsOpen(false)}
                                             />
                                     </TabsContent>
                                 </div>
-                            </div>
-                        </Tabs>
+                            </Tabs>
+                        </div>
                     </SheetContent>
                 </Sheet>
             </div>
