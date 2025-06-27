@@ -157,7 +157,6 @@ export default function SettlementsManager() {
                     <div className="text-sm text-green-500 font-medium">Owes you {formatCurrency(balance)}</div>
                   </div>
                 </div>
-                <ChevronDown className="h-5 w-5 shrink-0 transition-transform duration-200 text-muted-foreground" />
               </AccordionTrigger>
               <AccordionContent className="p-4 rounded-lg rounded-t-none bg-muted/30 animate-fade-in-up">
                 <div className="space-y-3">
