@@ -16,7 +16,6 @@ import { Loader2, Mic, Paperclip, PlusCircle, Users, X, ZoomIn, UserPlus } from 
 import React, { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
@@ -86,12 +85,8 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
         tags: [],
     };
     
-    // Explicitly create new arrays before setting state to ensure re-render
-    const newPeopleList = [...people, newPerson];
-    const newSelectedPeopleList = [...selectedPeople, newPerson.id];
-
-    setPeople(newPeopleList);
-    setSelectedPeople(newSelectedPeopleList);
+    setPeople(prev => [...prev, newPerson]);
+    setSelectedPeople(prev => [...prev, newPerson.id]);
 
     setNewPersonName('');
     toast({
@@ -121,7 +116,7 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
         let title = "Could not process voice command.";
         let description = "Please try speaking again.";
         
-        if (error instanceof Error && (error.message.includes('503') || error.message.toLowerCase().includes('overloaded'))) {
+        if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string' && (error.message.includes('503') || error.message.toLowerCase().includes('overloaded'))) {
             title = 'AI Service Overloaded';
             description = 'The voice service is busy. Please try again in a moment.';
         }
@@ -329,6 +324,12 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
                         placeholder="0.00"
                         {...field}
                         value={field.value ?? ''}
+                        onChange={(e) => {
+                            field.onChange(e);
+                            if (selectedPeople.length > 0) {
+                                setCustomSplits({});
+                            }
+                        }}
                       />
                     </FormControl>
                     <FormMessage />

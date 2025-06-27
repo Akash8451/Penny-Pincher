@@ -9,6 +9,7 @@ import { DEFAULT_CATEGORIES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -105,7 +106,7 @@ export default function StatementImporter() {
       } catch (err) {
         console.error("Parsing error:", err);
         let errorMessage = "An unexpected error occurred while parsing the statement. Please try again.";
-        if (err instanceof Error && (err.message.includes('503') || err.message.toLowerCase().includes('overloaded'))) {
+        if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string' && (err.message.includes('503') || err.message.toLowerCase().includes('overloaded'))) {
             errorMessage = "The AI service is currently overloaded and cannot parse the statement. Please try again in a few moments.";
         }
         setError(errorMessage);
