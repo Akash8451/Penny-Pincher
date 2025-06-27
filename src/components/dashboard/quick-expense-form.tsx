@@ -23,6 +23,7 @@ import Image from 'next/image';
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
 import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { cn } from '@/lib/utils';
 
 interface QuickExpenseFormProps {
   categories: Category[];
@@ -113,8 +114,12 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
         toast({ title: "✔️ Fields populated by voice" });
     } catch (error) {
         console.error("Voice expense logging error:", error);
-        const title = "Could not process voice command.";
-        const description = error instanceof Error ? error.message : "An unknown error occurred. Please try again.";
+        let title = "Could not process voice command.";
+        let description = error instanceof Error ? error.message : "An unknown error occurred. Please try again.";
+        if (typeof description === 'string' && description.includes('rate limit')) {
+            title = "Request Limit Exceeded";
+            description = "You've made too many requests. Please wait a moment before trying again.";
+        }
         toast({ variant: 'destructive', title, description });
     } finally {
         setIsVoiceLoading(false);
@@ -293,7 +298,7 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
                     size="icon"
                     onClick={toggleListening}
                     disabled={isVoiceLoading}
-                    className="rounded-full"
+                    className={cn("rounded-full", isListening && 'animate-pulse')}
                 >
                     {isVoiceLoading ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
