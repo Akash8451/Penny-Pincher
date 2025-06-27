@@ -40,7 +40,7 @@ export default function VaultPage() {
 
   const BackButton = () => (
     <div className="mb-4">
-        <Button onClick={() => router.back()} variant="outline" size="sm" className="rounded-full">
+        <Button onClick={() => router.back()} variant="outline" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
         </Button>

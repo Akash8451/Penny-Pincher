@@ -3,13 +3,9 @@
 
 import { AppHeader } from '@/components/layout/app-header';
 import AIAssistant from '@/components/dashboard/ai-assistant';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import type { Category, Expense, Person } from '@/lib/types';
-import { DEFAULT_CATEGORIES } from '@/lib/constants';
+import { useExpenses } from '@/hooks/use-expenses';
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
@@ -23,12 +19,8 @@ function AssistantSkeleton() {
 }
 
 export default function AssistantPage() {
-  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
-  const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
-  const [people] = useLocalStorage<Person[]>('people', []);
+  const { expenses, categories, people, addTransaction } = useExpenses();
   const [isClient, setIsClient] = useState(false);
-  const { toast } = useToast();
-  const formatCurrency = useCurrencyFormatter();
   const router = useRouter();
 
   useEffect(() => {
@@ -36,18 +28,9 @@ export default function AssistantPage() {
   }, []);
 
   const handleLogExpense = (details: { amount: number, categoryId: string, note: string }) => {
-    const newExpense: Expense = {
-      ...details,
-      id: `exp-${new Date().getTime()}`,
-      type: 'expense',
-      date: new Date().toISOString(),
-    };
-    setExpenses(prev => [newExpense, ...prev]);
-
-    const categoryName = categories.find(c => c.id === details.categoryId)?.name || 'a category';
-    toast({
-        title: `✔️ ${formatCurrency(details.amount)} added`,
-        description: `Logged to ${categoryName}.`,
+    addTransaction({
+        ...details,
+        type: 'expense'
     });
   };
   
@@ -56,7 +39,7 @@ export default function AssistantPage() {
       <AppHeader title="AI Assistant" />
       <div className="flex-1 flex flex-col p-4 md:p-6">
         <div className="mb-4">
-            <Button onClick={() => router.back()} variant="outline" size="sm" className="rounded-full">
+            <Button onClick={() => router.back()} variant="outline" size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
             </Button>

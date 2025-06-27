@@ -3,83 +3,46 @@
 
 import React, { useState } from 'react';
 import { Plus, Wand2 } from 'lucide-react';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import type { Category, Expense, Person } from '@/lib/types';
-import { DEFAULT_CATEGORIES } from '@/lib/constants';
+import type { Expense, Person } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from '@/components/ui/sheet';
 import QuickExpenseForm from '@/components/dashboard/quick-expense-form';
 import QuickIncomeForm from '@/components/dashboard/quick-income-form';
 import PaymentRequestForm from '@/components/dashboard/payment-request-form';
-import { useToast } from '@/hooks/use-toast';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useExpenses } from '@/hooks/use-expenses';
 
 
 export default function FloatingActionButton() {
     const [isOpen, setIsOpen] = useState(false);
-    const [, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
-    const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
-    const { toast } = useToast();
+    const { addTransaction, categories } = useExpenses();
     const pathname = usePathname();
-    const formatCurrency = useCurrencyFormatter();
 
     const isHidden = pathname === '/assistant';
     
     const handleAddExpense = (expense: Omit<Expense, 'id' | 'date'>) => {
-        const newExpense: Expense = {
-          ...expense,
-          id: `exp-${new Date().getTime()}`,
-          date: new Date().toISOString(),
-        };
-        setExpenses(prev => [newExpense, ...prev]);
-
-        const categoryName = categories.find(c => c.id === expense.categoryId)?.name || 'a category';
-        toast({
-            title: `✔️ ${formatCurrency(expense.amount)} added`,
-            description: `Logged to ${categoryName}.`,
-        })
+        addTransaction(expense);
     };
 
     const handleAddIncome = (income: Omit<Expense, 'id' | 'date' | 'type'>) => {
-        const newIncome: Expense = {
-            ...income,
-            id: `inc-${new Date().getTime()}`,
-            type: 'income',
-            date: new Date().toISOString(),
-        };
-        setExpenses(prev => [newIncome, ...prev]);
-
-        const categoryName = categories.find(c => c.id === income.categoryId)?.name || 'a category';
-        toast({
-            title: `💰 ${formatCurrency(income.amount)} received`,
-            description: `Logged to ${categoryName}.`,
-        })
+        addTransaction({ ...income, type: 'income' });
     };
       
     const handleAddPaymentRequest = (request: Omit<Expense, 'id'|'date'|'type'|'splitWith'|'categoryId'> & { personId: string }) => {
         const { personId, amount, note } = request;
-        const people = JSON.parse(window.localStorage.getItem('people') || '[]') as Person[];
-        const personName = people.find(p => p.id === personId)?.name || 'Someone';
 
-        const newRequest: Expense = {
+        const newRequest: Omit<Expense, 'id'|'date'> = {
             amount,
             note,
-            id: `exp-${new Date().getTime()}`,
-            type: 'expense', // It's an "expense" where your share is 0, creating a receivable
-            date: new Date().toISOString(),
+            type: 'expense',
             categoryId: 'cat-12', // Payment Request category
             splitWith: [{ personId: personId, amount: amount, settled: false }],
         };
-        setExpenses(prev => [newRequest, ...prev]);
-        toast({
-            title: `📨 Request Sent`,
-            description: `A request for ${formatCurrency(amount)} was sent to ${personName}.`,
-        })
+        addTransaction(newRequest);
     };
       
     return (

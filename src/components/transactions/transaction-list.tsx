@@ -9,9 +9,8 @@ import { format, isWithinInterval, startOfDay, endOfDay } from 'date-fns'
 import jsPDF from 'jspdf'
 import autoTable from 'jspdf-autotable'
 
-import { useLocalStorage } from '@/hooks/use-local-storage'
+import { useExpenses } from '@/hooks/use-expenses'
 import type { Expense, Category, Person } from '@/lib/types'
-import { DEFAULT_CATEGORIES } from '@/lib/constants'
 import { DateRangePicker } from './date-range-picker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -32,21 +31,17 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter'
-import { useToast } from '@/hooks/use-toast'
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
   return iconName in Lucide;
 }
 
 export default function TransactionList() {
-  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', [])
-  const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES)
-  const [people] = useLocalStorage<Person[]>('people', [])
+  const { expenses, categories, people, deleteTransaction } = useExpenses()
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined)
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const formatCurrency = useCurrencyFormatter();
-  const { toast } = useToast();
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
   const peopleMap = useMemo(() => new Map(people.map((p) => [p.id, p.name])), [people]);
@@ -74,36 +69,9 @@ export default function TransactionList() {
     setSelectedExpenseId(prevId => (prevId === id ? null : id));
   };
   
-  const handleDeleteExpense = (expenseId: string) => {
-    setExpenses(prev => {
-      const expenseToDelete = prev.find(e => e.id === expenseId);
-
-      if (expenseToDelete?.type === 'income' && expenseToDelete.relatedExpenseId && expenseToDelete.relatedPersonId) {
-        const updatedExpenses = prev.map(e => {
-          if (e.id === expenseToDelete.relatedExpenseId) {
-            return {
-              ...e,
-              splitWith: e.splitWith?.map(s => 
-                s.personId === expenseToDelete.relatedPersonId ? { ...s, settled: false } : s
-              ),
-            };
-          }
-          return e;
-        });
-        return updatedExpenses.filter(e => e.id !== expenseId);
-      }
-
-      const relatedIncomeIds = prev
-        .filter(e => e.type === 'income' && e.relatedExpenseId === expenseId)
-        .map(e => e.id);
-      
-      return prev.filter(e => e.id !== expenseId && !relatedIncomeIds.includes(e.id));
-    });
+  const handleDeleteClick = (expenseId: string) => {
+    deleteTransaction(expenseId);
     setSelectedExpenseId(null);
-    toast({
-      title: 'Transaction Deleted',
-      description: 'The transaction has been removed.',
-    });
   };
   
   const handleExportCSV = () => {
@@ -253,7 +221,7 @@ export default function TransactionList() {
                                       </AlertDialogHeader>
                                       <AlertDialogFooter>
                                           <AlertDialogCancel onClick={() => setSelectedExpenseId(null)}>Cancel</AlertDialogCancel>
-                                          <AlertDialogAction onClick={() => handleDeleteExpense(expense.id)} className="bg-destructive hover:bg-destructive/90">
+                                          <AlertDialogAction onClick={() => handleDeleteClick(expense.id)} className="bg-destructive hover:bg-destructive/90">
                                           Delete
                                           </AlertDialogAction>
                                       </AlertDialogFooter>

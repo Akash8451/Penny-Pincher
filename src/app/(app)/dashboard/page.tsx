@@ -3,17 +3,14 @@
 
 import { AppHeader } from '@/components/layout/app-header';
 import RecentExpenses from '@/components/dashboard/recent-expenses';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import type { Category, Expense, Person } from '@/lib/types';
-import { DEFAULT_CATEGORIES } from '@/lib/constants';
+import type { Expense } from '@/lib/types';
 import AIAssistant from '@/components/dashboard/ai-assistant';
 import SavingsGoal from '@/components/dashboard/savings-goal';
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AnalyticsOverview from '@/components/dashboard/analytics-overview';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useToast } from '@/hooks/use-toast';
-import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
+import { useExpenses } from '@/hooks/use-expenses';
 
 function DashboardSkeleton() {
   return (
@@ -32,67 +29,13 @@ function DashboardSkeleton() {
 }
 
 export default function DashboardPage() {
-  const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
-  const [categories] = useLocalStorage<Category[]>('categories', DEFAULT_CATEGORIES);
-  const [people] = useLocalStorage<Person[]>('people', []);
+  const { expenses, categories, people, addTransaction, deleteTransaction } = useExpenses();
   const [isClient, setIsClient] = useState(false);
-  const { toast } = useToast();
-  const formatCurrency = useCurrencyFormatter();
 
   useEffect(() => {
     // This effect runs only on the client, after the component has mounted.
     setIsClient(true);
   }, []);
-
-  const handleLogExpense = (details: { amount: number, categoryId: string, note: string }) => {
-    const newExpense: Expense = {
-      ...details,
-      id: `exp-${new Date().getTime()}`,
-      type: 'expense',
-      date: new Date().toISOString(),
-    };
-    setExpenses(prev => [newExpense, ...prev]);
-
-    const categoryName = categories.find(c => c.id === details.categoryId)?.name || 'a category';
-    toast({
-        title: `✔️ ${formatCurrency(details.amount)} added`,
-        description: `Logged to ${categoryName}.`,
-    });
-  };
-  
-  const handleDeleteExpense = (expenseId: string) => {
-    setExpenses(prev => {
-      const expenseToDelete = prev.find(e => e.id === expenseId);
-
-      // Case 1: Deleting a settlement income. Un-settle the original expense.
-      if (expenseToDelete?.type === 'income' && expenseToDelete.relatedExpenseId && expenseToDelete.relatedPersonId) {
-        const updatedExpenses = prev.map(e => {
-          if (e.id === expenseToDelete.relatedExpenseId) {
-            return {
-              ...e,
-              splitWith: e.splitWith?.map(s => 
-                s.personId === expenseToDelete.relatedPersonId ? { ...s, settled: false } : s
-              ),
-            };
-          }
-          return e;
-        });
-        return updatedExpenses.filter(e => e.id !== expenseId);
-      }
-
-      // Case 2: Deleting an original expense. Also delete related income settlements.
-      const relatedIncomeIds = prev
-        .filter(e => e.type === 'income' && e.relatedExpenseId === expenseId)
-        .map(e => e.id);
-      
-      return prev.filter(e => e.id !== expenseId && !relatedIncomeIds.includes(e.id));
-    });
-
-    toast({
-      title: 'Transaction Deleted',
-      description: 'The transaction has been removed.',
-    });
-  };
 
   if (!isClient) {
     return <DashboardSkeleton />;
@@ -110,12 +53,12 @@ export default function DashboardPage() {
                 expenses={expenses} 
                 categories={categories} 
                 people={people}
-                onLogExpense={handleLogExpense}
+                onLogExpense={(details) => addTransaction({ ...details, type: 'expense' })}
             />
         </div>
 
         {/* Analytics Section */}
-        <AnalyticsOverview expenses={expenses} categories={categories} onDeleteExpense={handleDeleteExpense} />
+        <AnalyticsOverview expenses={expenses} categories={categories} onDeleteExpense={deleteTransaction} />
         
         {/* Recent Transactions Section */}
         <Card>
@@ -127,7 +70,7 @@ export default function DashboardPage() {
                     expenses={expenses} 
                     categories={categories}
                     isDashboardList={true} 
-                    onDeleteExpense={handleDeleteExpense}
+                    onDeleteExpense={deleteTransaction}
                 />
             </CardContent>
         </Card>

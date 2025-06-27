@@ -22,7 +22,7 @@ export default function CategoriesPage() {
       <AppHeader title="Manage Categories" />
       <div className="flex-1 space-y-4 p-4 md:p-6">
          <div className="mb-4">
-            <Button onClick={() => router.back()} variant="outline" size="sm" className="rounded-full">
+            <Button onClick={() => router.back()} variant="outline" size="sm">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back
             </Button>
