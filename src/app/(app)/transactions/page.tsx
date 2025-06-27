@@ -3,9 +3,11 @@
 
 import { AppHeader } from '@/components/layout/app-header';
 import TransactionList from '@/components/transactions/transaction-list';
+import SettlementsManager from '@/components/transactions/settlements-manager';
 import { useState, useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 export default function TransactionsPage() {
@@ -17,10 +19,23 @@ export default function TransactionsPage() {
   
   return (
     <>
-      <AppHeader title="All Transactions" />
+      <AppHeader title="Transactions" />
       <div className="flex-1 space-y-4 p-4 sm:p-6">
         {isClient ? (
-          <TransactionList />
+           <Tabs defaultValue="history" className="w-full">
+            <div className="flex justify-center mb-6">
+              <TabsList>
+                <TabsTrigger value="history">History</TabsTrigger>
+                <TabsTrigger value="settlements">Settlements</TabsTrigger>
+              </TabsList>
+            </div>
+            <TabsContent value="history">
+              <TransactionList />
+            </TabsContent>
+            <TabsContent value="settlements">
+              <SettlementsManager />
+            </TabsContent>
+          </Tabs>
         ) : (
           <Card>
             <CardHeader>
