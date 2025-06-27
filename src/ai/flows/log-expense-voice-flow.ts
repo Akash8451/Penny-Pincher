@@ -87,7 +87,14 @@ const logExpenseVoiceFlow = ai.defineFlow(
     outputSchema: VoiceOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+    const response = await prompt(input);
+    const output = response.output;
+
+    if (!output) {
+      const reason = response.candidates[0]?.finishReasonMessage || 'The model did not produce a valid response.';
+      throw new Error(`Failed to process voice command. Reason: ${reason}`);
+    }
+
+    return output;
   }
 );
