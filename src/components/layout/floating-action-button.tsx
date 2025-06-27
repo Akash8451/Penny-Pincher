@@ -18,7 +18,6 @@ import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { ScrollArea } from '../ui/scroll-area';
 
 
 export default function FloatingActionButton() {
@@ -120,46 +119,46 @@ export default function FloatingActionButton() {
                         </TooltipContent>
                     </Tooltip>
                     <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-2xl bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
-                    <SheetHeader className="p-4 pt-2 text-center">
-                        <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
-                        {/* Drag handle for mobile */}
-                        <div className="mx-auto h-1.5 w-12 flex-shrink-0 rounded-full bg-muted-foreground/30" />
-                    </SheetHeader>
-                    <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col overflow-hidden">
-                        <div className="flex justify-center px-4 pb-4 border-b">
-                            <TabsList>
-                                <TabsTrigger value="expense">Expense</TabsTrigger>
-                                <TabsTrigger value="income">Income</TabsTrigger>
-                                <TabsTrigger value="request">Request</TabsTrigger>
-                            </TabsList>
-                        </div>
-                        <ScrollArea className="flex-grow">
-                            <div className="p-6 pt-4">
-                                <TabsContent value="expense" className="mt-0">
-                                    <QuickExpenseForm 
-                                        categories={categories.filter(c => c.group !== 'Income')} 
-                                        people={people} 
-                                        onAddExpense={handleAddExpense}
-                                        onSuccess={() => setIsOpen(false)}
-                                    />
-                                </TabsContent>
-                                <TabsContent value="income" className="mt-0">
-                                    <QuickIncomeForm 
-                                        categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
-                                        onAddIncome={handleAddIncome}
-                                        onSuccess={() => setIsOpen(false)}
-                                    />
-                                </TabsContent>
-                                <TabsContent value="request" className="mt-0">
-                                    <PaymentRequestForm
-                                        people={people}
-                                        onAddRequest={handleAddPaymentRequest}
-                                        onSuccess={() => setIsOpen(false)}
-                                        />
-                                </TabsContent>
+                        <SheetHeader className="p-4 pt-2 text-center flex-shrink-0">
+                            <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
+                            {/* Drag handle for mobile */}
+                            <div className="mx-auto h-1.5 w-12 flex-shrink-0 rounded-full bg-muted-foreground/30" />
+                        </SheetHeader>
+                        <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col overflow-y-hidden">
+                            <div className="flex justify-center px-4 pb-4 border-b flex-shrink-0">
+                                <TabsList>
+                                    <TabsTrigger value="expense">Expense</TabsTrigger>
+                                    <TabsTrigger value="income">Income</TabsTrigger>
+                                    <TabsTrigger value="request">Request</TabsTrigger>
+                                </TabsList>
                             </div>
-                        </ScrollArea>
-                    </Tabs>
+                            <div className="flex-grow overflow-y-auto">
+                                <div className="p-6 pt-4">
+                                    <TabsContent value="expense" className="mt-0">
+                                        <QuickExpenseForm 
+                                            categories={categories.filter(c => c.group !== 'Income')} 
+                                            people={people} 
+                                            onAddExpense={handleAddExpense}
+                                            onSuccess={() => setIsOpen(false)}
+                                        />
+                                    </TabsContent>
+                                    <TabsContent value="income" className="mt-0">
+                                        <QuickIncomeForm 
+                                            categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
+                                            onAddIncome={handleAddIncome}
+                                            onSuccess={() => setIsOpen(false)}
+                                        />
+                                    </TabsContent>
+                                    <TabsContent value="request" className="mt-0">
+                                        <PaymentRequestForm
+                                            people={people}
+                                            onAddRequest={handleAddPaymentRequest}
+                                            onSuccess={() => setIsOpen(false)}
+                                            />
+                                    </TabsContent>
+                                </div>
+                            </div>
+                        </Tabs>
                     </SheetContent>
                 </Sheet>
             </div>
