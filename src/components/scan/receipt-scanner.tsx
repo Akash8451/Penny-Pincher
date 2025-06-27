@@ -133,15 +133,7 @@ function ReceiptScannerInternal() {
       }
     } catch (err) {
       console.error("Scanning error:", err);
-      let errorMessage = "An unexpected error occurred while scanning the receipt. Please try again.";
-      if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
-          const lowerCaseMessage = (err.message as string).toLowerCase();
-          if (lowerCaseMessage.includes('503') || lowerCaseMessage.includes('overloaded')) {
-              errorMessage = "The AI service is currently overloaded and cannot scan the receipt. Please try again in a few moments.";
-          } else if (lowerCaseMessage.includes('429') || lowerCaseMessage.includes('too many requests') || lowerCaseMessage.includes('quota')) {
-              errorMessage = "You've exceeded the request limit. Please wait a moment and try scanning again.";
-          }
-      }
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred while scanning the receipt.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -456,15 +448,7 @@ function StatementImporterInternal() {
         }
       } catch (err) {
         console.error("Parsing error:", err);
-        let errorMessage = "An unexpected error occurred while parsing the statement. Please try again.";
-        if (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string') {
-          const lowerCaseMessage = (err.message as string).toLowerCase();
-          if (lowerCaseMessage.includes('503') || lowerCaseMessage.includes('overloaded')) {
-              errorMessage = "The AI service is currently overloaded and cannot parse the statement. Please try again in a few moments.";
-          } else if (lowerCaseMessage.includes('429') || lowerCaseMessage.includes('too many requests') || lowerCaseMessage.includes('quota')) {
-              errorMessage = "You've exceeded the request limit. Please wait a moment and try parsing again.";
-          }
-        }
+        const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred while parsing the statement.";
         setError(errorMessage);
       } finally {
         setIsLoading(false);
