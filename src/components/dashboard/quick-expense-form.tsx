@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Paperclip, PlusCircle, Users, X, ZoomIn } from 'lucide-react';
+import { Loader2, Mic, Paperclip, PlusCircle, Users, X, ZoomIn } from 'lucide-react';
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -21,6 +20,8 @@ import { Badge } from '../ui/badge';
 import { Separator } from '../ui/separator';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Image from 'next/image';
+import { useSpeechRecognition } from '@/hooks/use-speech-recognition';
+import { logExpenseFromVoice } from '@/ai/flows/log-expense-voice-flow';
 
 interface QuickExpenseFormProps {
   categories: Category[];
@@ -55,6 +56,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
   const [selectedPeople, setSelectedPeople] = React.useState<string[]>([]);
   const [customSplits, setCustomSplits] = React.useState<Record<string, string>>({});
   const [splitGroupName, setSplitGroupName] = React.useState('');
+  const [isVoiceLoading, setIsVoiceLoading] = useState(false);
 
   const categoryGroups = React.useMemo(() => {
     return categories.reduce((acc, category) => {
@@ -62,6 +64,46 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
       return acc;
     }, {} as Record<string, Category[]>);
   }, [categories]);
+
+  const handleVoiceResult = async (transcript: string) => {
+    if (!transcript) return;
+    setIsVoiceLoading(true);
+    toast({ title: "Processing your voice command...", description: `"${transcript}"`});
+    try {
+        const result = await logExpenseFromVoice({ query: transcript, categories });
+        if (result.amount) {
+            form.setValue('amount', result.amount as any);
+        }
+        if (result.categoryId) {
+            form.setValue('categoryId', result.categoryId);
+        }
+        if (result.note) {
+            form.setValue('note', result.note);
+        }
+        toast({ title: "✔️ Fields populated by voice" });
+    } catch (error) {
+        console.error("Voice expense logging error:", error);
+        toast({ variant: 'destructive', title: 'Could not process voice command.' });
+    } finally {
+        setIsVoiceLoading(false);
+    }
+  };
+
+  const handleVoiceError = (error: string) => {
+      let description = 'An unknown error occurred.';
+      if (error === 'not-allowed' || error === 'service-not-allowed') {
+          description = 'Microphone access denied. Please enable it in your browser settings.';
+      } else if (error === 'no-speech') {
+          description = 'No speech was detected. Please try again.';
+      }
+      toast({ variant: 'destructive', title: 'Speech Recognition Error', description });
+      setIsVoiceLoading(false);
+  };
+
+  const { isListening, toggleListening } = useSpeechRecognition({
+      onResult: handleVoiceResult,
+      onError: handleVoiceError,
+  });
 
   const handleClearReceipt = () => {
     form.setValue('receipt', null);
@@ -75,11 +117,11 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
     if (selectedPeople.length > 0) {
       const customTotal = Object.values(customSplits).reduce((sum, amount) => sum + (parseFloat(amount) || 0), 0);
 
-      if (customTotal > values.amount) {
+      if (customTotal > totalAmount) {
            toast({
               variant: 'destructive',
               title: "Split Error",
-              description: `The assigned splits for others (${formatCurrency(customTotal)}) cannot exceed the total expense (${formatCurrency(values.amount)}).`,
+              description: `The assigned splits for others (${formatCurrency(customTotal)}) cannot exceed the total expense (${formatCurrency(totalAmount)}).`,
           });
           return;
       }
@@ -92,7 +134,7 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
         })).filter(split => split.amount > 0);
       } else {
         const numberOfParticipants = selectedPeople.length + 1;
-        const equalAmount = values.amount / numberOfParticipants;
+        const equalAmount = totalAmount / numberOfParticipants;
         splitWithData = selectedPeople.map(personId => ({
             personId,
             amount: equalAmount,
@@ -171,9 +213,26 @@ export default function QuickExpenseForm({ categories, people, onAddExpense, onS
 
   return (
     <div className='space-y-2'>
-        <div className="text-center">
+        <div className="text-center relative">
             <h3 className="text-lg font-medium">Log Expense</h3>
             <p className="text-sm text-muted-foreground">Quickly add a new transaction manually.</p>
+            <div className="absolute top-0 right-0">
+                <Button
+                    type="button"
+                    variant={isListening ? 'destructive' : 'outline'}
+                    size="icon"
+                    onClick={toggleListening}
+                    disabled={isVoiceLoading}
+                    className="rounded-full"
+                >
+                    {isVoiceLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                        <Mic className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">Log expense with voice</span>
+                </Button>
+            </div>
         </div>
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
