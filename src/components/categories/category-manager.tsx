@@ -37,8 +37,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle, Edit, Trash2 } from 'lucide-react';
-import * as Lucide from 'lucide-react';
+import { icons, PlusCircle, Edit, Trash2, Package } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -49,11 +48,7 @@ import {
 import React from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-const iconList = Object.keys(Lucide).filter(k => typeof Lucide[k as keyof typeof Lucide] === 'object');
-
-function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
-  return iconName in Lucide;
-}
+const iconList = Object.keys(icons);
 
 function CategoryForm({
   category,
@@ -92,14 +87,17 @@ function CategoryForm({
               <SelectValue placeholder="Select an icon" />
             </SelectTrigger>
             <SelectContent>
-                {iconList.map((iconName) => (
-                    <SelectItem key={iconName} value={iconName}>
-                        <div className="flex items-center gap-2">
-                           {isValidIcon(iconName) && React.createElement(Lucide[iconName], { className: "h-4 w-4" })}
-                           {iconName}
-                        </div>
-                    </SelectItem>
-                ))}
+                {iconList.map((iconName) => {
+                    const Icon = icons[iconName as keyof typeof icons];
+                    return (
+                        <SelectItem key={iconName} value={iconName}>
+                            <div className="flex items-center gap-2">
+                               <Icon className="h-4 w-4" />
+                               {iconName}
+                            </div>
+                        </SelectItem>
+                    );
+                })}
             </SelectContent>
         </Select>
       </div>
@@ -152,7 +150,7 @@ export default function CategoryManager() {
                 <h3 className="text-lg font-semibold mb-2">{group}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {cats.map((cat) => {
-                    const Icon = isValidIcon(cat.icon) ? Lucide[cat.icon] as React.ElementType : Lucide.Package;
+                    const Icon = icons[cat.icon as keyof typeof icons] || Package;
                     return (
                         <div key={cat.id} className="flex items-center p-3 rounded-lg bg-accent/50">
                             <Icon className="h-5 w-5 mr-3 text-accent-foreground" />
