@@ -54,7 +54,7 @@ const itemizeReceiptFlow = ai.defineFlow(
     outputSchema: ItemizeReceiptOutputSchema,
   },
   async (input) => {
-    const response = await prompt(input, { model: 'googleai/gemini-1.5-flash' });
+    const response = await prompt(input);
     const output = response.output;
 
     if (!output) {

@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
+export const maxDuration = 60;
+
 function AssistantSkeleton() {
   return (
     <div className="flex-1 space-y-4 p-4 animate-pulse h-full">
