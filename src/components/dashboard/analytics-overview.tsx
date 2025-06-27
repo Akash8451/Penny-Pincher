@@ -87,6 +87,7 @@ export default function AnalyticsOverview({ expenses, categories, onDeleteExpens
               <RecentExpenses 
                   expenses={topExpenses} 
                   categories={categories}
+                  onDeleteExpense={onDeleteExpense}
               />
             </div>
           </TabsContent>
