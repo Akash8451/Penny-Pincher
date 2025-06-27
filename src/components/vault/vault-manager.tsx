@@ -33,6 +33,19 @@ export default function VaultManager() {
       toast({ variant: 'destructive', title: 'Password required' });
       return;
     }
+    // If there are notes, try to decrypt the first one to verify the password.
+    if (notes.length > 0) {
+      try {
+        const decryptedBytes = CryptoJS.AES.decrypt(notes[0].encryptedContent, password);
+        const decryptedText = decryptedBytes.toString(CryptoJS.enc.Utf8);
+        if (!decryptedText) {
+          throw new Error('Decryption failed. The resulting string is empty, which indicates a wrong password.');
+        }
+      } catch (e) {
+        toast({ variant: 'destructive', title: 'Incorrect Password', description: 'The password did not match the one used for existing notes.' });
+        return;
+      }
+    }
     setIsUnlocked(true);
     toast({ title: 'Vault Unlocked', description: 'You can now view and manage your notes for this session.' });
   };

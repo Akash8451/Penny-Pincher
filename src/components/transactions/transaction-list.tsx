@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter'
+import { useToast } from '@/hooks/use-toast'
 
 function isValidIcon(iconName: string): iconName is keyof typeof Lucide {
   return iconName in Lucide;
@@ -45,6 +46,7 @@ export default function TransactionList() {
   const [selectedExpenseId, setSelectedExpenseId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const formatCurrency = useCurrencyFormatter();
+  const { toast } = useToast();
 
   const categoryMap = useMemo(() => new Map(categories.map((c) => [c.id, c.name])), [categories]);
   const peopleMap = useMemo(() => new Map(people.map((p) => [p.id, p.name])), [people]);
@@ -98,6 +100,10 @@ export default function TransactionList() {
       return prev.filter(e => e.id !== expenseId && !relatedIncomeIds.includes(e.id));
     });
     setSelectedExpenseId(null);
+    toast({
+      title: 'Transaction Deleted',
+      description: 'The transaction has been removed.',
+    });
   };
   
   const handleExportCSV = () => {

@@ -63,9 +63,8 @@ export default function RecentExpenses({ expenses, categories, isDashboardList =
             const content = (
               <div
                   className={cn(
-                      "p-3 rounded-lg border transition-all duration-200",
-                      isSelected ? "border-primary bg-accent/80" : "border-transparent bg-muted/50",
-                      onDeleteExpense ? "cursor-pointer hover:bg-accent/80" : "hover:bg-accent/80"
+                      "p-3 rounded-lg border transition-all duration-200 cursor-pointer hover:bg-accent/80",
+                      isSelected ? "border-primary bg-accent/80" : "border-transparent bg-muted/50"
                   )}
                   onClick={() => onDeleteExpense ? handleItemClick(expense.id) : null}
               >
