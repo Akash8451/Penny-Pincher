@@ -37,16 +37,11 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { icons, PlusCircle, Edit, Trash2, Package } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Check, ChevronsUpDown, icons, PlusCircle, Edit, Trash2, Package } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 
 
 // A curated list of common icons for finance apps to avoid loading all 700+ icons.
@@ -72,7 +67,7 @@ function CategoryForm({
   const [name, setName] = useState(category?.name || '');
   const [group, setGroup] = useState(category?.group || '');
   const [icon, setIcon] = useState(category?.icon || 'Package');
-  const [iconSearch, setIconSearch] = useState('');
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,10 +75,8 @@ function CategoryForm({
       onSave({ name, group, icon });
     }
   };
-
-  const filteredIcons = iconList.filter((i) =>
-    i.toLowerCase().includes(iconSearch.toLowerCase())
-  );
+  
+  const CurrentIcon = icons[icon as keyof typeof icons] || Package;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -96,38 +89,56 @@ function CategoryForm({
         <Input id="group" value={group} onChange={(e) => setGroup(e.target.value)} placeholder="e.g., Essentials, Discretionary" required />
       </div>
       <div>
-        <Label htmlFor="icon">Icon</Label>
-         <Select onValueChange={setIcon} defaultValue={icon}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select an icon" />
-            </SelectTrigger>
-            <SelectContent className="max-h-[var(--radix-select-content-available-height)]">
-                <div className="p-2">
-                    <Input
-                        placeholder="Search icons..."
-                        value={iconSearch}
-                        onChange={(e) => setIconSearch(e.target.value)}
-                        className="w-full"
-                    />
-                </div>
-                {filteredIcons.map((iconName) => {
-                    const Icon = icons[iconName as keyof typeof icons];
+        <Label>Icon</Label>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={popoverOpen}
+              className="w-full justify-between font-normal"
+            >
+              <div className="flex items-center gap-2">
+                <CurrentIcon className="h-4 w-4" />
+                {icon}
+              </div>
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+            <Command>
+              <CommandInput placeholder="Search icons..." />
+              <CommandList>
+                <CommandEmpty>No icon found.</CommandEmpty>
+                <CommandGroup>
+                  {iconList.map((iconName) => {
+                    const IconComponent = icons[iconName as keyof typeof icons] || Package;
                     return (
-                        <SelectItem key={iconName} value={iconName}>
-                            <div className="flex items-center gap-2">
-                               {Icon ? <Icon className="h-4 w-4" /> : <Package className="h-4 w-4" />}
-                               {iconName}
-                            </div>
-                        </SelectItem>
+                      <CommandItem
+                        key={iconName}
+                        value={iconName}
+                        onSelect={(currentValue) => {
+                          const originalIconName = iconList.find(i => i.toLowerCase() === currentValue);
+                          setIcon(originalIconName || 'Package');
+                          setPopoverOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            icon.toLowerCase() === iconName.toLowerCase() ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <IconComponent className="mr-2 h-4 w-4" />
+                        {iconName}
+                      </CommandItem>
                     );
-                })}
-                {filteredIcons.length === 0 && (
-                    <div className="p-4 text-center text-sm text-muted-foreground">
-                        No icons found.
-                    </div>
-                )}
-            </SelectContent>
-        </Select>
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
       <DialogFooter>
         <DialogClose asChild>
