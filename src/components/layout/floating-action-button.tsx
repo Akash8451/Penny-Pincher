@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -16,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 export default function FloatingActionButton() {
@@ -81,63 +83,79 @@ export default function FloatingActionButton() {
     };
       
     return (
-        <div className={cn(
-            "fixed bottom-20 sm:bottom-6 right-6 z-30 flex flex-col items-center gap-3",
-            isHidden && "hidden"
-        )}>
-             <Button asChild variant="secondary" className="h-12 w-12 rounded-full shadow-md animate-pulse-glow animate-bounce-sm">
-                <Link href="/assistant">
-                    <Wand2 className="h-6 w-6 text-primary" />
-                    <span className="sr-only">AI Assistant</span>
-                </Link>
-            </Button>
-            <Sheet open={isOpen} onOpenChange={setIsOpen}>
-                <SheetTrigger asChild>
-                    <Button 
-                        className="h-16 w-16 rounded-full shadow-lg"
-                        size="icon"
-                    >
-                        <Plus className="h-8 w-8" />
-                        <span className="sr-only">Log Transaction</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-lg bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
-                   <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
-                   <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col">
-                        <div className="flex justify-center p-4">
-                            <TabsList>
-                                <TabsTrigger value="expense">Expense</TabsTrigger>
-                                <TabsTrigger value="income">Income</TabsTrigger>
-                                <TabsTrigger value="request">Request</TabsTrigger>
-                            </TabsList>
-                        </div>
-                        <div className="flex-grow overflow-y-auto">
-                            <TabsContent value="expense" className="p-6 pt-0 mt-0">
-                                <QuickExpenseForm 
-                                    categories={categories.filter(c => c.group !== 'Income')} 
-                                    people={people} 
-                                    onAddExpense={handleAddExpense}
-                                    onSuccess={() => setIsOpen(false)}
-                                />
-                            </TabsContent>
-                            <TabsContent value="income" className="p-6 pt-0 mt-0">
-                                <QuickIncomeForm 
-                                    categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
-                                    onAddIncome={handleAddIncome}
-                                    onSuccess={() => setIsOpen(false)}
-                                />
-                            </TabsContent>
-                            <TabsContent value="request" className="p-6 pt-0 mt-0">
-                                <PaymentRequestForm
-                                    people={people}
-                                    onAddRequest={handleAddPaymentRequest}
-                                    onSuccess={() => setIsOpen(false)}
+        <TooltipProvider>
+            <div className={cn(
+                "fixed bottom-20 sm:bottom-6 right-6 z-30 flex flex-col items-center gap-3",
+                isHidden && "hidden"
+            )}>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button asChild variant="secondary" className="h-12 w-12 rounded-full shadow-md animate-pulse-glow animate-bounce-sm">
+                            <Link href="/assistant">
+                                <Wand2 className="h-6 w-6 text-primary" />
+                                <span className="sr-only">AI Assistant</span>
+                            </Link>
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <p>AI Assistant</p>
+                    </TooltipContent>
+                </Tooltip>
+                <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <SheetTrigger asChild>
+                                <Button 
+                                    className="h-16 w-16 rounded-full shadow-lg"
+                                    size="icon"
+                                >
+                                    <Plus className="h-8 w-8" />
+                                    <span className="sr-only">Log Transaction</span>
+                                </Button>
+                            </SheetTrigger>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Add New Transaction</p>
+                        </TooltipContent>
+                    </Tooltip>
+                    <SheetContent side="bottom" className="sm:max-w-none md:max-w-lg mx-auto rounded-t-lg bg-background/90 backdrop-blur-lg max-h-[90vh] p-0 flex flex-col">
+                    <SheetTitle className="sr-only">Add New Transaction</SheetTitle>
+                    <Tabs defaultValue="expense" className="w-full flex-grow flex flex-col">
+                            <div className="flex justify-center p-4">
+                                <TabsList>
+                                    <TabsTrigger value="expense">Expense</TabsTrigger>
+                                    <TabsTrigger value="income">Income</TabsTrigger>
+                                    <TabsTrigger value="request">Request</TabsTrigger>
+                                </TabsList>
+                            </div>
+                            <div className="flex-grow overflow-y-auto">
+                                <TabsContent value="expense" className="p-6 pt-0 mt-0">
+                                    <QuickExpenseForm 
+                                        categories={categories.filter(c => c.group !== 'Income')} 
+                                        people={people} 
+                                        onAddExpense={handleAddExpense}
+                                        onSuccess={() => setIsOpen(false)}
                                     />
-                            </TabsContent>
-                        </div>
-                    </Tabs>
-                </SheetContent>
-            </Sheet>
-        </div>
+                                </TabsContent>
+                                <TabsContent value="income" className="p-6 pt-0 mt-0">
+                                    <QuickIncomeForm 
+                                        categories={categories.filter(c => c.group === 'Income' || c.name === 'Other')} 
+                                        onAddIncome={handleAddIncome}
+                                        onSuccess={() => setIsOpen(false)}
+                                    />
+                                </TabsContent>
+                                <TabsContent value="request" className="p-6 pt-0 mt-0">
+                                    <PaymentRequestForm
+                                        people={people}
+                                        onAddRequest={handleAddPaymentRequest}
+                                        onSuccess={() => setIsOpen(false)}
+                                        />
+                                </TabsContent>
+                            </div>
+                        </Tabs>
+                    </SheetContent>
+                </Sheet>
+            </div>
+        </TooltipProvider>
     );
 }
