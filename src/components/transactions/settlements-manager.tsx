@@ -11,8 +11,19 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { HandCoins, ChevronDown, User, Users } from 'lucide-react';
+import { HandCoins, User, Users } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function SettlementsManager() {
   const [expenses, setExpenses] = useLocalStorage<Expense[]>('expenses', []);
@@ -168,17 +179,51 @@ export default function SettlementsManager() {
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="font-semibold">{formatCurrency(split.amount)}</span>
-                        <Button size="sm" variant="outline" onClick={() => handleSettleTransaction(split.expenseId, personId, split.amount)}>
-                          Settle
-                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button size="sm" variant="outline">Settle</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirm Settlement</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to mark this payment of {formatCurrency(split.amount)} for "{split.expenseNote}" as settled? This will create a new income entry.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleSettleTransaction(split.expenseId, personId, split.amount)}>
+                                Confirm
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                   ))}
                   <Separator />
                   <div className="flex justify-end pt-2">
-                    <Button onClick={() => handleSettleAllForPerson(personId, personName, balance, unsettledSplits)}>
-                      <HandCoins className="mr-2 h-4 w-4" /> Settle All for {formatCurrency(balance)}
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button>
+                                <HandCoins className="mr-2 h-4 w-4" /> Settle All for {formatCurrency(balance)}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Settle All Debts for {personName}?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will clear the entire outstanding balance of {formatCurrency(balance)}. A single income transaction will be created to record this settlement. This action cannot be undone.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleSettleAllForPerson(personId, personName, balance, unsettledSplits)}>
+                                    Settle All
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </AccordionContent>

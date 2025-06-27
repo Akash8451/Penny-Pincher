@@ -32,7 +32,7 @@ function TransactionDetailsSkeleton() {
     return (
         <>
             <AppHeader title="Loading Transaction..." />
-            <div className="flex-1 space-y-4 p-4">
+            <div className="flex-1 space-y-4 p-2 sm:p-4">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex justify-between items-start">
@@ -221,7 +221,7 @@ export default function TransactionDetailsPage() {
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
       </AppHeader>
-      <div className="flex-1 space-y-4 p-4">
+      <div className="flex-1 space-y-4 p-2 sm:p-4">
         <Card>
           <CardHeader>
             <CardTitle className="flex justify-between items-start">

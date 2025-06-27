@@ -206,24 +206,25 @@ export default function TransactionList() {
                     >
                         <div className="flex items-center flex-1 min-w-0 gap-4">
                             <div className="h-10 w-10 bg-accent rounded-full flex items-center justify-center flex-shrink-0">
-                            <Icon className="h-5 w-5 text-accent-foreground" />
+                                <Icon className="h-5 w-5 text-accent-foreground" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">
+                                <p className="font-medium truncate text-card-foreground">
                                     {expense.note || category?.name || 'Uncategorized'}
                                 </p>
-                                <div className="flex items-baseline gap-2">
-                                     <p className="text-sm text-muted-foreground truncate">
-                                        {expense.type === 'expense' && splitWithNames 
-                                            ? `Split with: ${splitWithNames}`
-                                            : format(new Date(expense.date), "MMM d, yyyy")
-                                        }
-                                    </p>
-                                    <p className={`ml-auto font-semibold text-base ${expense.type === 'expense' ? 'text-destructive' : 'text-green-500'}`}>
-                                        {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
-                                    </p>
-                                </div>
+                                <p className="text-sm text-muted-foreground truncate">
+                                    {expense.type === 'expense' && splitWithNames 
+                                        ? `Split with: ${splitWithNames}`
+                                        : format(new Date(expense.date), "MMM d, yyyy")
+                                    }
+                                </p>
                             </div>
+                            <p className={cn(
+                                "ml-4 font-semibold",
+                                expense.type === 'expense' ? 'text-destructive' : 'text-green-500'
+                            )}>
+                                {expense.type === 'expense' ? '-' : '+'} {formatCurrency(expense.amount)}
+                            </p>
                         </div>
 
                         {isSelected && (

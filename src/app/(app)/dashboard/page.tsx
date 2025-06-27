@@ -19,7 +19,7 @@ function DashboardSkeleton() {
   return (
     <>
       <AppHeader title="Dashboard" />
-      <div className="flex-1 space-y-4 p-4 animate-pulse">
+      <div className="flex-1 space-y-4 p-2 sm:p-4 animate-pulse">
         <div className="grid gap-4 md:grid-cols-2">
           <Skeleton className="h-[210px] rounded-lg" />
           <Skeleton className="h-[210px] rounded-lg" />
@@ -101,7 +101,7 @@ export default function DashboardPage() {
   return (
     <>
       <AppHeader title="Dashboard" />
-      <div className="flex-1 space-y-4 p-4">
+      <div className="flex-1 space-y-4 p-2 sm:p-4">
 
         {/* Savings and AI Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
