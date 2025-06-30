@@ -27,7 +27,7 @@ export default function AppLayout({
       <div className="flex h-screen w-full bg-background overflow-hidden">
         <AppSidebar />
         <MainContent>
-          <div className="flex-1 overflow-y-auto pb-32 sm:pb-0">
+          <div className="flex-1 overflow-y-auto pb-40 sm:pb-24">
             {children}
           </div>
           <FloatingActionButton />
