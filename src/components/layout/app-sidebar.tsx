@@ -14,9 +14,9 @@ export default function AppSidebar() {
   const { isExpanded, setIsPinned } = useSidebar();
 
   const navItems = [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/transactions', icon: List, label: 'Transactions' },
-    { href: '/scan', icon: ScanLine, label: 'Scan & Import' },
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', id: 'dashboard-nav-link' },
+    { href: '/transactions', icon: List, label: 'Transactions', id: 'transactions-nav-link' },
+    { href: '/scan', icon: ScanLine, label: 'Scan & Import', id: 'scan-nav-link' },
   ];
   
   const mobileNavItems = [
@@ -36,6 +36,7 @@ export default function AppSidebar() {
       {/* Desktop Sidebar */}
         <TooltipProvider delayDuration={0}>
             <aside 
+            id="app-sidebar"
             className={cn(
                 "fixed top-0 h-screen left-0 hidden border-r bg-card sm:flex flex-col z-40 transition-all duration-200 ease-in-out",
                 isExpanded ? "w-[220px]" : "w-[68px]"
@@ -63,6 +64,7 @@ export default function AppSidebar() {
                     <Tooltip key={item.href}>
                         <TooltipTrigger asChild>
                             <Link
+                            id={item.id}
                             href={item.href}
                             className={cn(
                                 'flex items-center h-10 rounded-lg transition-colors relative',
@@ -89,6 +91,7 @@ export default function AppSidebar() {
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Link
+                        id="settings-nav-link"
                         href="/settings"
                         className={cn(
                             'flex items-center h-10 rounded-lg transition-colors relative',

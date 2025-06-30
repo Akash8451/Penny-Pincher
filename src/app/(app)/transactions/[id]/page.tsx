@@ -287,7 +287,7 @@ export default function TransactionDetailsPage() {
                                         <Input
                                             id={`split-edit-${split.personId}`}
                                             type="number"
-                                            placeholder="0.00"
+                                            placeholder="0"
                                             value={editableSplits[split.personId] ?? ''}
                                             onChange={(e) => {
                                                 const value = e.target.value;

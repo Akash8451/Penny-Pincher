@@ -1,3 +1,4 @@
+
 'use client';
 import AppSidebar from '@/components/layout/app-sidebar';
 import FloatingActionButton from '@/components/layout/floating-action-button';
@@ -26,7 +27,7 @@ export default function AppLayout({
       <div className="flex h-screen w-full bg-background overflow-hidden">
         <AppSidebar />
         <MainContent>
-          <div className="flex-1 overflow-y-auto pb-20 sm:pb-0">
+          <div className="flex-1 overflow-y-auto pb-32 sm:pb-0">
             {children}
           </div>
           <FloatingActionButton />

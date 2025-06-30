@@ -327,7 +327,7 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
                     <FormControl>
                       <Input
                         type="number"
-                        placeholder="0.00"
+                        placeholder="0"
                         {...field}
                         value={field.value ?? ''}
                         onChange={(e) => {
@@ -505,7 +505,7 @@ export default function QuickExpenseForm({ categories, onAddExpense, onSuccess }
                                                     <Input 
                                                         id={`split-${personId}`} 
                                                         type="number" 
-                                                        placeholder="0.00"
+                                                        placeholder="0"
                                                         className="pl-6"
                                                         value={customSplits[personId] || ''}
                                                         onChange={(e) => setCustomSplits(prev => ({...prev, [personId]: e.target.value }))}

@@ -69,6 +69,7 @@ export default function FloatingActionButton() {
                         <TooltipTrigger asChild>
                             <SheetTrigger asChild>
                                 <Button 
+                                    id="fab-add-button"
                                     className="h-16 w-16 rounded-full shadow-lg"
                                     size="icon"
                                 >
