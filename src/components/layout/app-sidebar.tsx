@@ -22,7 +22,7 @@ export default function AppSidebar() {
   const mobileNavItems = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/transactions', icon: List, label: 'Transactions' },
-    { href: '/scan', icon: ScanLine, label: 'Scan' },
+    { href: '/scan', icon: ScanLine, label: 'Scan/Import' },
     { href: '/settings', icon: Settings, label: 'Settings' }
   ];
 

@@ -4,7 +4,7 @@
 import * as React from 'react';
 import { Line, LineChart, ResponsiveContainer, XAxis, Tooltip } from 'recharts';
 import type { Expense } from '@/lib/types';
-import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, eachDayOfInterval, eachMonthOfInterval, isWithinInterval } from 'date-fns';
+import { format, startOfWeek, addDays, eachDayOfInterval, startOfMonth, endOfMonth, eachMonthOfInterval, startOfYear, isWithinInterval } from 'date-fns';
 import { useCurrencyFormatter } from '@/hooks/use-currency-formatter';
 import { useTheme } from 'next-themes';
 
@@ -123,11 +123,4 @@ export default function SpendingTrendLineChart({ expenses, period }: SpendingTre
       )}
     </div>
   );
-}
-
-// Helper function to avoid date-fns v3 import issues
-function addDays(date: Date, days: number): Date {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
 }

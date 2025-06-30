@@ -7,6 +7,7 @@ import "driver.js/dist/driver.css";
 import { Button } from '@/components/ui/button';
 import { Compass } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const AppTour = () => {
   const router = useRouter();
@@ -98,7 +99,7 @@ const AppTour = () => {
   };
 
   return (
-    <Button variant="outline" onClick={startTour}>
+    <Button variant="outline" onClick={startTour} className="hidden sm:inline-flex">
       <Compass className="mr-2 h-4 w-4" />
       Tour
     </Button>
