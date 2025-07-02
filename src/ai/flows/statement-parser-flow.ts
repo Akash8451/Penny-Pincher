@@ -60,6 +60,11 @@ const prompt = ai.definePrompt({
   name: 'statementParserPrompt',
   input: { schema: ParseStatementFlowInputSchema },
   output: { schema: ParseStatementOutputSchema },
+  config: {
+    requestOptions: {
+      timeout: 58000, // 58 seconds
+    }
+  },
   prompt: `You are an expert financial statement analyst. Your task is to parse the provided statement (PDF or CSV) and extract all transactions.
 
 Current Date: {{currentDate}}

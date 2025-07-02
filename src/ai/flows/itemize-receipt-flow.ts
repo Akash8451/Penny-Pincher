@@ -36,6 +36,11 @@ const prompt = ai.definePrompt({
   name: 'itemizeReceiptPrompt',
   input: { schema: ItemizeReceiptInputSchema },
   output: { schema: ItemizeReceiptOutputSchema },
+  config: {
+    requestOptions: {
+      timeout: 58000, // 58 seconds
+    }
+  },
   prompt: `You are an expert receipt processing agent. Your task is to analyze the provided receipt image and extract all individual line items with their corresponding prices.
 
 - Identify each distinct item purchased.
